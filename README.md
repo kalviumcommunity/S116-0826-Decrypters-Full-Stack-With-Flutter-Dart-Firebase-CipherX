@@ -8,7 +8,6 @@
 
 <img src="https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white" />
 <img src="https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white" />
-[![CI](https://github.com/kalviumcommunity/-S116-0826-Decrypters-Full-Stack-With-Flutter-Dart-Firebase-CipherX/actions/workflows/ci.yml/badge.svg)](https://github.com/kalviumcommunity/-S116-0826-Decrypters-Full-Stack-With-Flutter-Dart-Firebase-CipherX/actions/workflows/ci.yml)
 <img src="https://img.shields.io/badge/Firebase-Free%20Tier-FFCA28?logo=firebase&logoColor=black" />
 <img src="https://img.shields.io/badge/Riverpod-State%20Management-4A90D9" />
 <img src="https://img.shields.io/badge/GoRouter-Navigation-5C6BC0" />
