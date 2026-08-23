@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/presentation/screens/email_verification_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../navigation_shell.dart';
 
 abstract class AppRoutes {
   static const String initial = '/';
+  static const String login = '/login';
+  static const String register = '/register';
+  static const String forgotPassword = '/forgot-password';
+  static const String verifyEmail = '/verify-email';
   static const String shift = '/guard/today-shift';
   static const String checkIn = '/guard/check-in';
   static const String incidents = '/guard/incidents';
@@ -22,6 +30,30 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.initial,
       builder: (BuildContext context, GoRouterState state) {
         return const SplashScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.login,
+      builder: (BuildContext context, GoRouterState state) {
+        return const LoginScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.register,
+      builder: (BuildContext context, GoRouterState state) {
+        return const RegisterScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.forgotPassword,
+      builder: (BuildContext context, GoRouterState state) {
+        return const ForgotPasswordScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.verifyEmail,
+      builder: (BuildContext context, GoRouterState state) {
+        return const EmailVerificationScreen();
       },
     ),
     StatefulShellRoute.indexedStack(
