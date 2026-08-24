@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/datasources/firebase_auth_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/auth_user.dart';
@@ -111,6 +112,6 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
 
 final authControllerProvider =
     StateNotifierProvider<AuthController, AsyncValue<void>>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return AuthController(repository);
-});
+      final repository = ref.watch(authRepositoryProvider);
+      return AuthController(repository);
+    });

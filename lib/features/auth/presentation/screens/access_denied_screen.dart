@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'providers/auth_providers.dart';
 
 class AccessDeniedScreen extends ConsumerWidget {
@@ -15,10 +16,14 @@ class AccessDeniedScreen extends ConsumerWidget {
           children: [
             const Icon(Icons.error_outline, color: Colors.red, size: 64),
             const SizedBox(height: 20),
-            const Text('You do not have permission to access this app or your account is inactive.', textAlign: TextAlign.center),
+            const Text(
+              'You do not have permission to access this app or your account is inactive.',
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+              onPressed: () =>
+                  ref.read(authControllerProvider.notifier).signOut(),
               child: const Text('Logout'),
             ),
           ],

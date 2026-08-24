@@ -28,7 +28,8 @@ void main() {
       expect(
         failure.message,
         equals(
-            'Unable to connect. Check your internet connection and try again.'),
+          'Unable to connect. Check your internet connection and try again.',
+        ),
       );
       expect(failure.code, equals('network-request-failed'));
     });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../core/enums/user_role.dart';
 import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
@@ -25,7 +26,7 @@ abstract class AppRoutes {
   static const String verifyEmail = '/verify-email';
   static const String loading = '/loading';
   static const String accessDenied = '/access-denied';
-  
+
   static const String adminDashboard = '/admin/dashboard';
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
@@ -36,8 +37,9 @@ abstract class AppRoutes {
   static const String profile = '/guard/profile';
 }
 
-final GlobalKey<NavigatorState> _rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final routerNotifier = ref.watch(routerNotifierProvider);
@@ -56,7 +58,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isAuthLoading) return AppRoutes.loading;
 
       final authUser = authState.value;
-      
+
       final isAuthRoute = [
         AppRoutes.login,
         AppRoutes.register,
@@ -65,15 +67,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ].contains(state.uri.path);
 
       if (authUser == null) {
-        if (!isAuthRoute && state.uri.path != AppRoutes.initial && state.uri.path != AppRoutes.loading) {
+        if (!isAuthRoute &&
+            state.uri.path != AppRoutes.initial &&
+            state.uri.path != AppRoutes.loading) {
           return AppRoutes.login;
         }
         return null;
       }
 
       if (isProfileLoading && profileState.value == null) {
-         if (state.uri.path == AppRoutes.loading) return null;
-         return AppRoutes.loading;
+        if (state.uri.path == AppRoutes.loading) return null;
+        return AppRoutes.loading;
       }
 
       final profile = profileState.value;
@@ -88,8 +92,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       final role = profile.role!;
-      
-      final isLoginRoute = isAuthRoute || state.uri.path == AppRoutes.initial || state.uri.path == AppRoutes.loading;
+
+      final isLoginRoute =
+          isAuthRoute ||
+          state.uri.path == AppRoutes.initial ||
+          state.uri.path == AppRoutes.loading;
 
       String allowedBasePath = '';
       String roleHome = '';
@@ -108,8 +115,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return roleHome;
       }
 
-      if (!state.uri.path.startsWith(allowedBasePath) && state.uri.path != AppRoutes.accessDenied) {
-         return roleHome;
+      if (!state.uri.path.startsWith(allowedBasePath) &&
+          state.uri.path != AppRoutes.accessDenied) {
+        return roleHome;
       }
 
       return null;
@@ -117,49 +125,63 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: <RouteBase>[
       GoRoute(
         path: AppRoutes.initial,
-        builder: (BuildContext context, GoRouterState state) => const SplashScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const SplashScreen(),
       ),
       GoRoute(
         path: AppRoutes.loading,
-        builder: (BuildContext context, GoRouterState state) => const ProfileLoadingScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const ProfileLoadingScreen(),
       ),
       GoRoute(
         path: AppRoutes.accessDenied,
-        builder: (BuildContext context, GoRouterState state) => const AccessDeniedScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const AccessDeniedScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (BuildContext context, GoRouterState state) => const LoginScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (BuildContext context, GoRouterState state) => const RegisterScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const RegisterScreen(),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
-        builder: (BuildContext context, GoRouterState state) => const ForgotPasswordScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: AppRoutes.verifyEmail,
-        builder: (BuildContext context, GoRouterState state) => const EmailVerificationScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const EmailVerificationScreen(),
       ),
       GoRoute(
         path: AppRoutes.adminDashboard,
-        builder: (BuildContext context, GoRouterState state) => const AdminDashboardScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const AdminDashboardScreen(),
       ),
       GoRoute(
         path: AppRoutes.supervisorDashboard,
-        builder: (BuildContext context, GoRouterState state) => const SupervisorDashboardScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const SupervisorDashboardScreen(),
       ),
       GoRoute(
         path: AppRoutes.guardHome,
-        builder: (BuildContext context, GoRouterState state) => const GuardHomeScreen(),
+        builder: (BuildContext context, GoRouterState state) =>
+            const GuardHomeScreen(),
       ),
       StatefulShellRoute.indexedStack(
-        builder: (BuildContext context, GoRouterState state,
-            StatefulNavigationShell navigationShell) {
-          return NavigationShell(navigationShell: navigationShell);
-        },
+        builder:
+            (
+              BuildContext context,
+              GoRouterState state,
+              StatefulNavigationShell navigationShell,
+            ) {
+              return NavigationShell(navigationShell: navigationShell);
+            },
         branches: <StatefulShellBranch>[
           StatefulShellBranch(
             routes: <RouteBase>[
@@ -167,7 +189,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.shift,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                        title: 'Shift', icon: Icons.shield_outlined),
+                      title: 'Shift',
+                      icon: Icons.shield_outlined,
+                    ),
               ),
             ],
           ),
@@ -177,7 +201,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.checkIn,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                        title: 'Check-In', icon: Icons.location_on_outlined),
+                      title: 'Check-In',
+                      icon: Icons.location_on_outlined,
+                    ),
               ),
             ],
           ),
@@ -187,7 +213,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.incidents,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                        title: 'Incidents', icon: Icons.warning_amber_outlined),
+                      title: 'Incidents',
+                      icon: Icons.warning_amber_outlined,
+                    ),
               ),
             ],
           ),
@@ -197,7 +225,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.profile,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                        title: 'Profile', icon: Icons.person_outline),
+                      title: 'Profile',
+                      icon: Icons.person_outline,
+                    ),
               ),
             ],
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../auth/presentation/providers/auth_providers.dart';
 
 class SupervisorDashboardScreen extends ConsumerWidget {
@@ -16,7 +17,8 @@ class SupervisorDashboardScreen extends ConsumerWidget {
             const Text('Welcome, Supervisor!'),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+              onPressed: () =>
+                  ref.read(authControllerProvider.notifier).signOut(),
               child: const Text('Logout'),
             ),
           ],

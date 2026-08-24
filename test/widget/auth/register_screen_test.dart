@@ -23,18 +23,15 @@ void main() {
 
   Widget buildTestableWidget() {
     return ProviderScope(
-      overrides: [
-        authRepositoryProvider.overrideWithValue(mockRepository),
-      ],
-      child: const MaterialApp(
-        home: RegisterScreen(),
-      ),
+      overrides: [authRepositoryProvider.overrideWithValue(mockRepository)],
+      child: const MaterialApp(home: RegisterScreen()),
     );
   }
 
   group('RegisterScreen Widget Tests', () {
-    testWidgets('renders all RegisterScreen fields and controls',
-        (WidgetTester tester) async {
+    testWidgets('renders all RegisterScreen fields and controls', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
 
       expect(find.text('Create Account'), findsOneWidget);
@@ -47,39 +44,46 @@ void main() {
       expect(find.byKey(const Key('register_submit_button')), findsOneWidget);
     });
 
-    testWidgets('shows validation error when password confirmation mismatches',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(buildTestableWidget());
+    testWidgets(
+      'shows validation error when password confirmation mismatches',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildTestableWidget());
 
-      await tester.enterText(
-        find.byKey(const Key('register_email_field')),
-        'newguard@cipherx.com',
-      );
-      await tester.enterText(
-        find.byKey(const Key('register_password_field')),
-        'password123',
-      );
-      await tester.enterText(
-        find.byKey(const Key('register_confirm_password_field')),
-        'password456',
-      );
+        await tester.enterText(
+          find.byKey(const Key('register_email_field')),
+          'newguard@cipherx.com',
+        );
+        await tester.enterText(
+          find.byKey(const Key('register_password_field')),
+          'password123',
+        );
+        await tester.enterText(
+          find.byKey(const Key('register_confirm_password_field')),
+          'password456',
+        );
 
-      await tester.tap(find.byKey(const Key('register_submit_button')));
-      await tester.pump();
+        await tester.tap(find.byKey(const Key('register_submit_button')));
+        await tester.pump();
 
-      expect(find.text('Passwords do not match.'), findsOneWidget);
-      verifyNever(() => mockRepository.signUpWithEmailAndPassword(
+        expect(find.text('Passwords do not match.'), findsOneWidget);
+        verifyNever(
+          () => mockRepository.signUpWithEmailAndPassword(
             email: any(named: 'email'),
             password: any(named: 'password'),
-          ));
-    });
+          ),
+        );
+      },
+    );
 
-    testWidgets('calls signUpWithEmailAndPassword on valid form submission',
-        (WidgetTester tester) async {
-      when(() => mockRepository.signUpWithEmailAndPassword(
-            email: 'newguard@cipherx.com',
-            password: 'password123',
-          )).thenAnswer((_) async => tUser);
+    testWidgets('calls signUpWithEmailAndPassword on valid form submission', (
+      WidgetTester tester,
+    ) async {
+      when(
+        () => mockRepository.signUpWithEmailAndPassword(
+          email: 'newguard@cipherx.com',
+          password: 'password123',
+        ),
+      ).thenAnswer((_) async => tUser);
 
       await tester.pumpWidget(buildTestableWidget());
 
@@ -99,18 +103,23 @@ void main() {
       await tester.tap(find.byKey(const Key('register_submit_button')));
       await tester.pump();
 
-      verify(() => mockRepository.signUpWithEmailAndPassword(
-            email: 'newguard@cipherx.com',
-            password: 'password123',
-          )).called(1);
+      verify(
+        () => mockRepository.signUpWithEmailAndPassword(
+          email: 'newguard@cipherx.com',
+          password: 'password123',
+        ),
+      ).called(1);
     });
 
-    testWidgets('displays AuthFailure banner when email already in use',
-        (WidgetTester tester) async {
-      when(() => mockRepository.signUpWithEmailAndPassword(
-            email: 'existing@cipherx.com',
-            password: 'password123',
-          )).thenThrow(const EmailAlreadyInUseFailure());
+    testWidgets('displays AuthFailure banner when email already in use', (
+      WidgetTester tester,
+    ) async {
+      when(
+        () => mockRepository.signUpWithEmailAndPassword(
+          email: 'existing@cipherx.com',
+          password: 'password123',
+        ),
+      ).thenThrow(const EmailAlreadyInUseFailure());
 
       await tester.pumpWidget(buildTestableWidget());
 

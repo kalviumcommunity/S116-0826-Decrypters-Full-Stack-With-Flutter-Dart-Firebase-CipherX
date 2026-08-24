@@ -1,18 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/user_profile.dart';
 
 class UserProfileRepository {
   final FirebaseFirestore _firestore;
 
   UserProfileRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Stream<UserProfile?> streamUserProfile(String uid) {
-    return _firestore
-        .collection('users')
-        .doc(uid)
-        .snapshots()
-        .map((snapshot) {
+    return _firestore.collection('users').doc(uid).snapshots().map((snapshot) {
       if (!snapshot.exists || snapshot.data() == null) {
         return null;
       }

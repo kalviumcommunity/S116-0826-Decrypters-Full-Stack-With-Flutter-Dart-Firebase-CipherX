@@ -33,7 +33,9 @@ void main() {
       test('returns null for valid email addresses', () {
         expect(AuthValidators.validateEmail('guard@cipherx.com'), isNull);
         expect(
-            AuthValidators.validateEmail('admin.user@sub.domain.org'), isNull);
+          AuthValidators.validateEmail('admin.user@sub.domain.org'),
+          isNull,
+        );
       });
     });
 

@@ -23,18 +23,15 @@ void main() {
 
   Widget buildTestableWidget() {
     return ProviderScope(
-      overrides: [
-        authRepositoryProvider.overrideWithValue(mockRepository),
-      ],
-      child: const MaterialApp(
-        home: LoginScreen(),
-      ),
+      overrides: [authRepositoryProvider.overrideWithValue(mockRepository)],
+      child: const MaterialApp(home: LoginScreen()),
     );
   }
 
   group('LoginScreen Widget Tests', () {
-    testWidgets('renders all essential LoginScreen elements',
-        (WidgetTester tester) async {
+    testWidgets('renders all essential LoginScreen elements', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
 
       expect(find.text('CIPHER-X'), findsOneWidget);
@@ -46,8 +43,9 @@ void main() {
       expect(find.byKey(const Key('register_navigation_link')), findsOneWidget);
     });
 
-    testWidgets('triggers client validation errors when submitted empty',
-        (WidgetTester tester) async {
+    testWidgets('triggers client validation errors when submitted empty', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
 
       await tester.tap(find.byKey(const Key('login_submit_button')));
@@ -55,45 +53,56 @@ void main() {
 
       expect(find.text('Email address is required.'), findsOneWidget);
       expect(find.text('Password is required.'), findsOneWidget);
-      verifyNever(() => mockRepository.signInWithEmailAndPassword(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ));
+      verifyNever(
+        () => mockRepository.signInWithEmailAndPassword(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      );
     });
 
-    testWidgets('submits credentials to repository when form inputs are valid',
-        (WidgetTester tester) async {
-      when(() => mockRepository.signInWithEmailAndPassword(
+    testWidgets(
+      'submits credentials to repository when form inputs are valid',
+      (WidgetTester tester) async {
+        when(
+          () => mockRepository.signInWithEmailAndPassword(
             email: 'guard@cipherx.com',
             password: 'password123',
-          )).thenAnswer((_) async => tUser);
+          ),
+        ).thenAnswer((_) async => tUser);
 
-      await tester.pumpWidget(buildTestableWidget());
+        await tester.pumpWidget(buildTestableWidget());
 
-      await tester.enterText(
-        find.byKey(const Key('email_field')),
-        'guard@cipherx.com',
-      );
-      await tester.enterText(
-        find.byKey(const Key('password_field')),
-        'password123',
-      );
+        await tester.enterText(
+          find.byKey(const Key('email_field')),
+          'guard@cipherx.com',
+        );
+        await tester.enterText(
+          find.byKey(const Key('password_field')),
+          'password123',
+        );
 
-      await tester.tap(find.byKey(const Key('login_submit_button')));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('login_submit_button')));
+        await tester.pumpAndSettle();
 
-      verify(() => mockRepository.signInWithEmailAndPassword(
+        verify(
+          () => mockRepository.signInWithEmailAndPassword(
             email: 'guard@cipherx.com',
             password: 'password123',
-          )).called(1);
-    });
+          ),
+        ).called(1);
+      },
+    );
 
-    testWidgets('displays mapped AuthFailure message when login fails',
-        (WidgetTester tester) async {
-      when(() => mockRepository.signInWithEmailAndPassword(
-            email: 'guard@cipherx.com',
-            password: 'wrongpassword',
-          )).thenThrow(const InvalidCredentialsFailure());
+    testWidgets('displays mapped AuthFailure message when login fails', (
+      WidgetTester tester,
+    ) async {
+      when(
+        () => mockRepository.signInWithEmailAndPassword(
+          email: 'guard@cipherx.com',
+          password: 'wrongpassword',
+        ),
+      ).thenThrow(const InvalidCredentialsFailure());
 
       await tester.pumpWidget(buildTestableWidget());
 

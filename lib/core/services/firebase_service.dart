@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+
 import '../../firebase_options.dart';
 import '../config/app_config.dart';
 import '../errors/app_exception.dart';
@@ -54,17 +55,22 @@ class FirebaseService {
 
   /// Configures Auth, Firestore, and Storage to use local Emulator Suite
   static Future<void> configureEmulators({String? host}) async {
-    final String targetHost = host ??
+    final String targetHost =
+        host ??
         (defaultTargetPlatform == TargetPlatform.android
             ? emulatorHostAndroid
             : emulatorHostLocalhost);
 
     try {
       await FirebaseAuth.instance.useAuthEmulator(targetHost, authEmulatorPort);
-      FirebaseFirestore.instance
-          .useFirestoreEmulator(targetHost, firestoreEmulatorPort);
-      await FirebaseStorage.instance
-          .useStorageEmulator(targetHost, storageEmulatorPort);
+      FirebaseFirestore.instance.useFirestoreEmulator(
+        targetHost,
+        firestoreEmulatorPort,
+      );
+      await FirebaseStorage.instance.useStorageEmulator(
+        targetHost,
+        storageEmulatorPort,
+      );
       debugPrint('Firebase Emulators connected cleanly to $targetHost');
     } catch (e) {
       debugPrint('Firebase Emulator Configuration Warning: $e');

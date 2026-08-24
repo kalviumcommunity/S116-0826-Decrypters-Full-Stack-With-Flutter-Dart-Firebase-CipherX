@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../domain/failures/auth_failure.dart';
 import '../providers/auth_providers.dart';
 import '../utils/auth_validators.dart';
@@ -54,16 +55,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final String? errorMessage = authState.hasError
         ? (authState.error is AuthFailure
-            ? (authState.error as AuthFailure).message
-            : authState.error
-                .toString()
-                .replaceFirst(RegExp(r'^.*Exception:\s*'), ''))
+              ? (authState.error as AuthFailure).message
+              : authState.error.toString().replaceFirst(
+                  RegExp(r'^.*Exception:\s*'),
+                  '',
+                ))
         : null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Account'),
-      ),
+      appBar: AppBar(title: const Text('Create Account')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -77,17 +77,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Text(
                     'Join Cipher-X',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Register for secure platform access',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   if (errorMessage != null) ...<Widget>[
@@ -171,9 +170,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     validator: (String? value) =>
                         AuthValidators.validateConfirmPassword(
-                      value,
-                      _passwordController.text,
-                    ),
+                          value,
+                          _passwordController.text,
+                        ),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(

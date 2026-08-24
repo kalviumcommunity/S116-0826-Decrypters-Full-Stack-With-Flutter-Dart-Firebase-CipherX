@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../auth/presentation/providers/auth_providers.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -16,7 +17,8 @@ class AdminDashboardScreen extends ConsumerWidget {
             const Text('Welcome, Admin!'),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+              onPressed: () =>
+                  ref.read(authControllerProvider.notifier).signOut(),
               child: const Text('Logout'),
             ),
           ],

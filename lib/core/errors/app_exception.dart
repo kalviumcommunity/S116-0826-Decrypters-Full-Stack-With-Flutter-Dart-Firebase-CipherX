@@ -3,11 +3,7 @@ abstract class AppException implements Exception {
   final String? code;
   final dynamic details;
 
-  const AppException(
-    this.message, {
-    this.code,
-    this.details,
-  });
+  const AppException(this.message, {this.code, this.details});
 
   @override
   String toString() =>

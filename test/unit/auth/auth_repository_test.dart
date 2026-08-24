@@ -44,10 +44,12 @@ void main() {
     });
 
     test('signInWithEmailAndPassword delegates to dataSource', () async {
-      when(() => mockDataSource.signInWithEmailAndPassword(
-            email: 'guard@cipherx.com',
-            password: 'password123',
-          )).thenAnswer((_) async => tUser);
+      when(
+        () => mockDataSource.signInWithEmailAndPassword(
+          email: 'guard@cipherx.com',
+          password: 'password123',
+        ),
+      ).thenAnswer((_) async => tUser);
 
       final result = await repository.signInWithEmailAndPassword(
         email: 'guard@cipherx.com',
@@ -55,33 +57,41 @@ void main() {
       );
 
       expect(result, equals(tUser));
-      verify(() => mockDataSource.signInWithEmailAndPassword(
-            email: 'guard@cipherx.com',
-            password: 'password123',
-          )).called(1);
+      verify(
+        () => mockDataSource.signInWithEmailAndPassword(
+          email: 'guard@cipherx.com',
+          password: 'password123',
+        ),
+      ).called(1);
     });
 
-    test('signInWithEmailAndPassword propagates AuthFailure from dataSource',
-        () async {
-      when(() => mockDataSource.signInWithEmailAndPassword(
+    test(
+      'signInWithEmailAndPassword propagates AuthFailure from dataSource',
+      () async {
+        when(
+          () => mockDataSource.signInWithEmailAndPassword(
             email: 'wrong@cipherx.com',
             password: 'wrongpassword',
-          )).thenThrow(const InvalidCredentialsFailure());
+          ),
+        ).thenThrow(const InvalidCredentialsFailure());
 
-      expect(
-        () => repository.signInWithEmailAndPassword(
-          email: 'wrong@cipherx.com',
-          password: 'wrongpassword',
-        ),
-        throwsA(isA<InvalidCredentialsFailure>()),
-      );
-    });
+        expect(
+          () => repository.signInWithEmailAndPassword(
+            email: 'wrong@cipherx.com',
+            password: 'wrongpassword',
+          ),
+          throwsA(isA<InvalidCredentialsFailure>()),
+        );
+      },
+    );
 
     test('signUpWithEmailAndPassword delegates to dataSource', () async {
-      when(() => mockDataSource.signUpWithEmailAndPassword(
-            email: 'newguard@cipherx.com',
-            password: 'password123',
-          )).thenAnswer((_) async => tUser);
+      when(
+        () => mockDataSource.signUpWithEmailAndPassword(
+          email: 'newguard@cipherx.com',
+          password: 'password123',
+        ),
+      ).thenAnswer((_) async => tUser);
 
       final result = await repository.signUpWithEmailAndPassword(
         email: 'newguard@cipherx.com',
@@ -89,10 +99,12 @@ void main() {
       );
 
       expect(result, equals(tUser));
-      verify(() => mockDataSource.signUpWithEmailAndPassword(
-            email: 'newguard@cipherx.com',
-            password: 'password123',
-          )).called(1);
+      verify(
+        () => mockDataSource.signUpWithEmailAndPassword(
+          email: 'newguard@cipherx.com',
+          password: 'password123',
+        ),
+      ).called(1);
     });
 
     test('signOut delegates to dataSource', () async {
@@ -104,15 +116,15 @@ void main() {
     });
 
     test('sendPasswordResetEmail delegates to dataSource', () async {
-      when(() =>
-              mockDataSource.sendPasswordResetEmail(email: 'reset@cipherx.com'))
-          .thenAnswer((_) async {});
+      when(
+        () => mockDataSource.sendPasswordResetEmail(email: 'reset@cipherx.com'),
+      ).thenAnswer((_) async {});
 
       await repository.sendPasswordResetEmail(email: 'reset@cipherx.com');
 
-      verify(() =>
-              mockDataSource.sendPasswordResetEmail(email: 'reset@cipherx.com'))
-          .called(1);
+      verify(
+        () => mockDataSource.sendPasswordResetEmail(email: 'reset@cipherx.com'),
+      ).called(1);
     });
 
     test('sendEmailVerification delegates to dataSource', () async {

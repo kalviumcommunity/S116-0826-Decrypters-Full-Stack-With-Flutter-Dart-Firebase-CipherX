@@ -28,10 +28,7 @@ void main() {
         emailVerified: true,
       );
 
-      const user3 = AuthUser(
-        uid: 'user_456',
-        email: 'guard2@cipherx.com',
-      );
+      const user3 = AuthUser(uid: 'user_456', email: 'guard2@cipherx.com');
 
       expect(user1, equals(user2));
       expect(user1.hashCode, equals(user2.hashCode));
@@ -45,14 +42,8 @@ void main() {
         emailVerified: true,
       );
 
-      expect(
-        user.toString(),
-        contains('user_123'),
-      );
-      expect(
-        user.toString(),
-        contains('guard@cipherx.com'),
-      );
+      expect(user.toString(), contains('user_123'));
+      expect(user.toString(), contains('guard@cipherx.com'));
     });
   });
 }

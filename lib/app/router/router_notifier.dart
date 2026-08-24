@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/profile/presentation/providers/profile_providers.dart';
 
@@ -18,7 +20,10 @@ class RouterNotifier extends ChangeNotifier {
       notifyListeners();
     });
 
-    _profileSubscription = _ref.listen(userProfileProvider.stream, (previous, next) {
+    _profileSubscription = _ref.listen(userProfileProvider.stream, (
+      previous,
+      next,
+    ) {
       notifyListeners();
     });
   }

@@ -10,8 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Router Redirect Logic', () {
-    testWidgets('Unauthenticated user is redirected to /login',
-        (WidgetTester tester) async {
+    testWidgets('Unauthenticated user is redirected to /login', (
+      WidgetTester tester,
+    ) async {
       final container = ProviderContainer(
         overrides: [
           authStateProvider.overrideWith((ref) => Stream.value(null)),
@@ -24,9 +25,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
+          child: MaterialApp.router(routerConfig: router),
         ),
       );
       await tester.pumpAndSettle();
@@ -34,15 +33,25 @@ void main() {
       expect(router.routerDelegate.currentConfiguration.uri.path, '/login');
     });
 
-    testWidgets('Admin user is redirected to /admin/dashboard',
-        (WidgetTester tester) async {
+    testWidgets('Admin user is redirected to /admin/dashboard', (
+      WidgetTester tester,
+    ) async {
       final container = ProviderContainer(
         overrides: [
-          authStateProvider.overrideWith((ref) => Stream.value(
-              const AuthUser(uid: 'admin_uid', email: 'admin@test.com'))),
-          userProfileProvider.overrideWith((ref) => Stream.value(
+          authStateProvider.overrideWith(
+            (ref) => Stream.value(
+              const AuthUser(uid: 'admin_uid', email: 'admin@test.com'),
+            ),
+          ),
+          userProfileProvider.overrideWith(
+            (ref) => Stream.value(
               const UserProfile(
-                  uid: 'admin_uid', role: UserRole.admin, status: 'active'))),
+                uid: 'admin_uid',
+                role: UserRole.admin,
+                status: 'active',
+              ),
+            ),
+          ),
         ],
       );
 
@@ -51,83 +60,36 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(router.routerDelegate.currentConfiguration.uri.path,
-          '/admin/dashboard');
-    });
-
-    testWidgets('Supervisor user is redirected to /supervisor/dashboard',
-        (WidgetTester tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          authStateProvider.overrideWith((ref) => Stream.value(
-              const AuthUser(uid: 'super_uid', email: 'super@test.com'))),
-          userProfileProvider.overrideWith((ref) => Stream.value(const UserProfile(
-              uid: 'super_uid', role: UserRole.supervisor, status: 'active'))),
-        ],
-      );
-
-      final router = container.read(appRouterProvider);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(router.routerDelegate.currentConfiguration.uri.path,
-          '/supervisor/dashboard');
-    });
-
-    testWidgets('Guard user is redirected to /guard/home',
-        (WidgetTester tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          authStateProvider.overrideWith((ref) => Stream.value(
-              const AuthUser(uid: 'guard_uid', email: 'guard@test.com'))),
-          userProfileProvider.overrideWith((ref) => Stream.value(
-              const UserProfile(
-                  uid: 'guard_uid', role: UserRole.guard, status: 'active'))),
-        ],
-      );
-
-      final router = container.read(appRouterProvider);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
+          child: MaterialApp.router(routerConfig: router),
         ),
       );
       await tester.pumpAndSettle();
 
       expect(
-          router.routerDelegate.currentConfiguration.uri.path, '/guard/home');
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/admin/dashboard',
+      );
     });
 
-    testWidgets('Inactive user is redirected to /access-denied',
-        (WidgetTester tester) async {
+    testWidgets('Supervisor user is redirected to /supervisor/dashboard', (
+      WidgetTester tester,
+    ) async {
       final container = ProviderContainer(
         overrides: [
-          authStateProvider.overrideWith((ref) => Stream.value(
-              const AuthUser(uid: 'inactive_uid', email: 'inactive@test.com'))),
-          userProfileProvider.overrideWith((ref) => Stream.value(
+          authStateProvider.overrideWith(
+            (ref) => Stream.value(
+              const AuthUser(uid: 'super_uid', email: 'super@test.com'),
+            ),
+          ),
+          userProfileProvider.overrideWith(
+            (ref) => Stream.value(
               const UserProfile(
-                  uid: 'inactive_uid',
-                  role: UserRole.admin,
-                  status: 'inactive'))),
+                uid: 'super_uid',
+                role: UserRole.supervisor,
+                status: 'active',
+              ),
+            ),
+          ),
         ],
       );
 
@@ -136,15 +98,91 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
+          child: MaterialApp.router(routerConfig: router),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(router.routerDelegate.currentConfiguration.uri.path,
-          '/access-denied');
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/supervisor/dashboard',
+      );
+    });
+
+    testWidgets('Guard user is redirected to /guard/home', (
+      WidgetTester tester,
+    ) async {
+      final container = ProviderContainer(
+        overrides: [
+          authStateProvider.overrideWith(
+            (ref) => Stream.value(
+              const AuthUser(uid: 'guard_uid', email: 'guard@test.com'),
+            ),
+          ),
+          userProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              const UserProfile(
+                uid: 'guard_uid',
+                role: UserRole.guard,
+                status: 'active',
+              ),
+            ),
+          ),
+        ],
+      );
+
+      final router = container.read(appRouterProvider);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/guard/home',
+      );
+    });
+
+    testWidgets('Inactive user is redirected to /access-denied', (
+      WidgetTester tester,
+    ) async {
+      final container = ProviderContainer(
+        overrides: [
+          authStateProvider.overrideWith(
+            (ref) => Stream.value(
+              const AuthUser(uid: 'inactive_uid', email: 'inactive@test.com'),
+            ),
+          ),
+          userProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              const UserProfile(
+                uid: 'inactive_uid',
+                role: UserRole.admin,
+                status: 'inactive',
+              ),
+            ),
+          ),
+        ],
+      );
+
+      final router = container.read(appRouterProvider);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/access-denied',
+      );
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../domain/failures/auth_failure.dart';
 import '../providers/auth_providers.dart';
 import '../utils/auth_validators.dart';
@@ -44,10 +45,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final String? errorMessage = authState.hasError
         ? (authState.error is AuthFailure
-            ? (authState.error as AuthFailure).message
-            : authState.error
-                .toString()
-                .replaceFirst(RegExp(r'^.*Exception:\s*'), ''))
+              ? (authState.error as AuthFailure).message
+              : authState.error.toString().replaceFirst(
+                  RegExp(r'^.*Exception:\s*'),
+                  '',
+                ))
         : null;
 
     return Scaffold(
@@ -71,17 +73,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     'CIPHER-X',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2.0,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2.0,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Security Workforce Authentication',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 32),
                   if (errorMessage != null) ...<Widget>[
