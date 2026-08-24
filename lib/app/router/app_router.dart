@@ -4,6 +4,8 @@ import '../../features/auth/presentation/screens/email_verification_screen.dart'
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/identity/presentation/screens/profile_screen.dart';
+import '../../features/identity/presentation/screens/profile_setup_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../navigation_shell.dart';
 
@@ -13,10 +15,11 @@ abstract class AppRoutes {
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
   static const String verifyEmail = '/verify-email';
+  static const String profileSetup = '/profile-setup';
+  static const String profile = '/profile';
   static const String shift = '/guard/today-shift';
   static const String checkIn = '/guard/check-in';
   static const String incidents = '/guard/incidents';
-  static const String profile = '/guard/profile';
 }
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
@@ -54,6 +57,18 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.verifyEmail,
       builder: (BuildContext context, GoRouterState state) {
         return const EmailVerificationScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.profileSetup,
+      builder: (BuildContext context, GoRouterState state) {
+        return const ProfileSetupScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.profile,
+      builder: (BuildContext context, GoRouterState state) {
+        return const ProfileScreen();
       },
     ),
     StatefulShellRoute.indexedStack(
@@ -95,10 +110,9 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: <RouteBase>[
             GoRoute(
-              path: AppRoutes.profile,
+              path: '/guard/profile',
               builder: (BuildContext context, GoRouterState state) =>
-                  const PlaceholderPage(
-                      title: 'Profile', icon: Icons.person_outline),
+                  const ProfileScreen(),
             ),
           ],
         ),

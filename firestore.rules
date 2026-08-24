@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check authentication
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check self ownership
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // User Profile security boundaries
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      
+      allow create: if isOwner(userId) 
+        && request.resource.data.uid == userId
+        && request.resource.data.organizationId != null
+        && request.resource.data.organizationId != '';
+
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.organizationId == resource.data.organizationId
+        && request.resource.data.status == resource.data.status
+        && (!('createdAt' in resource.data) || request.resource.data.createdAt == resource.data.createdAt)
+        && (!('role' in resource.data) || request.resource.data.role == resource.data.role);
+
+      allow delete: if false;
+    }
+
+    // Organization document rules (Read-only for members; client writes forbidden)
+    match /organizations/{organizationId} {
+      allow read: if isAuthenticated() 
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+      
+      allow write: if false;
+    }
+
+    // Default deny all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
