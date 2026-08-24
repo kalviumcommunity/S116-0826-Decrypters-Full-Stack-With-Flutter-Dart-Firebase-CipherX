@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../auth/presentation/providers/auth_providers.dart';
+import 'package:cipher_x/features/auth/presentation/providers/auth_providers.dart';
 
 class GuardHomeScreen extends ConsumerWidget {
   const GuardHomeScreen({super.key});

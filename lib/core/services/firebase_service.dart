@@ -55,8 +55,7 @@ class FirebaseService {
 
   /// Configures Auth, Firestore, and Storage to use local Emulator Suite
   static Future<void> configureEmulators({String? host}) async {
-    final String targetHost =
-        host ??
+    final String targetHost = host ??
         (defaultTargetPlatform == TargetPlatform.android
             ? emulatorHostAndroid
             : emulatorHostLocalhost);

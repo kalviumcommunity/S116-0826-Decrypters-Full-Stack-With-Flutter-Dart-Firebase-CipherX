@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:cipher_x/app/app.dart';
 import 'package:cipher_x/app/theme/app_theme.dart';
 import 'package:cipher_x/core/config/app_config.dart';
 import 'package:cipher_x/core/services/firebase_service.dart';
 import 'package:cipher_x/core/widgets/app_error_view.dart';
 import 'package:cipher_x/core/widgets/app_loading.dart';
+import 'package:cipher_x/features/auth/domain/repositories/auth_repository.dart';
+import 'package:cipher_x/features/auth/presentation/providers/auth_providers.dart';
+import 'package:cipher_x/features/auth/presentation/screens/login_screen.dart';
+
+class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
   group('Cipher-X Bootstrap & Firebase Foundation Tests', () {
     testWidgets(
-      'Root CipherXApp navigates to NavigationShell and renders Home',
+      'Root CipherXApp starts splash and navigates to LoginScreen when unauthenticated',
       (WidgetTester tester) async {
-        await tester.pumpWidget(const ProviderScope(child: CipherXApp()));
+        final mockAuthRepository = MockAuthRepository();
+        when(() => mockAuthRepository.authStateChanges)
+            .thenAnswer((_) => Stream.value(null));
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              authRepositoryProvider.overrideWithValue(mockAuthRepository),
+            ],
+            child: const CipherXApp(),
+          ),
+        );
 
         // Initially, splash screen elements should be visible
         expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
@@ -21,8 +38,8 @@ void main() {
         // Let the navigation delay complete
         await tester.pumpAndSettle();
 
-        // Should now be on the Shift tab of NavigationShell
-        expect(find.text('Placeholder for Shift'), findsOneWidget);
+        // Should now be on the LoginScreen
+        expect(find.byType(LoginScreen), findsOneWidget);
       },
     );
 
@@ -46,7 +63,9 @@ void main() {
       expect(defaultDevConfig.enableLogging, isTrue);
     });
 
-    test('FirebaseService exposes correct emulator ports & checkHealth diagnostics', () {
+    test(
+        'FirebaseService exposes correct emulator ports & checkHealth diagnostics',
+        () {
       expect(FirebaseService.authEmulatorPort, equals(9099));
       expect(FirebaseService.firestoreEmulatorPort, equals(8080));
       expect(FirebaseService.storageEmulatorPort, equals(9199));

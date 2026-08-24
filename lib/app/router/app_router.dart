@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/enums/user_role.dart';
 import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/access_denied_screen.dart';
@@ -12,7 +11,10 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/profile_loading_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/guard/presentation/screens/guard_home_screen.dart';
-import '../../features/profile/presentation/providers/profile_providers.dart';
+import '../../features/identity/domain/entities/user_profile.dart';
+import '../../features/identity/presentation/providers/identity_providers.dart';
+import '../../features/identity/presentation/screens/profile_screen.dart';
+import '../../features/identity/presentation/screens/profile_setup_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/supervisor/presentation/screens/supervisor_dashboard_screen.dart';
 import '../navigation_shell.dart';
@@ -20,26 +22,26 @@ import 'router_notifier.dart';
 
 abstract class AppRoutes {
   static const String initial = '/';
+  static const String loading = '/loading';
+  static const String accessDenied = '/access-denied';
   static const String login = '/login';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
   static const String verifyEmail = '/verify-email';
-  static const String loading = '/loading';
-  static const String accessDenied = '/access-denied';
+  static const String profileSetup = '/profile-setup';
 
   static const String adminDashboard = '/admin/dashboard';
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
 
-  static const String shift = '/guard/today-shift';
+  static const String shift = '/guard/shift';
   static const String checkIn = '/guard/check-in';
   static const String incidents = '/guard/incidents';
   static const String profile = '/guard/profile';
 }
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
-  debugLabel: 'root',
-);
+final GlobalKey<NavigatorState> _rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final routerNotifier = ref.watch(routerNotifierProvider);
@@ -50,14 +52,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: routerNotifier,
     redirect: (BuildContext context, GoRouterState state) {
       final authState = ref.read(authStateProvider);
-      final profileState = ref.read(userProfileProvider);
 
-      final isAuthLoading = authState.isLoading;
-      final isProfileLoading = profileState.isLoading;
+      if (authState.isLoading) {
+        if (state.uri.path == AppRoutes.initial ||
+            state.uri.path == AppRoutes.loading) {
+          return null;
+        }
+        return AppRoutes.loading;
+      }
 
-      if (isAuthLoading) return AppRoutes.loading;
-
-      final authUser = authState.value;
+      final authUser = authState.asData?.value;
 
       final isAuthRoute = [
         AppRoutes.login,
@@ -67,36 +71,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ].contains(state.uri.path);
 
       if (authUser == null) {
-        if (!isAuthRoute &&
-            state.uri.path != AppRoutes.initial &&
-            state.uri.path != AppRoutes.loading) {
+        if (!isAuthRoute) {
           return AppRoutes.login;
         }
         return null;
       }
 
-      if (isProfileLoading && profileState.value == null) {
+      final profileControllerState = ref.read(profileControllerProvider);
+      final profileFromController = profileControllerState.asData?.value;
+      final currentUserProfileState = ref.read(currentUserProfileProvider);
+
+      if (currentUserProfileState.isLoading && profileFromController == null) {
         if (state.uri.path == AppRoutes.loading) return null;
         return AppRoutes.loading;
       }
 
-      final profile = profileState.value;
+      final profile =
+          profileFromController ?? currentUserProfileState.asData?.value;
+
       if (profile == null) {
+        if (state.uri.path == AppRoutes.profileSetup) return null;
+        return AppRoutes.profileSetup;
+      }
+
+      if (profile.status != UserStatus.active) {
         if (state.uri.path == AppRoutes.accessDenied) return null;
         return AppRoutes.accessDenied;
       }
 
-      if (!profile.isActive || profile.role == null) {
-        if (state.uri.path == AppRoutes.accessDenied) return null;
-        return AppRoutes.accessDenied;
-      }
+      final role = profile.role;
 
-      final role = profile.role!;
-
-      final isLoginRoute =
-          isAuthRoute ||
+      final isEntryRoute = isAuthRoute ||
           state.uri.path == AppRoutes.initial ||
-          state.uri.path == AppRoutes.loading;
+          state.uri.path == AppRoutes.loading ||
+          state.uri.path == AppRoutes.profileSetup;
 
       String allowedBasePath = '';
       String roleHome = '';
@@ -111,7 +119,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         roleHome = AppRoutes.guardHome;
       }
 
-      if (isLoginRoute) {
+      if (isEntryRoute) {
         return roleHome;
       }
 
@@ -159,6 +167,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const EmailVerificationScreen(),
       ),
       GoRoute(
+        path: AppRoutes.profileSetup,
+        builder: (BuildContext context, GoRouterState state) =>
+            const ProfileSetupScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.adminDashboard,
         builder: (BuildContext context, GoRouterState state) =>
             const AdminDashboardScreen(),
@@ -174,14 +187,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const GuardHomeScreen(),
       ),
       StatefulShellRoute.indexedStack(
-        builder:
-            (
-              BuildContext context,
-              GoRouterState state,
-              StatefulNavigationShell navigationShell,
-            ) {
-              return NavigationShell(navigationShell: navigationShell);
-            },
+        builder: (
+          BuildContext context,
+          GoRouterState state,
+          StatefulNavigationShell navigationShell,
+        ) {
+          return NavigationShell(navigationShell: navigationShell);
+        },
         branches: <StatefulShellBranch>[
           StatefulShellBranch(
             routes: <RouteBase>[
@@ -189,9 +201,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.shift,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                      title: 'Shift',
-                      icon: Icons.shield_outlined,
-                    ),
+                  title: 'Shift',
+                  icon: Icons.shield_outlined,
+                ),
               ),
             ],
           ),
@@ -201,9 +213,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.checkIn,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                      title: 'Check-In',
-                      icon: Icons.location_on_outlined,
-                    ),
+                  title: 'Check-In',
+                  icon: Icons.location_on_outlined,
+                ),
               ),
             ],
           ),
@@ -213,9 +225,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.incidents,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                      title: 'Incidents',
-                      icon: Icons.warning_amber_outlined,
-                    ),
+                  title: 'Incidents',
+                  icon: Icons.warning_amber_outlined,
+                ),
               ),
             ],
           ),
@@ -224,10 +236,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.profile,
                 builder: (BuildContext context, GoRouterState state) =>
-                    const PlaceholderPage(
-                      title: 'Profile',
-                      icon: Icons.person_outline,
-                    ),
+                    const ProfileScreen(),
               ),
             ],
           ),

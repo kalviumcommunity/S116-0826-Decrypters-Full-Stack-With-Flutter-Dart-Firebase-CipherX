@@ -55,8 +55,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final String? errorMessage = authState.hasError
         ? (authState.error is AuthFailure
-              ? (authState.error as AuthFailure).message
-              : authState.error.toString().replaceFirst(
+            ? (authState.error as AuthFailure).message
+            : authState.error.toString().replaceFirst(
                   RegExp(r'^.*Exception:\s*'),
                   '',
                 ))
@@ -77,7 +77,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Text(
                     'Join Cipher-X',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -85,8 +87,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     'Register for secure platform access',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                   const SizedBox(height: 24),
                   if (errorMessage != null) ...<Widget>[
@@ -170,9 +172,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     validator: (String? value) =>
                         AuthValidators.validateConfirmPassword(
-                          value,
-                          _passwordController.text,
-                        ),
+                      value,
+                      _passwordController.text,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(

@@ -47,8 +47,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     final String? errorMessage = authState.hasError
         ? (authState.error is AuthFailure
-              ? (authState.error as AuthFailure).message
-              : authState.error.toString().replaceFirst(
+            ? (authState.error as AuthFailure).message
+            : authState.error.toString().replaceFirst(
                   RegExp(r'^.*Exception:\s*'),
                   '',
                 ))
@@ -75,7 +75,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   Text(
                     'Forgot Your Password?',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -83,8 +85,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     'Enter your registered email address to receive password reset instructions.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                   const SizedBox(height: 24),
                   if (errorMessage != null) ...<Widget>[
@@ -148,9 +150,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     key: const Key('reset_submit_button'),
-                    onPressed: (isLoading || _emailSent)
-                        ? null
-                        : _handleResetPassword,
+                    onPressed:
+                        (isLoading || _emailSent) ? null : _handleResetPassword,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),

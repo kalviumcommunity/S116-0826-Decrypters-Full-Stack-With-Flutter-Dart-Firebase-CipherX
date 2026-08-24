@@ -39,8 +39,8 @@ class _EmailVerificationScreenState
 
     final String? errorMessage = authState.hasError
         ? (authState.error is AuthFailure
-              ? (authState.error as AuthFailure).message
-              : authState.error.toString().replaceFirst(
+            ? (authState.error as AuthFailure).message
+            : authState.error.toString().replaceFirst(
                   RegExp(r'^.*Exception:\s*'),
                   '',
                 ))
@@ -73,7 +73,9 @@ class _EmailVerificationScreenState
               Text(
                 'Verify Your Email Address',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
@@ -81,8 +83,8 @@ class _EmailVerificationScreenState
                 'A verification link has been sent to ${user?.email ?? "your email address"}. Please check your inbox and verify your account.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
               const SizedBox(height: 24),
               if (_resendSent) ...<Widget>[

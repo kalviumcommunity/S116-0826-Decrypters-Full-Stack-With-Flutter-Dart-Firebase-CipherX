@@ -6,7 +6,7 @@ class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuthDataSource _dataSource;
 
   AuthRepositoryImpl({required FirebaseAuthDataSource dataSource})
-    : _dataSource = dataSource;
+      : _dataSource = dataSource;
 
   @override
   AuthUser? get currentUser => _dataSource.currentUser;

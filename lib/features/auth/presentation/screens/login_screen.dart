@@ -45,8 +45,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final String? errorMessage = authState.hasError
         ? (authState.error is AuthFailure
-              ? (authState.error as AuthFailure).message
-              : authState.error.toString().replaceFirst(
+            ? (authState.error as AuthFailure).message
+            : authState.error.toString().replaceFirst(
                   RegExp(r'^.*Exception:\s*'),
                   '',
                 ))
@@ -73,17 +73,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     'CIPHER-X',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2.0,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2.0,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Security Workforce Authentication',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                   const SizedBox(height: 32),
                   if (errorMessage != null) ...<Widget>[
