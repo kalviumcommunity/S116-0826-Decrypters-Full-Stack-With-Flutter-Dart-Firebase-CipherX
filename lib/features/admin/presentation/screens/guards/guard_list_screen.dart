@@ -37,9 +37,8 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest,
+                fillColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               onChanged: (value) {
                 setState(() {
@@ -55,8 +54,8 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
           final filteredGuards = guards.where((guard) {
             final nameMatch = guard.name.toLowerCase().contains(_searchQuery);
             final idMatch = guard.employeeId.toLowerCase().contains(
-              _searchQuery,
-            );
+                  _searchQuery,
+                );
             return nameMatch || idMatch;
           }).toList();
 
@@ -125,11 +124,11 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
       child: Text(
         isActive ? 'Active' : 'Inactive',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: isActive
-              ? Colors.green[800]
-              : Theme.of(context).colorScheme.onErrorContainer,
-          fontWeight: FontWeight.bold,
-        ),
+              color: isActive
+                  ? Colors.green[800]
+                  : Theme.of(context).colorScheme.onErrorContainer,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }

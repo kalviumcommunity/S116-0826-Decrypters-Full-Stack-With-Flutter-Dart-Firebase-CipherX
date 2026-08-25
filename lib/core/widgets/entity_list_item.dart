@@ -37,16 +37,14 @@ class EntityListItem extends StatelessWidget {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                backgroundImage: avatarUrl != null
-                    ? NetworkImage(avatarUrl!)
-                    : null,
+                backgroundImage:
+                    avatarUrl != null ? NetworkImage(avatarUrl!) : null,
                 child: avatarUrl == null
                     ? Text(
                         avatarFallback ?? title.substring(0, 1).toUpperCase(),
                         style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryContainer,
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                       )
@@ -59,7 +57,9 @@ class EntityListItem extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleMedium
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
                           ?.copyWith(fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -68,8 +68,9 @@ class EntityListItem extends StatelessWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

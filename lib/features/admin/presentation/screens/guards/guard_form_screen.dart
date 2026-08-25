@@ -115,9 +115,8 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
               // TODO: Add Photo Upload Widget here
               CircleAvatar(
                 radius: 40,
-                backgroundColor: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest,
+                backgroundColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: Icon(
                   Icons.add_a_photo_outlined,
                   size: 32,

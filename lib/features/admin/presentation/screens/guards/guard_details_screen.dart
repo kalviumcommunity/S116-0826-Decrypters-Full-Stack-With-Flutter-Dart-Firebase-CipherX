@@ -35,9 +35,8 @@ class GuardDetailsScreen extends ConsumerWidget {
             CircleAvatar(
               radius: 60,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              backgroundImage: guard.photoUrl != null
-                  ? NetworkImage(guard.photoUrl!)
-                  : null,
+              backgroundImage:
+                  guard.photoUrl != null ? NetworkImage(guard.photoUrl!) : null,
               child: guard.photoUrl == null
                   ? Text(
                       guard.name.isNotEmpty
@@ -54,7 +53,9 @@ class GuardDetailsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               guard.name,
-              style: Theme.of(context).textTheme.headlineMedium
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -158,8 +159,8 @@ class GuardDetailsScreen extends ConsumerWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(value, style: Theme.of(context).textTheme.bodyLarge),
@@ -184,12 +185,12 @@ class GuardDetailsScreen extends ConsumerWidget {
       child: Text(
         isActive ? 'ACTIVE' : 'INACTIVE',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: isActive
-              ? Colors.green[800]
-              : Theme.of(context).colorScheme.onErrorContainer,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
+              color: isActive
+                  ? Colors.green[800]
+                  : Theme.of(context).colorScheme.onErrorContainer,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
       ),
     );
   }
@@ -219,9 +220,8 @@ class GuardDetailsScreen extends ConsumerWidget {
             FilledButton(
               onPressed: () => context.pop(true),
               style: FilledButton.styleFrom(
-                backgroundColor: isActive
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+                backgroundColor:
+                    isActive ? Theme.of(context).colorScheme.error : null,
               ),
               child: Text(isActive ? 'Deactivate' : 'Activate'),
             ),
@@ -231,13 +231,12 @@ class GuardDetailsScreen extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final success = await ref
-          .read(guardControllerProvider.notifier)
-          .updateGuardStatus(
-            organizationId: guard.organizationId,
-            guardId: guard.guardId,
-            status: newStatus,
-          );
+      final success =
+          await ref.read(guardControllerProvider.notifier).updateGuardStatus(
+                organizationId: guard.organizationId,
+                guardId: guard.guardId,
+                status: newStatus,
+              );
 
       if (success && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
