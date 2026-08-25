@@ -20,6 +20,9 @@ abstract class GuardRepository {
   /// Retrieves all guards belonging to the specified [organizationId].
   Future<List<Guard>> getGuards(String organizationId);
 
+  /// Watches all guards belonging to the specified [organizationId] in real-time.
+  Stream<List<Guard>> watchGuards(String organizationId);
+
   /// Validates and updates mutable fields of an existing [guard].
   ///
   /// Immutable fields (`guardId`, `organizationId`, `createdAt`) are preserved.
