@@ -9,6 +9,7 @@ import '../../domain/entities/user_profile.dart';
 import '../../domain/failures/identity_failure.dart';
 import '../../domain/repositories/organization_repository.dart';
 import '../../domain/repositories/user_profile_repository.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 final cloudFirestoreProvider = Provider<FirebaseFirestore>((ref) {
   return FirebaseFirestore.instance;
@@ -40,6 +41,13 @@ final userProfileProvider =
     FutureProvider.family<UserProfile?, String>((ref, uid) async {
   final repository = ref.watch(userProfileRepositoryProvider);
   return await repository.getUserProfile(uid);
+});
+
+final currentUserProfileProvider = Provider<AsyncValue<UserProfile?>>((ref) {
+  final authState = ref.watch(authStateProvider);
+  final authUser = authState.asData?.value;
+  if (authUser == null) return const AsyncValue.data(null);
+  return ref.watch(userProfileProvider(authUser.uid));
 });
 
 final organizationProvider =

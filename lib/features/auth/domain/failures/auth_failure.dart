@@ -51,15 +51,18 @@ class WrongPasswordFailure extends AuthFailure {
 
 class EmailAlreadyInUseFailure extends AuthFailure {
   const EmailAlreadyInUseFailure([String? message])
-      : super(message ?? 'An account already exists with this email.',
-            'email-already-in-use');
+      : super(
+          message ?? 'An account already exists with this email.',
+          'email-already-in-use',
+        );
 }
 
 class WeakPasswordFailure extends AuthFailure {
   const WeakPasswordFailure([String? message])
       : super(
-            message ?? 'Password is too weak. Please use a stronger password.',
-            'weak-password');
+          message ?? 'Password is too weak. Please use a stronger password.',
+          'weak-password',
+        );
 }
 
 class OperationNotAllowedFailure extends AuthFailure {
@@ -69,20 +72,25 @@ class OperationNotAllowedFailure extends AuthFailure {
 
 class TooManyRequestsFailure extends AuthFailure {
   const TooManyRequestsFailure([String? message])
-      : super(message ?? 'Too many attempts. Please try again later.',
-            'too-many-requests');
+      : super(
+          message ?? 'Too many attempts. Please try again later.',
+          'too-many-requests',
+        );
 }
 
 class NetworkRequestFailedFailure extends AuthFailure {
   const NetworkRequestFailedFailure([String? message])
       : super(
-            message ??
-                'Unable to connect. Check your internet connection and try again.',
-            'network-request-failed');
+          message ??
+              'Unable to connect. Check your internet connection and try again.',
+          'network-request-failed',
+        );
 }
 
 class UnknownAuthFailure extends AuthFailure {
   const UnknownAuthFailure([String? message, String? code])
-      : super(message ?? 'Something went wrong. Please try again.',
-            code ?? 'unknown');
+      : super(
+          message ?? 'Something went wrong. Please try again.',
+          code ?? 'unknown',
+        );
 }

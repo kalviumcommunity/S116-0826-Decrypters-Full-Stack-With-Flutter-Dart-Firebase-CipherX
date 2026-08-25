@@ -19,18 +19,15 @@ void main() {
 
   Widget buildTestableWidget() {
     return ProviderScope(
-      overrides: [
-        authRepositoryProvider.overrideWithValue(mockRepository),
-      ],
-      child: const MaterialApp(
-        home: ForgotPasswordScreen(),
-      ),
+      overrides: [authRepositoryProvider.overrideWithValue(mockRepository)],
+      child: const MaterialApp(home: ForgotPasswordScreen()),
     );
   }
 
   group('ForgotPasswordScreen Widget Tests', () {
-    testWidgets('renders ForgotPasswordScreen elements',
-        (WidgetTester tester) async {
+    testWidgets('renders ForgotPasswordScreen elements', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
 
       expect(find.text('Reset Password'), findsOneWidget);
@@ -39,43 +36,47 @@ void main() {
       expect(find.byKey(const Key('reset_submit_button')), findsOneWidget);
     });
 
-    testWidgets('triggers email validation error on empty submit',
-        (WidgetTester tester) async {
+    testWidgets('triggers email validation error on empty submit', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
 
       await tester.tap(find.byKey(const Key('reset_submit_button')));
       await tester.pump();
 
       expect(find.text('Email address is required.'), findsOneWidget);
-      verifyNever(() => mockRepository.sendPasswordResetEmail(
-            email: any(named: 'email'),
-          ));
+      verifyNever(
+        () => mockRepository.sendPasswordResetEmail(email: any(named: 'email')),
+      );
     });
 
     testWidgets(
-        'calls sendPasswordResetEmail and renders success feedback banner',
-        (WidgetTester tester) async {
-      when(() => mockRepository.sendPasswordResetEmail(
-            email: 'guard@cipherx.com',
-          )).thenAnswer((_) async {});
+      'calls sendPasswordResetEmail and renders success feedback banner',
+      (WidgetTester tester) async {
+        when(
+          () =>
+              mockRepository.sendPasswordResetEmail(email: 'guard@cipherx.com'),
+        ).thenAnswer((_) async {});
 
-      await tester.pumpWidget(buildTestableWidget());
+        await tester.pumpWidget(buildTestableWidget());
 
-      await tester.enterText(
-        find.byKey(const Key('reset_email_field')),
-        'guard@cipherx.com',
-      );
+        await tester.enterText(
+          find.byKey(const Key('reset_email_field')),
+          'guard@cipherx.com',
+        );
 
-      await tester.tap(find.byKey(const Key('reset_submit_button')));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('reset_submit_button')));
+        await tester.pumpAndSettle();
 
-      verify(() => mockRepository.sendPasswordResetEmail(
-            email: 'guard@cipherx.com',
-          )).called(1);
-      expect(
-        find.byKey(const Key('reset_email_sent_banner')),
-        findsOneWidget,
-      );
-    });
+        verify(
+          () =>
+              mockRepository.sendPasswordResetEmail(email: 'guard@cipherx.com'),
+        ).called(1);
+        expect(
+          find.byKey(const Key('reset_email_sent_banner')),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

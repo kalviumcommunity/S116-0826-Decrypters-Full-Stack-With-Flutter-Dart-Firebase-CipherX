@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+
 import '../../domain/entities/auth_user.dart';
 import '../../domain/failures/auth_failure.dart';
 
@@ -22,11 +23,8 @@ class FirebaseAuthDataSource {
     required String password,
   }) async {
     try {
-      final fb.UserCredential credential =
-          await _firebaseAuth.signInWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
-      );
+      final fb.UserCredential credential = await _firebaseAuth
+          .signInWithEmailAndPassword(email: email.trim(), password: password);
 
       final AuthUser? user = _mapFirebaseUser(credential.user);
       if (user == null) {

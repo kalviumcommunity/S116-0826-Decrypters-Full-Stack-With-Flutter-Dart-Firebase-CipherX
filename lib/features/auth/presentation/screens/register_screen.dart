@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../domain/failures/auth_failure.dart';
 import '../providers/auth_providers.dart';
 import '../utils/auth_validators.dart';
@@ -55,15 +56,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final String? errorMessage = authState.hasError
         ? (authState.error is AuthFailure
             ? (authState.error as AuthFailure).message
-            : authState.error
-                .toString()
-                .replaceFirst(RegExp(r'^.*Exception:\s*'), ''))
+            : authState.error.toString().replaceFirst(
+                  RegExp(r'^.*Exception:\s*'),
+                  '',
+                ))
         : null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Account'),
-      ),
+      appBar: AppBar(title: const Text('Create Account')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -77,9 +77,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Text(
                     'Join Cipher-X',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'app/app.dart';
 import 'core/services/firebase_service.dart';
 
@@ -11,9 +12,5 @@ Future<void> main() async {
     debugPrint('Main Bootstrap Warning: Firebase initialization deferred: $e');
   }
 
-  runApp(
-    const ProviderScope(
-      child: CipherXApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: CipherXApp()));
 }
