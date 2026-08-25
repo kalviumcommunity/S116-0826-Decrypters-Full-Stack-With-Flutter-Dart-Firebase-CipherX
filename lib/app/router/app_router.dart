@@ -17,6 +17,10 @@ import '../../features/identity/presentation/screens/profile_screen.dart';
 import '../../features/identity/presentation/screens/profile_setup_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/supervisor/presentation/screens/supervisor_dashboard_screen.dart';
+import '../../features/admin/presentation/screens/guards/guard_list_screen.dart';
+import '../../features/admin/presentation/screens/guards/guard_details_screen.dart';
+import '../../features/admin/presentation/screens/guards/guard_form_screen.dart';
+import '../../features/guards/domain/entities/guard.dart';
 import '../navigation_shell.dart';
 import 'router_notifier.dart';
 
@@ -31,6 +35,11 @@ abstract class AppRoutes {
   static const String profileSetup = '/profile-setup';
 
   static const String adminDashboard = '/admin/dashboard';
+  static const String adminGuards = '/admin/guards';
+  static const String adminGuardDetails = '/admin/guards/details';
+  static const String adminGuardCreate = '/admin/guards/create';
+  static const String adminGuardEdit = '/admin/guards/edit';
+  
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
 
@@ -175,6 +184,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.adminDashboard,
         builder: (BuildContext context, GoRouterState state) =>
             const AdminDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminGuards,
+        builder: (BuildContext context, GoRouterState state) =>
+            const GuardListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminGuardDetails,
+        builder: (BuildContext context, GoRouterState state) {
+          final guard = state.extra as Guard;
+          return GuardDetailsScreen(guard: guard);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminGuardCreate,
+        builder: (BuildContext context, GoRouterState state) =>
+            const GuardFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminGuardEdit,
+        builder: (BuildContext context, GoRouterState state) {
+          final guard = state.extra as Guard;
+          return GuardFormScreen(existingGuard: guard);
+        },
       ),
       GoRoute(
         path: AppRoutes.supervisorDashboard,
