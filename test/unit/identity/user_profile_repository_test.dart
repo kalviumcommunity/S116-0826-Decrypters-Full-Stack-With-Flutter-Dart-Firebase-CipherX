@@ -59,46 +59,53 @@ void main() {
     });
 
     test(
-        'updateUserProfile calls datasource update and returns updated profile',
-        () async {
-      const updatedProfile = UserProfile(
-        uid: 'u123',
-        email: 'guard@cipherx.com',
-        displayName: 'Guard Alex Updated',
-        phone: '+1 555-9999',
-        organizationId: 'org_001',
-      );
+      'updateUserProfile calls datasource update and returns updated profile',
+      () async {
+        const updatedProfile = UserProfile(
+          uid: 'u123',
+          email: 'guard@cipherx.com',
+          displayName: 'Guard Alex Updated',
+          phone: '+1 555-9999',
+          organizationId: 'org_001',
+        );
 
-      when(() => mockDataSource.updateUserProfile(
+        when(
+          () => mockDataSource.updateUserProfile(
             uid: 'u123',
             displayName: 'Guard Alex Updated',
             phone: '+1 555-9999',
-          )).thenAnswer((_) async => updatedProfile);
+          ),
+        ).thenAnswer((_) async => updatedProfile);
 
-      final result = await repository.updateUserProfile(
-        uid: 'u123',
-        displayName: 'Guard Alex Updated',
-        phone: '+1 555-9999',
-      );
+        final result = await repository.updateUserProfile(
+          uid: 'u123',
+          displayName: 'Guard Alex Updated',
+          phone: '+1 555-9999',
+        );
 
-      expect(result.displayName, 'Guard Alex Updated');
-      verify(() => mockDataSource.updateUserProfile(
+        expect(result.displayName, 'Guard Alex Updated');
+        verify(
+          () => mockDataSource.updateUserProfile(
             uid: 'u123',
             displayName: 'Guard Alex Updated',
             phone: '+1 555-9999',
-          )).called(1);
-    });
+          ),
+        ).called(1);
+      },
+    );
 
-    test('maps permission-denied FirebaseException to PermissionDeniedFailure',
-        () async {
-      when(() => mockDataSource.getUserProfile('u123')).thenThrow(
-        FirebaseException(plugin: 'firestore', code: 'permission-denied'),
-      );
+    test(
+      'maps permission-denied FirebaseException to PermissionDeniedFailure',
+      () async {
+        when(() => mockDataSource.getUserProfile('u123')).thenThrow(
+          FirebaseException(plugin: 'firestore', code: 'permission-denied'),
+        );
 
-      expect(
-        () => repository.getUserProfile('u123'),
-        throwsA(isA<PermissionDeniedFailure>()),
-      );
-    });
+        expect(
+          () => repository.getUserProfile('u123'),
+          throwsA(isA<PermissionDeniedFailure>()),
+        );
+      },
+    );
   });
 }

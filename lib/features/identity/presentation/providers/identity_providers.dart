@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/datasources/firebase_organization_data_source.dart';
 import '../../data/datasources/firebase_user_profile_data_source.dart';
 import '../../data/repositories/organization_repository_impl.dart';
@@ -15,17 +16,19 @@ final cloudFirestoreProvider = Provider<FirebaseFirestore>((ref) {
   return FirebaseFirestore.instance;
 });
 
-final userProfileDataSourceProvider =
-    Provider<FirebaseUserProfileDataSource>((ref) {
+final userProfileDataSourceProvider = Provider<FirebaseUserProfileDataSource>((
+  ref,
+) {
   final firestore = ref.watch(cloudFirestoreProvider);
   return FirebaseUserProfileDataSource(firestore: firestore);
 });
 
-final organizationDataSourceProvider =
-    Provider<FirebaseOrganizationDataSource>((ref) {
-  final firestore = ref.watch(cloudFirestoreProvider);
-  return FirebaseOrganizationDataSource(firestore: firestore);
-});
+final organizationDataSourceProvider = Provider<FirebaseOrganizationDataSource>(
+  (ref) {
+    final firestore = ref.watch(cloudFirestoreProvider);
+    return FirebaseOrganizationDataSource(firestore: firestore);
+  },
+);
 
 final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
   final dataSource = ref.watch(userProfileDataSourceProvider);
@@ -37,8 +40,10 @@ final organizationRepositoryProvider = Provider<OrganizationRepository>((ref) {
   return OrganizationRepositoryImpl(dataSource: dataSource);
 });
 
-final userProfileProvider =
-    FutureProvider.family<UserProfile?, String>((ref, uid) async {
+final userProfileProvider = FutureProvider.family<UserProfile?, String>((
+  ref,
+  uid,
+) async {
   final repository = ref.watch(userProfileRepositoryProvider);
   return await repository.getUserProfile(uid);
 });
@@ -50,8 +55,10 @@ final currentUserProfileProvider = Provider<AsyncValue<UserProfile?>>((ref) {
   return ref.watch(userProfileProvider(authUser.uid));
 });
 
-final organizationProvider =
-    FutureProvider.family<Organization?, String>((ref, id) async {
+final organizationProvider = FutureProvider.family<Organization?, String>((
+  ref,
+  id,
+) async {
   final repository = ref.watch(organizationRepositoryProvider);
   return await repository.getOrganizationById(id);
 });
@@ -88,8 +95,9 @@ class ProfileController extends StateNotifier<AsyncValue<UserProfile?>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      final org =
-          await _organizationRepository.getOrganizationByCode(organizationCode);
+      final org = await _organizationRepository.getOrganizationByCode(
+        organizationCode,
+      );
       if (org == null) {
         throw const OrganizationNotFoundFailure(
           'No organization found with this code. Please check code and try again.',
@@ -106,8 +114,9 @@ class ProfileController extends StateNotifier<AsyncValue<UserProfile?>> {
         role: UserRole.guard,
       );
 
-      final created =
-          await _userProfileRepository.createUserProfile(newProfile);
+      final created = await _userProfileRepository.createUserProfile(
+        newProfile,
+      );
       state = AsyncValue.data(created);
       return true;
     } catch (e, st) {

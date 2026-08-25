@@ -45,16 +45,18 @@ void main() {
       verify(() => mockDataSource.getOrganizationByCode('ORG001')).called(1);
     });
 
-    test('maps permission-denied FirebaseException to PermissionDeniedFailure',
-        () async {
-      when(() => mockDataSource.getOrganizationById('org_001')).thenThrow(
-        FirebaseException(plugin: 'firestore', code: 'permission-denied'),
-      );
+    test(
+      'maps permission-denied FirebaseException to PermissionDeniedFailure',
+      () async {
+        when(() => mockDataSource.getOrganizationById('org_001')).thenThrow(
+          FirebaseException(plugin: 'firestore', code: 'permission-denied'),
+        );
 
-      expect(
-        () => repository.getOrganizationById('org_001'),
-        throwsA(isA<PermissionDeniedFailure>()),
-      );
-    });
+        expect(
+          () => repository.getOrganizationById('org_001'),
+          throwsA(isA<PermissionDeniedFailure>()),
+        );
+      },
+    );
   });
 }

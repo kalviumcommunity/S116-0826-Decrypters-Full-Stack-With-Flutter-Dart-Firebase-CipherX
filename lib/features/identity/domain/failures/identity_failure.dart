@@ -10,9 +10,7 @@ abstract class IdentityFailure implements Exception {
 }
 
 class ProfileNotFoundFailure extends IdentityFailure {
-  const ProfileNotFoundFailure([
-    super.message = 'User profile was not found.',
-  ]);
+  const ProfileNotFoundFailure([super.message = 'User profile was not found.']);
 }
 
 class OrganizationNotFoundFailure extends IdentityFailure {

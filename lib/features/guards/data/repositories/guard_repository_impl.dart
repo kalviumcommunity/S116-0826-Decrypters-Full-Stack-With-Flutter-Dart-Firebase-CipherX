@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/guard.dart';
 import '../../domain/failures/guard_failure.dart';
 import '../../domain/repositories/guard_repository.dart';
@@ -8,9 +9,8 @@ import '../datasources/firebase_guard_data_source.dart';
 class GuardRepositoryImpl implements GuardRepository {
   final FirebaseGuardDataSource _dataSource;
 
-  GuardRepositoryImpl({
-    required FirebaseGuardDataSource dataSource,
-  }) : _dataSource = dataSource;
+  GuardRepositoryImpl({required FirebaseGuardDataSource dataSource})
+      : _dataSource = dataSource;
 
   @override
   Future<Guard> createGuard(Guard guard) async {

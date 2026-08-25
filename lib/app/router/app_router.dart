@@ -111,8 +111,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       final role = profile.role;
 
-      final isEntryRoute =
-          isAuthRoute ||
+      final isEntryRoute = isAuthRoute ||
           state.uri.path == AppRoutes.initial ||
           state.uri.path == AppRoutes.loading ||
           state.uri.path == AppRoutes.profileSetup;
@@ -222,14 +221,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const GuardHomeScreen(),
       ),
       StatefulShellRoute.indexedStack(
-        builder:
-            (
-              BuildContext context,
-              GoRouterState state,
-              StatefulNavigationShell navigationShell,
-            ) {
-              return NavigationShell(navigationShell: navigationShell);
-            },
+        builder: (
+          BuildContext context,
+          GoRouterState state,
+          StatefulNavigationShell navigationShell,
+        ) {
+          return NavigationShell(navigationShell: navigationShell);
+        },
         branches: <StatefulShellBranch>[
           StatefulShellBranch(
             routes: <RouteBase>[
@@ -237,9 +235,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.shift,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                      title: 'Shift',
-                      icon: Icons.shield_outlined,
-                    ),
+                  title: 'Shift',
+                  icon: Icons.shield_outlined,
+                ),
               ),
             ],
           ),
@@ -249,9 +247,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.checkIn,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                      title: 'Check-In',
-                      icon: Icons.location_on_outlined,
-                    ),
+                  title: 'Check-In',
+                  icon: Icons.location_on_outlined,
+                ),
               ),
             ],
           ),
@@ -261,9 +259,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: AppRoutes.incidents,
                 builder: (BuildContext context, GoRouterState state) =>
                     const PlaceholderPage(
-                      title: 'Incidents',
-                      icon: Icons.warning_amber_outlined,
-                    ),
+                  title: 'Incidents',
+                  icon: Icons.warning_amber_outlined,
+                ),
               ),
             ],
           ),

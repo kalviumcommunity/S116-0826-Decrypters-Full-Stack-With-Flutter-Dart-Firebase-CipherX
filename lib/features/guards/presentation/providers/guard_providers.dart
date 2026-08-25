@@ -84,5 +84,5 @@ class GuardController extends AutoDisposeAsyncNotifier<void> {
 
 final guardControllerProvider =
     AutoDisposeAsyncNotifierProvider<GuardController, void>(() {
-      return GuardController();
-    });
+  return GuardController();
+});

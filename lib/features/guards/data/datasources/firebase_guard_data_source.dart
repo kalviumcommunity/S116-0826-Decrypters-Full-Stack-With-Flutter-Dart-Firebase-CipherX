@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/guard.dart';
 
 class FirebaseGuardDataSource {
@@ -8,7 +9,8 @@ class FirebaseGuardDataSource {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> _guardsCollection(
-          String organizationId) =>
+    String organizationId,
+  ) =>
       _firestore
           .collection('organizations')
           .doc(organizationId)

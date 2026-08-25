@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/entities/user_profile.dart';
@@ -86,8 +87,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: authState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => Center(
-            child: Text('Auth Error: $err',
-                style: const TextStyle(color: AppColors.error)),
+            child: Text(
+              'Auth Error: $err',
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
           data: (authUser) {
             if (authUser == null) {
@@ -115,17 +118,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.account_circle_outlined,
-                              size: 64, color: AppColors.primary),
+                          const Icon(
+                            Icons.account_circle_outlined,
+                            size: 64,
+                            color: AppColors.primary,
+                          ),
                           const SizedBox(height: 16),
                           const Text(
                             'Profile Not Found',
                             style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                              'Please complete your identity setup to proceed.'),
+                            'Please complete your identity setup to proceed.',
+                          ),
                           const SizedBox(height: 16),
                           ElevatedButton(
                             key: const Key('go_setup_profile_button'),
@@ -158,8 +167,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               children: [
                                 CircleAvatar(
                                   radius: 30,
-                                  backgroundColor:
-                                      AppColors.primary.withValues(alpha: 0.2),
+                                  backgroundColor: AppColors.primary.withValues(
+                                    alpha: 0.2,
+                                  ),
                                   child: Text(
                                     activeProfile.displayName.isNotEmpty
                                         ? activeProfile.displayName[0]
@@ -200,10 +210,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         ),
                                         backgroundColor: activeProfile.status ==
                                                 UserStatus.active
-                                            ? Colors.green
-                                                .withValues(alpha: 0.2)
-                                            : Colors.orange
-                                                .withValues(alpha: 0.2),
+                                            ? Colors.green.withValues(
+                                                alpha: 0.2,
+                                              )
+                                            : Colors.orange.withValues(
+                                                alpha: 0.2,
+                                              ),
                                         visualDensity: VisualDensity.compact,
                                       ),
                                     ],
@@ -269,7 +281,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                           height: 20,
                                           width: 20,
                                           child: CircularProgressIndicator(
-                                              strokeWidth: 2),
+                                            strokeWidth: 2,
+                                          ),
                                         )
                                       : const Text('Save Changes'),
                                 ),

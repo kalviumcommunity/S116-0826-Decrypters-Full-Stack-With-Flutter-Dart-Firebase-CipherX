@@ -42,10 +42,12 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          userProfileRepositoryProvider
-              .overrideWithValue(mockUserProfileRepository),
-          organizationRepositoryProvider
-              .overrideWithValue(mockOrganizationRepository),
+          userProfileRepositoryProvider.overrideWithValue(
+            mockUserProfileRepository,
+          ),
+          organizationRepositoryProvider.overrideWithValue(
+            mockOrganizationRepository,
+          ),
           authStateProvider.overrideWith((ref) => Stream.value(null)),
           currentUserProfileProvider.overrideWithValue(
             const AsyncValue.data(null),
@@ -73,10 +75,12 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             authRepositoryProvider.overrideWithValue(mockAuthRepository),
-            userProfileRepositoryProvider
-                .overrideWithValue(mockUserProfileRepository),
-            organizationRepositoryProvider
-                .overrideWithValue(mockOrganizationRepository),
+            userProfileRepositoryProvider.overrideWithValue(
+              mockUserProfileRepository,
+            ),
+            organizationRepositoryProvider.overrideWithValue(
+              mockOrganizationRepository,
+            ),
             authStateProvider.overrideWith(
               (ref) => Stream.value(
                 const AuthUser(uid: 'new_uid', email: 'new@test.com'),
@@ -119,10 +123,12 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          userProfileRepositoryProvider
-              .overrideWithValue(mockUserProfileRepository),
-          organizationRepositoryProvider
-              .overrideWithValue(mockOrganizationRepository),
+          userProfileRepositoryProvider.overrideWithValue(
+            mockUserProfileRepository,
+          ),
+          organizationRepositoryProvider.overrideWithValue(
+            mockOrganizationRepository,
+          ),
           authStateProvider.overrideWith(
             (ref) => Stream.value(
               const AuthUser(uid: 'admin_uid', email: 'admin@test.com'),
@@ -164,10 +170,12 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          userProfileRepositoryProvider
-              .overrideWithValue(mockUserProfileRepository),
-          organizationRepositoryProvider
-              .overrideWithValue(mockOrganizationRepository),
+          userProfileRepositoryProvider.overrideWithValue(
+            mockUserProfileRepository,
+          ),
+          organizationRepositoryProvider.overrideWithValue(
+            mockOrganizationRepository,
+          ),
           authStateProvider.overrideWith(
             (ref) => Stream.value(
               const AuthUser(uid: 'super_uid', email: 'super@test.com'),
@@ -209,10 +217,12 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          userProfileRepositoryProvider
-              .overrideWithValue(mockUserProfileRepository),
-          organizationRepositoryProvider
-              .overrideWithValue(mockOrganizationRepository),
+          userProfileRepositoryProvider.overrideWithValue(
+            mockUserProfileRepository,
+          ),
+          organizationRepositoryProvider.overrideWithValue(
+            mockOrganizationRepository,
+          ),
           authStateProvider.overrideWith(
             (ref) => Stream.value(
               const AuthUser(uid: 'guard_uid', email: 'guard@test.com'),
@@ -254,10 +264,12 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(mockAuthRepository),
-          userProfileRepositoryProvider
-              .overrideWithValue(mockUserProfileRepository),
-          organizationRepositoryProvider
-              .overrideWithValue(mockOrganizationRepository),
+          userProfileRepositoryProvider.overrideWithValue(
+            mockUserProfileRepository,
+          ),
+          organizationRepositoryProvider.overrideWithValue(
+            mockOrganizationRepository,
+          ),
           authStateProvider.overrideWith(
             (ref) => Stream.value(
               const AuthUser(uid: 'inactive_uid', email: 'inactive@test.com'),

@@ -8,14 +8,16 @@ class UserProfileValidator {
     }
     if (profile.email.trim().isEmpty || !profile.email.contains('@')) {
       throw const ProfileValidationFailure(
-          'A valid email address is required.');
+        'A valid email address is required.',
+      );
     }
     if (profile.displayName.trim().isEmpty) {
       throw const ProfileValidationFailure('Display name is required.');
     }
     if (profile.displayName.trim().length < 2) {
       throw const ProfileValidationFailure(
-          'Display name must be at least 2 characters.');
+        'Display name must be at least 2 characters.',
+      );
     }
     if (profile.organizationId.trim().isEmpty) {
       throw const ProfileValidationFailure('Organization ID is required.');

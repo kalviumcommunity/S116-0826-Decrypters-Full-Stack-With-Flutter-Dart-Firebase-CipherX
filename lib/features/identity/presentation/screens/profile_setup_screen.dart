@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/failures/identity_failure.dart';
@@ -99,9 +100,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Complete your identity details and attach your organization membership code to access Cipher-X services.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondaryLight,
-                      ),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppColors.textSecondaryLight),
                 ),
                 const SizedBox(height: 24),
                 if (authUser != null)
@@ -114,8 +116,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.verified_user,
-                            color: AppColors.primary),
+                        const Icon(
+                          Icons.verified_user,
+                          color: AppColors.primary,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(

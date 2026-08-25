@@ -21,9 +21,7 @@ abstract class GuardFailure implements Exception {
 }
 
 class GuardNotFoundFailure extends GuardFailure {
-  const GuardNotFoundFailure([
-    super.message = 'Guard was not found.',
-  ]);
+  const GuardNotFoundFailure([super.message = 'Guard was not found.']);
 }
 
 class GuardValidationFailure extends GuardFailure {
