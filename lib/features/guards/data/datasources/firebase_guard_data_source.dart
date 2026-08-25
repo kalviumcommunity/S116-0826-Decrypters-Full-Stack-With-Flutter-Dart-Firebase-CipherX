@@ -50,8 +50,7 @@ class FirebaseGuardDataSource {
   }
 
   Future<Guard> updateGuard(Guard guard) async {
-    final docRef =
-        _guardsCollection(guard.organizationId).doc(guard.guardId);
+    final docRef = _guardsCollection(guard.organizationId).doc(guard.guardId);
     final updates = <String, dynamic>{
       'name': guard.name,
       'employeeId': guard.employeeId,
