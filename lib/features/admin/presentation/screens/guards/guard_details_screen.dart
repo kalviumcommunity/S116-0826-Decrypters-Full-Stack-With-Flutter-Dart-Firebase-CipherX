@@ -178,7 +178,7 @@ class GuardDetailsScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: isActive
-            ? Colors.green.withOpacity(0.2)
+            ? Colors.green.withValues(alpha: 0.2)
             : Theme.of(context).colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(20),
       ),

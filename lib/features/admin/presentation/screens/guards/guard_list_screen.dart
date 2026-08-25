@@ -117,7 +117,7 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isActive
-            ? Colors.green.withOpacity(0.2)
+            ? Colors.green.withValues(alpha: 0.2)
             : Theme.of(context).colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(12),
       ),
