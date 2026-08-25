@@ -77,7 +77,8 @@ void main() {
       test('rejects non-finite latitude (NaN and Infinity)', () {
         expect(SiteValidator.validateLatitude(double.nan), isNotNull);
         expect(SiteValidator.validateLatitude(double.infinity), isNotNull);
-        expect(SiteValidator.validateLatitude(double.negativeInfinity), isNotNull);
+        expect(
+            SiteValidator.validateLatitude(double.negativeInfinity), isNotNull);
       });
     });
 
@@ -96,7 +97,8 @@ void main() {
       test('rejects non-finite longitude (NaN and Infinity)', () {
         expect(SiteValidator.validateLongitude(double.nan), isNotNull);
         expect(SiteValidator.validateLongitude(double.infinity), isNotNull);
-        expect(SiteValidator.validateLongitude(double.negativeInfinity), isNotNull);
+        expect(SiteValidator.validateLongitude(double.negativeInfinity),
+            isNotNull);
       });
     });
 
@@ -113,7 +115,8 @@ void main() {
 
       test('rejects non-finite geofence radius', () {
         expect(SiteValidator.validateGeofenceRadius(double.nan), isNotNull);
-        expect(SiteValidator.validateGeofenceRadius(double.infinity), isNotNull);
+        expect(
+            SiteValidator.validateGeofenceRadius(double.infinity), isNotNull);
       });
     });
   });

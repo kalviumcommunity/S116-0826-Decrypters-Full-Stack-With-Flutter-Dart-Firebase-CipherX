@@ -50,8 +50,7 @@ class FirebaseSiteDataSource {
   }
 
   Future<Site> updateSite(Site site) async {
-    final docRef =
-        _sitesCollection(site.organizationId).doc(site.siteId);
+    final docRef = _sitesCollection(site.organizationId).doc(site.siteId);
     final updates = <String, dynamic>{
       'name': site.name,
       'address': site.address,
