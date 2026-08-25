@@ -35,8 +35,9 @@ class GuardDetailsScreen extends ConsumerWidget {
             CircleAvatar(
               radius: 60,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              backgroundImage:
-                  guard.photoUrl != null ? NetworkImage(guard.photoUrl!) : null,
+              backgroundImage: guard.photoUrl != null
+                  ? NetworkImage(guard.photoUrl!)
+                  : null,
               child: guard.photoUrl == null
                   ? Text(
                       guard.name.isNotEmpty
@@ -53,9 +54,8 @@ class GuardDetailsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               guard.name,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             _buildStatusBadge(context, guard.status),
@@ -107,20 +107,31 @@ class GuardDetailsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildInfoRow(context, Icons.badge_outlined, 'Employee ID', guard.employeeId),
+            _buildInfoRow(
+              context,
+              Icons.badge_outlined,
+              'Employee ID',
+              guard.employeeId,
+            ),
             const Divider(),
             _buildInfoRow(context, Icons.phone_outlined, 'Phone', guard.phone),
             if (guard.email != null && guard.email!.isNotEmpty) ...[
               const Divider(),
-              _buildInfoRow(context, Icons.email_outlined, 'Email', guard.email!),
+              _buildInfoRow(
+                context,
+                Icons.email_outlined,
+                'Email',
+                guard.email!,
+              ),
             ],
             if (guard.createdAt != null) ...[
               const Divider(),
               _buildInfoRow(
-                  context,
-                  Icons.calendar_today_outlined,
-                  'Joined',
-                  DateFormat.yMMMd().format(guard.createdAt!)),
+                context,
+                Icons.calendar_today_outlined,
+                'Joined',
+                DateFormat.yMMMd().format(guard.createdAt!),
+              ),
             ],
           ],
         ),
@@ -128,7 +139,12 @@ class GuardDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -142,14 +158,11 @@ class GuardDetailsScreen extends ConsumerWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                Text(value, style: Theme.of(context).textTheme.bodyLarge),
               ],
             ),
           ),
@@ -171,20 +184,23 @@ class GuardDetailsScreen extends ConsumerWidget {
       child: Text(
         isActive ? 'ACTIVE' : 'INACTIVE',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: isActive
-                  ? Colors.green[800]
-                  : Theme.of(context).colorScheme.onErrorContainer,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
+          color: isActive
+              ? Colors.green[800]
+              : Theme.of(context).colorScheme.onErrorContainer,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
 
-  Future<void> _showStatusToggleDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showStatusToggleDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final isActive = guard.status == GuardStatus.active;
     final newStatus = isActive ? GuardStatus.inactive : GuardStatus.active;
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -203,7 +219,9 @@ class GuardDetailsScreen extends ConsumerWidget {
             FilledButton(
               onPressed: () => context.pop(true),
               style: FilledButton.styleFrom(
-                backgroundColor: isActive ? Theme.of(context).colorScheme.error : null,
+                backgroundColor: isActive
+                    ? Theme.of(context).colorScheme.error
+                    : null,
               ),
               child: Text(isActive ? 'Deactivate' : 'Activate'),
             ),
@@ -213,16 +231,20 @@ class GuardDetailsScreen extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final success = await ref.read(guardControllerProvider.notifier).updateGuardStatus(
+      final success = await ref
+          .read(guardControllerProvider.notifier)
+          .updateGuardStatus(
             organizationId: guard.organizationId,
             guardId: guard.guardId,
             status: newStatus,
           );
-          
+
       if (success && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Guard successfully ${isActive ? 'deactivated' : 'activated'}.'),
+            content: Text(
+              'Guard successfully ${isActive ? 'deactivated' : 'activated'}.',
+            ),
           ),
         );
         // Navigate back as the list will update automatically.

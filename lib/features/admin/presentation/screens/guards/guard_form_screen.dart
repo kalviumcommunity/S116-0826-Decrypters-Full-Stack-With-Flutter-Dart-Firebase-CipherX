@@ -18,7 +18,7 @@ class GuardFormScreen extends ConsumerStatefulWidget {
 
 class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late TextEditingController _nameController;
   late TextEditingController _employeeIdController;
   late TextEditingController _phoneController;
@@ -29,10 +29,18 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.existingGuard?.name ?? '');
-    _employeeIdController = TextEditingController(text: widget.existingGuard?.employeeId ?? '');
-    _phoneController = TextEditingController(text: widget.existingGuard?.phone ?? '');
-    _emailController = TextEditingController(text: widget.existingGuard?.email ?? '');
+    _nameController = TextEditingController(
+      text: widget.existingGuard?.name ?? '',
+    );
+    _employeeIdController = TextEditingController(
+      text: widget.existingGuard?.employeeId ?? '',
+    );
+    _phoneController = TextEditingController(
+      text: widget.existingGuard?.phone ?? '',
+    );
+    _emailController = TextEditingController(
+      text: widget.existingGuard?.email ?? '',
+    );
   }
 
   @override
@@ -49,10 +57,12 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
 
     final profileAsync = ref.read(currentUserProfileProvider);
     final profile = profileAsync.asData?.value;
-    
+
     if (profile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Session error: No organization context.')),
+        const SnackBar(
+          content: Text('Session error: No organization context.'),
+        ),
       );
       return;
     }
@@ -63,14 +73,16 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
       name: _nameController.text.trim(),
       employeeId: _employeeIdController.text.trim(),
       phone: _phoneController.text.trim(),
-      email: _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
+      email: _emailController.text.trim().isEmpty
+          ? null
+          : _emailController.text.trim(),
       status: isEditing ? widget.existingGuard!.status : GuardStatus.active,
       createdAt: isEditing ? widget.existingGuard!.createdAt : null,
       // photoUrl: TODO: Add photo upload integration
     );
 
     final controller = ref.read(guardControllerProvider.notifier);
-    final success = isEditing 
+    final success = isEditing
         ? await controller.updateGuard(guard)
         : await controller.createGuard(guard);
 
@@ -92,9 +104,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
     final isLoading = controllerState is AsyncLoading;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? 'Edit Guard' : 'Add New Guard'),
-      ),
+      appBar: AppBar(title: Text(isEditing ? 'Edit Guard' : 'Add New Guard')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -105,7 +115,9 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
               // TODO: Add Photo Upload Widget here
               CircleAvatar(
                 radius: 40,
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest,
                 child: Icon(
                   Icons.add_a_photo_outlined,
                   size: 32,
@@ -172,7 +184,9 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 prefixIcon: const Icon(Icons.email_outlined),
                 validator: (value) {
                   if (value != null && value.trim().isNotEmpty) {
-                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    final emailRegex = RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    );
                     if (!emailRegex.hasMatch(value)) {
                       return 'Please enter a valid email address';
                     }
@@ -192,7 +206,9 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : Text(

@@ -37,7 +37,9 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest,
               ),
               onChanged: (value) {
                 setState(() {
@@ -52,7 +54,9 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
         data: (guards) {
           final filteredGuards = guards.where((guard) {
             final nameMatch = guard.name.toLowerCase().contains(_searchQuery);
-            final idMatch = guard.employeeId.toLowerCase().contains(_searchQuery);
+            final idMatch = guard.employeeId.toLowerCase().contains(
+              _searchQuery,
+            );
             return nameMatch || idMatch;
           }).toList();
 
@@ -63,9 +67,7 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
           }
 
           if (filteredGuards.isEmpty) {
-            return const Center(
-              child: Text('No guards match your search.'),
-            );
+            return const Center(child: Text('No guards match your search.'));
           }
 
           return ListView.builder(
@@ -78,10 +80,7 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
                 avatarUrl: guard.photoUrl,
                 badge: _buildStatusBadge(context, guard.status),
                 onTap: () {
-                  context.push(
-                    AppRoutes.adminGuardDetails,
-                    extra: guard,
-                  );
+                  context.push(AppRoutes.adminGuardDetails, extra: guard);
                 },
               );
             },
@@ -126,11 +125,11 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
       child: Text(
         isActive ? 'Active' : 'Inactive',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isActive
-                  ? Colors.green[800]
-                  : Theme.of(context).colorScheme.onErrorContainer,
-              fontWeight: FontWeight.bold,
-            ),
+          color: isActive
+              ? Colors.green[800]
+              : Theme.of(context).colorScheme.onErrorContainer,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
