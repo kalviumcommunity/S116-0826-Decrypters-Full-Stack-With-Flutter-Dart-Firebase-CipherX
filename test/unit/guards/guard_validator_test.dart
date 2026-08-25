@@ -72,7 +72,8 @@ void main() {
       );
     });
 
-    test('throws GuardValidationFailure when email is syntactically invalid', () {
+    test('throws GuardValidationFailure when email is syntactically invalid',
+        () {
       final invalid = tValidGuard.copyWith(email: 'invalid-email');
       expect(
         () => GuardValidator.validate(invalid),
