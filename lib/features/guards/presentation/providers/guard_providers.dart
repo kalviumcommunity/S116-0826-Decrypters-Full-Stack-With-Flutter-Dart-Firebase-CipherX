@@ -6,7 +6,9 @@ import '../../data/repositories/guard_repository_impl.dart';
 import '../../domain/entities/guard.dart';
 import '../../domain/repositories/guard_repository.dart';
 
-final firebaseGuardDataSourceProvider = Provider<FirebaseGuardDataSource>((ref) {
+final firebaseGuardDataSourceProvider = Provider<FirebaseGuardDataSource>((
+  ref,
+) {
   final firestore = ref.watch(cloudFirestoreProvider);
   return FirebaseGuardDataSource(firestore: firestore);
 });
@@ -19,11 +21,11 @@ final guardRepositoryProvider = Provider<GuardRepository>((ref) {
 final guardsStreamProvider = StreamProvider.autoDispose<List<Guard>>((ref) {
   final profileAsync = ref.watch(currentUserProfileProvider);
   final profile = profileAsync.asData?.value;
-  
+
   if (profile == null) {
     return const Stream.empty();
   }
-  
+
   final repository = ref.watch(guardRepositoryProvider);
   return repository.watchGuards(profile.organizationId);
 });
@@ -80,6 +82,7 @@ class GuardController extends AutoDisposeAsyncNotifier<void> {
   }
 }
 
-final guardControllerProvider = AutoDisposeAsyncNotifierProvider<GuardController, void>(() {
-  return GuardController();
-});
+final guardControllerProvider =
+    AutoDisposeAsyncNotifierProvider<GuardController, void>(() {
+      return GuardController();
+    });
