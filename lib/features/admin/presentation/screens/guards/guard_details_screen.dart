@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../../guards/domain/entities/guard.dart';
@@ -131,7 +130,7 @@ class GuardDetailsScreen extends ConsumerWidget {
                 context,
                 Icons.calendar_today_outlined,
                 'Joined',
-                DateFormat.yMMMd().format(guard.createdAt!),
+                '${guard.createdAt!.year}-${guard.createdAt!.month.toString().padLeft(2, '0')}-${guard.createdAt!.day.toString().padLeft(2, '0')}',
               ),
             ],
           ],
@@ -178,7 +177,7 @@ class GuardDetailsScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: isActive
-            ? Colors.green.withOpacity(0.2)
+            ? Colors.green.withValues(alpha: 0.2)
             : Theme.of(context).colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(20),
       ),
