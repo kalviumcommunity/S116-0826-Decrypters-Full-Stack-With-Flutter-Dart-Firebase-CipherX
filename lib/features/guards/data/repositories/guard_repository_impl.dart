@@ -68,6 +68,19 @@ class GuardRepositoryImpl implements GuardRepository {
   }
 
   @override
+  Stream<List<Guard>> watchGuards(String organizationId) {
+    if (organizationId.trim().isEmpty) {
+      throw const GuardValidationFailure('Organization ID cannot be empty.');
+    }
+    return _dataSource.watchGuards(organizationId.trim()).handleError((e) {
+      if (e is FirebaseException) {
+        throw _mapFirebaseException(e);
+      }
+      throw UnknownGuardFailure(e.toString());
+    });
+  }
+
+  @override
   Future<Guard> updateGuard(Guard guard) async {
     try {
       if (guard.guardId.trim().isEmpty) {

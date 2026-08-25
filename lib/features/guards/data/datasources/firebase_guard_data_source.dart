@@ -49,6 +49,12 @@ class FirebaseGuardDataSource {
     return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
   }
 
+  Stream<List<Guard>> watchGuards(String organizationId) {
+    return _guardsCollection(organizationId).snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
+    });
+  }
+
   Future<Guard> updateGuard(Guard guard) async {
     final docRef = _guardsCollection(guard.organizationId).doc(guard.guardId);
     final updates = <String, dynamic>{
