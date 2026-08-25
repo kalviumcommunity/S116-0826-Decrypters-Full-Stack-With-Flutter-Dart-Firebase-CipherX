@@ -81,7 +81,11 @@ class FirebaseGuardDataSource {
     });
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
-      throw Exception('Guard document does not exist after status update.');
+      throw FirebaseException(
+        plugin: 'cloud_firestore',
+        code: 'not-found',
+        message: 'Guard document does not exist after status update.',
+      );
     }
     return Guard.fromMap(snapshot.data()!);
   }

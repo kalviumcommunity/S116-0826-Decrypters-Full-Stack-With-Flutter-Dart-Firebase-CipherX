@@ -13,7 +13,7 @@ enum GuardStatus {
       case 'inactive':
         return GuardStatus.inactive;
       default:
-        return GuardStatus.active;
+        return GuardStatus.inactive;
     }
   }
 }
@@ -122,7 +122,9 @@ class Guard {
         other.phone == phone &&
         other.email == email &&
         other.photoUrl == photoUrl &&
-        other.status == status;
+        other.status == status &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt;
   }
 
   @override
@@ -136,6 +138,8 @@ class Guard {
       email,
       photoUrl,
       status,
+      createdAt,
+      updatedAt,
     );
   }
 }
