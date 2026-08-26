@@ -47,12 +47,17 @@ class FirebaseGuardDataSource {
   }
 
   Future<List<Guard>> getGuards(String organizationId) async {
-    final snapshot = await _guardsCollection(organizationId).get();
+    final snapshot = await _guardsCollection(organizationId)
+        .where('status', isEqualTo: GuardStatus.active.toMapString())
+        .get();
     return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
   }
 
   Stream<List<Guard>> watchGuards(String organizationId) {
-    return _guardsCollection(organizationId).snapshots().map((snapshot) {
+    return _guardsCollection(organizationId)
+        .where('status', isEqualTo: GuardStatus.active.toMapString())
+        .snapshots()
+        .map((snapshot) {
       return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
     });
   }
@@ -89,7 +94,11 @@ class FirebaseGuardDataSource {
     });
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
-      throw Exception('Guard document does not exist after status update.');
+      throw FirebaseException(
+        plugin: 'cloud_firestore',
+        code: 'not-found',
+        message: 'Guard document does not exist after status update.',
+      );
     }
     return Guard.fromMap(snapshot.data()!);
   }

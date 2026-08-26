@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/app_text_field.dart';
 import '../../../../guards/domain/entities/guard.dart';
+import '../../../../guards/domain/validators/guard_validator.dart';
 import '../../../../guards/presentation/providers/guard_providers.dart';
 import '../../../../identity/presentation/providers/identity_providers.dart';
 
@@ -89,9 +90,13 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
     if (success && mounted) {
       context.pop();
     } else if (mounted) {
+      final errorState = ref.read(guardControllerProvider).error;
+      final errorMessage = errorState != null
+          ? errorState.toString()
+          : 'Failed to save guard. Please try again.';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save guard. Please try again.'),
+        SnackBar(
+          content: Text(errorMessage),
           backgroundColor: Colors.red,
         ),
       );
@@ -183,12 +188,8 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 prefixIcon: const Icon(Icons.email_outlined),
                 validator: (value) {
                   if (value != null && value.trim().isNotEmpty) {
-                    final emailRegex = RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    );
-                    if (!emailRegex.hasMatch(value)) {
-                      return 'Please enter a valid email address';
-                    }
+                    final err = GuardValidator.validateEmail(value);
+                    if (err != null) return err;
                   }
                   return null;
                 },

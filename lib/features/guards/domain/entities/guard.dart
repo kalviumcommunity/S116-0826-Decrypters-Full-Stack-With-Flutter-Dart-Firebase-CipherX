@@ -13,7 +13,7 @@ enum GuardStatus {
       case 'inactive':
         return GuardStatus.inactive;
       default:
-        return GuardStatus.active;
+        throw FormatException('Invalid GuardStatus value: $value');
     }
   }
 }
@@ -80,8 +80,8 @@ class Guard {
       if (email != null) 'email': email,
       if (photoUrl != null) 'photoUrl': photoUrl,
       'status': status.toMapString(),
-      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
-      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
     };
   }
 
@@ -122,7 +122,9 @@ class Guard {
         other.phone == phone &&
         other.email == email &&
         other.photoUrl == photoUrl &&
-        other.status == status;
+        other.status == status &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt;
   }
 
   @override
@@ -136,6 +138,8 @@ class Guard {
       email,
       photoUrl,
       status,
+      createdAt,
+      updatedAt,
     );
   }
 }
