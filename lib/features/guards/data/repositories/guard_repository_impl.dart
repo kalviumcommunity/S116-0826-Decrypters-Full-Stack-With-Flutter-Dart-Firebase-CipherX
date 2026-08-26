@@ -52,12 +52,18 @@ class GuardRepositoryImpl implements GuardRepository {
   }
 
   @override
-  Future<List<Guard>> getGuards(String organizationId) async {
+  Future<List<Guard>> getGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async {
     try {
       if (organizationId.trim().isEmpty) {
         throw const GuardValidationFailure('Organization ID cannot be empty.');
       }
-      return await _dataSource.getGuards(organizationId.trim());
+      return await _dataSource.getGuards(
+        organizationId.trim(),
+        includeInactive: includeInactive,
+      );
     } on GuardFailure {
       rethrow;
     } on FirebaseException catch (e) {
@@ -68,11 +74,19 @@ class GuardRepositoryImpl implements GuardRepository {
   }
 
   @override
-  Stream<List<Guard>> watchGuards(String organizationId) {
+  Stream<List<Guard>> watchGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) {
     if (organizationId.trim().isEmpty) {
       throw const GuardValidationFailure('Organization ID cannot be empty.');
     }
-    return _dataSource.watchGuards(organizationId.trim()).handleError((e) {
+    return _dataSource
+        .watchGuards(
+      organizationId.trim(),
+      includeInactive: includeInactive,
+    )
+        .handleError((e) {
       if (e is FirebaseException) {
         throw _mapFirebaseException(e);
       }

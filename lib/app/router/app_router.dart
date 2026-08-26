@@ -200,8 +200,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return null;
         },
         builder: (BuildContext context, GoRouterState state) {
-          final guard = state.extra as Guard;
-          return GuardDetailsScreen(guard: guard);
+          final extra = state.extra;
+          if (extra is Guard) {
+            return GuardDetailsScreen(guard: extra);
+          }
+          return const GuardListScreen();
         },
       ),
       GoRoute(
@@ -218,8 +221,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return null;
         },
         builder: (BuildContext context, GoRouterState state) {
-          final guard = state.extra as Guard;
-          return GuardFormScreen(existingGuard: guard);
+          final extra = state.extra;
+          if (extra is Guard) {
+            return GuardFormScreen(existingGuard: extra);
+          }
+          return const GuardListScreen();
         },
       ),
       GoRoute(

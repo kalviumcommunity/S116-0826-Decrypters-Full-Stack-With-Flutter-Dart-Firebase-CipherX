@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cipher_x/features/guards/domain/entities/guard.dart';
 
@@ -18,7 +19,7 @@ void main() {
   );
 
   group('Guard Model Unit Tests', () {
-    test('supports value equality', () {
+    test('supports value equality including timestamps', () {
       final guard2 = Guard(
         guardId: 'test-guard-001',
         organizationId: 'test-org-001',
@@ -34,9 +35,14 @@ void main() {
 
       expect(tGuard, equals(guard2));
       expect(tGuard.hashCode, equals(guard2.hashCode));
+
+      final guardWithDifferentDate = tGuard.copyWith(
+        createdAt: DateTime(2025, 1, 1),
+      );
+      expect(tGuard, isNot(equals(guardWithDifferentDate)));
     });
 
-    test('serializes to Map correctly', () {
+    test('serializes to Map correctly with Firestore Timestamp', () {
       final map = tGuard.toMap();
 
       expect(map['guardId'], 'test-guard-001');
@@ -47,11 +53,12 @@ void main() {
       expect(map['email'], 'john.smith@cipherx.com');
       expect(map['photoUrl'], 'https://example.com/photo.jpg');
       expect(map['status'], 'active');
-      expect(map['createdAt'], tNow.toIso8601String());
-      expect(map['updatedAt'], tNow.toIso8601String());
+      expect(map['isActive'], true);
+      expect(map['createdAt'], Timestamp.fromDate(tNow));
+      expect(map['updatedAt'], Timestamp.fromDate(tNow));
     });
 
-    test('deserializes from Map correctly', () {
+    test('deserializes from Map with Firestore Timestamp correctly', () {
       final map = {
         'guardId': 'test-guard-001',
         'organizationId': 'test-org-001',
@@ -61,8 +68,8 @@ void main() {
         'email': 'john.smith@cipherx.com',
         'photoUrl': 'https://example.com/photo.jpg',
         'status': 'active',
-        'createdAt': tNow.toIso8601String(),
-        'updatedAt': tNow.toIso8601String(),
+        'createdAt': Timestamp.fromDate(tNow),
+        'updatedAt': Timestamp.fromDate(tNow),
       };
 
       final result = Guard.fromMap(map);
@@ -73,14 +80,27 @@ void main() {
       expect(result.employeeId, 'EMP-9001');
       expect(result.status, GuardStatus.active);
       expect(result.createdAt, tNow);
+      expect(result.updatedAt, tNow);
     });
 
-    test('handles status enum conversion correctly', () {
+    test('fails closed on invalid status string', () {
       expect(GuardStatus.fromMapString('active'), GuardStatus.active);
       expect(GuardStatus.fromMapString('inactive'), GuardStatus.inactive);
       expect(GuardStatus.fromMapString('ACTIVE'), GuardStatus.active);
       expect(GuardStatus.fromMapString('INACTIVE'), GuardStatus.inactive);
-      expect(GuardStatus.fromMapString('unknown'), GuardStatus.active);
+
+      expect(
+        () => GuardStatus.fromMapString('decommissioned'),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => GuardStatus.fromMapString('suspended'),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => GuardStatus.fromMapString('unknown'),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('copyWith creates updated Guard copy', () {

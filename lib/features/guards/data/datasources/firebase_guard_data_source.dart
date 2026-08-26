@@ -8,7 +8,8 @@ class FirebaseGuardDataSource {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> _guardsCollection(
-          String organizationId) =>
+    String organizationId,
+  ) =>
       _firestore
           .collection('organizations')
           .doc(organizationId)
@@ -21,14 +22,18 @@ class FirebaseGuardDataSource {
         : collection.doc();
 
     final assignedId = docRef.id;
-    final data = guard.copyWith(guardId: assignedId).toMap();
-    data['createdAt'] = FieldValue.serverTimestamp();
-    data['updatedAt'] = FieldValue.serverTimestamp();
+    final now = DateTime.now();
+    final preparedGuard = guard.copyWith(
+      guardId: assignedId,
+      createdAt: guard.createdAt ?? now,
+      updatedAt: guard.updatedAt ?? now,
+    );
 
+    final data = preparedGuard.toMap();
     await docRef.set(data);
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
-      return guard.copyWith(guardId: assignedId);
+      return preparedGuard;
     }
     return Guard.fromMap(snapshot.data()!);
   }
@@ -44,24 +49,42 @@ class FirebaseGuardDataSource {
     return Guard.fromMap(doc.data()!);
   }
 
-  Future<List<Guard>> getGuards(String organizationId) async {
-    final snapshot = await _guardsCollection(organizationId)
-        .where('status', isEqualTo: GuardStatus.active.toMapString())
-        .get();
+  Future<List<Guard>> getGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async {
+    final collection = _guardsCollection(organizationId);
+    final Query<Map<String, dynamic>> query = includeInactive
+        ? collection
+        : collection.where(
+            'status',
+            isEqualTo: GuardStatus.active.toMapString(),
+          );
+
+    final snapshot = await query.get();
     return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
   }
 
-  Stream<List<Guard>> watchGuards(String organizationId) {
-    return _guardsCollection(organizationId)
-        .where('status', isEqualTo: GuardStatus.active.toMapString())
-        .snapshots()
-        .map((snapshot) {
+  Stream<List<Guard>> watchGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) {
+    final collection = _guardsCollection(organizationId);
+    final Query<Map<String, dynamic>> query = includeInactive
+        ? collection
+        : collection.where(
+            'status',
+            isEqualTo: GuardStatus.active.toMapString(),
+          );
+
+    return query.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
     });
   }
 
   Future<Guard> updateGuard(Guard guard) async {
     final docRef = _guardsCollection(guard.organizationId).doc(guard.guardId);
+    final now = DateTime.now();
     final updates = <String, dynamic>{
       'name': guard.name,
       'employeeId': guard.employeeId,
@@ -69,13 +92,29 @@ class FirebaseGuardDataSource {
       'email': guard.email,
       'photoUrl': guard.photoUrl,
       'status': guard.status.toMapString(),
-      'updatedAt': FieldValue.serverTimestamp(),
+      'isActive': guard.status == GuardStatus.active,
+      'updatedAt': Timestamp.fromDate(now),
     };
 
-    await docRef.update(updates);
+    try {
+      await docRef.update(updates);
+    } on FirebaseException {
+      rethrow;
+    } catch (e) {
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'not-found',
+        message: 'Guard document does not exist.',
+      );
+    }
+
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
-      return guard;
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'not-found',
+        message: 'Guard document does not exist after update.',
+      );
     }
     return Guard.fromMap(snapshot.data()!);
   }
@@ -86,14 +125,28 @@ class FirebaseGuardDataSource {
     required GuardStatus status,
   }) async {
     final docRef = _guardsCollection(organizationId).doc(guardId);
-    await docRef.update({
-      'status': status.toMapString(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    final now = DateTime.now();
+
+    try {
+      await docRef.update({
+        'status': status.toMapString(),
+        'isActive': status == GuardStatus.active,
+        'updatedAt': Timestamp.fromDate(now),
+      });
+    } on FirebaseException {
+      rethrow;
+    } catch (e) {
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'not-found',
+        message: 'Guard document does not exist.',
+      );
+    }
+
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
       throw FirebaseException(
-        plugin: 'cloud_firestore',
+        plugin: 'firestore',
         code: 'not-found',
         message: 'Guard document does not exist after status update.',
       );

@@ -113,20 +113,21 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
 
   Widget _buildStatusBadge(BuildContext context, GuardStatus status) {
     final isActive = status == GuardStatus.active;
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isActive
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.errorContainer,
+            ? colorScheme.primaryContainer
+            : colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         isActive ? 'Active' : 'Inactive',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: isActive
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                  : Theme.of(context).colorScheme.onErrorContainer,
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onErrorContainer,
               fontWeight: FontWeight.bold,
             ),
       ),

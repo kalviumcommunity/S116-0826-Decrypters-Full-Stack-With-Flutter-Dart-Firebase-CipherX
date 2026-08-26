@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/app_text_field.dart';
 import '../../../../guards/domain/entities/guard.dart';
+import '../../../../guards/domain/failures/guard_failure.dart';
 import '../../../../guards/domain/validators/guard_validator.dart';
 import '../../../../guards/presentation/providers/guard_providers.dart';
 import '../../../../identity/presentation/providers/identity_providers.dart';
@@ -97,10 +98,19 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
     if (success && mounted) {
       context.pop();
     } else if (mounted) {
-      final errorState = ref.read(guardControllerProvider).error;
-      final errorMessage = errorState != null
-          ? errorState.toString()
-          : 'Failed to save guard. Please try again.';
+      final state = ref.read(guardControllerProvider);
+      final String errorMessage;
+      if (state.hasError && state.error != null) {
+        final err = state.error!;
+        if (err is GuardFailure) {
+          errorMessage = err.message;
+        } else {
+          errorMessage = err.toString().replaceAll('Exception: ', '');
+        }
+      } else {
+        errorMessage = 'Failed to save guard. Please try again.';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
@@ -149,12 +159,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 label: 'Full Name',
                 hint: 'e.g., John Doe',
                 prefixIcon: const Icon(Icons.person_outline),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter the guard\'s full name';
-                  }
-                  return null;
-                },
+                validator: (value) => GuardValidator.validateName(value ?? ''),
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -162,12 +167,8 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 label: 'Employee ID',
                 hint: 'e.g., GRD-1024',
                 prefixIcon: const Icon(Icons.badge_outlined),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an employee ID';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    GuardValidator.validateEmployeeId(value ?? ''),
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -176,15 +177,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 hint: 'e.g., +1234567890',
                 keyboardType: TextInputType.phone,
                 prefixIcon: const Icon(Icons.phone_outlined),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a phone number';
-                  }
-                  if (value.length < 7) {
-                    return 'Please enter a valid phone number';
-                  }
-                  return null;
-                },
+                validator: (value) => GuardValidator.validatePhone(value ?? ''),
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -193,13 +186,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 hint: 'e.g., john@example.com',
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: const Icon(Icons.email_outlined),
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    final err = GuardValidator.validateEmail(value);
-                    if (err != null) return err;
-                  }
-                  return null;
-                },
+                validator: (value) => GuardValidator.validateEmail(value),
               ),
               const SizedBox(height: 16),
               AppTextField(
