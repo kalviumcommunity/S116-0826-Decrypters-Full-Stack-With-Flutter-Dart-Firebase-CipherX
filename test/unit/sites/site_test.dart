@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cipher_x/features/sites/domain/entities/site.dart';
 
@@ -18,7 +19,7 @@ void main() {
   );
 
   group('Site Model Unit Tests', () {
-    test('supports value equality', () {
+    test('supports value equality including timestamps', () {
       final site2 = Site(
         siteId: 'test-site-001',
         organizationId: 'test-org-001',
@@ -34,9 +35,14 @@ void main() {
 
       expect(tSite, equals(site2));
       expect(tSite.hashCode, equals(site2.hashCode));
+
+      final siteWithDifferentDate = tSite.copyWith(
+        createdAt: DateTime(2025, 1, 1),
+      );
+      expect(tSite, isNot(equals(siteWithDifferentDate)));
     });
 
-    test('serializes to Map correctly', () {
+    test('serializes to Map correctly with Firestore Timestamp', () {
       final map = tSite.toMap();
 
       expect(map['siteId'], 'test-site-001');
@@ -48,11 +54,11 @@ void main() {
       expect(map['geofenceRadius'], 100.0);
       expect(map['status'], 'active');
       expect(map['isActive'], true);
-      expect(map['createdAt'], tNow.toIso8601String());
-      expect(map['updatedAt'], tNow.toIso8601String());
+      expect(map['createdAt'], Timestamp.fromDate(tNow));
+      expect(map['updatedAt'], Timestamp.fromDate(tNow));
     });
 
-    test('deserializes from Map correctly', () {
+    test('deserializes from Map with Firestore Timestamp correctly', () {
       final map = {
         'siteId': 'test-site-001',
         'organizationId': 'test-org-001',
@@ -62,8 +68,8 @@ void main() {
         'longitude': 78.3772,
         'geofenceRadius': 100.0,
         'status': 'active',
-        'createdAt': tNow.toIso8601String(),
-        'updatedAt': tNow.toIso8601String(),
+        'createdAt': Timestamp.fromDate(tNow),
+        'updatedAt': Timestamp.fromDate(tNow),
       };
 
       final result = Site.fromMap(map);
@@ -75,14 +81,27 @@ void main() {
       expect(result.geofenceRadius, 100.0);
       expect(result.status, SiteStatus.active);
       expect(result.createdAt, tNow);
+      expect(result.updatedAt, tNow);
     });
 
-    test('handles status enum conversion and fallback', () {
+    test('fails closed by throwing FormatException for unknown status strings', () {
       expect(SiteStatus.fromMapString('active'), SiteStatus.active);
       expect(SiteStatus.fromMapString('inactive'), SiteStatus.inactive);
       expect(SiteStatus.fromMapString('ACTIVE'), SiteStatus.active);
       expect(SiteStatus.fromMapString('INACTIVE'), SiteStatus.inactive);
-      expect(SiteStatus.fromMapString('unknown'), SiteStatus.active);
+
+      expect(
+        () => SiteStatus.fromMapString('decommissioned'),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => SiteStatus.fromMapString('under_construction'),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => SiteStatus.fromMapString('unknown'),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('copyWith creates modified Site copy', () {

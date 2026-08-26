@@ -21,14 +21,18 @@ class FirebaseSiteDataSource {
         : collection.doc();
 
     final assignedId = docRef.id;
-    final data = site.copyWith(siteId: assignedId).toMap();
-    data['createdAt'] = FieldValue.serverTimestamp();
-    data['updatedAt'] = FieldValue.serverTimestamp();
+    final now = DateTime.now();
+    final preparedSite = site.copyWith(
+      siteId: assignedId,
+      createdAt: site.createdAt ?? now,
+      updatedAt: site.updatedAt ?? now,
+    );
 
+    final data = preparedSite.toMap();
     await docRef.set(data);
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
-      return site.copyWith(siteId: assignedId);
+      return preparedSite;
     }
     return Site.fromMap(snapshot.data()!);
   }
@@ -44,13 +48,22 @@ class FirebaseSiteDataSource {
     return Site.fromMap(doc.data()!);
   }
 
-  Future<List<Site>> getSites(String organizationId) async {
-    final snapshot = await _sitesCollection(organizationId).get();
+  Future<List<Site>> getSites(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async {
+    final collection = _sitesCollection(organizationId);
+    final Query<Map<String, dynamic>> query = includeInactive
+        ? collection
+        : collection.where('status', isEqualTo: SiteStatus.active.toMapString());
+
+    final snapshot = await query.get();
     return snapshot.docs.map((doc) => Site.fromMap(doc.data())).toList();
   }
 
   Future<Site> updateSite(Site site) async {
     final docRef = _sitesCollection(site.organizationId).doc(site.siteId);
+    final now = DateTime.now();
     final updates = <String, dynamic>{
       'name': site.name,
       'address': site.address,
@@ -59,13 +72,28 @@ class FirebaseSiteDataSource {
       'geofenceRadius': site.geofenceRadius,
       'status': site.status.toMapString(),
       'isActive': site.status == SiteStatus.active,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'updatedAt': Timestamp.fromDate(now),
     };
 
-    await docRef.update(updates);
+    try {
+      await docRef.update(updates);
+    } on FirebaseException {
+      rethrow;
+    } catch (e) {
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'not-found',
+        message: 'Site document does not exist.',
+      );
+    }
+
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
-      return site;
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'not-found',
+        message: 'Site document does not exist after update.',
+      );
     }
     return Site.fromMap(snapshot.data()!);
   }
@@ -76,14 +104,31 @@ class FirebaseSiteDataSource {
     required SiteStatus status,
   }) async {
     final docRef = _sitesCollection(organizationId).doc(siteId);
-    await docRef.update({
-      'status': status.toMapString(),
-      'isActive': status == SiteStatus.active,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    final now = DateTime.now();
+
+    try {
+      await docRef.update({
+        'status': status.toMapString(),
+        'isActive': status == SiteStatus.active,
+        'updatedAt': Timestamp.fromDate(now),
+      });
+    } on FirebaseException {
+      rethrow;
+    } catch (e) {
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'not-found',
+        message: 'Site document does not exist.',
+      );
+    }
+
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
-      throw Exception('Site document does not exist after status update.');
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'not-found',
+        message: 'Site document does not exist after status update.',
+      );
     }
     return Site.fromMap(snapshot.data()!);
   }

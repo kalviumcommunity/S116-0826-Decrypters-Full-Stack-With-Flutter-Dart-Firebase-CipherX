@@ -52,12 +52,18 @@ class SiteRepositoryImpl implements SiteRepository {
   }
 
   @override
-  Future<List<Site>> getSites(String organizationId) async {
+  Future<List<Site>> getSites(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async {
     try {
       if (organizationId.trim().isEmpty) {
         throw const SiteValidationFailure('Organization ID cannot be empty.');
       }
-      return await _dataSource.getSites(organizationId.trim());
+      return await _dataSource.getSites(
+        organizationId.trim(),
+        includeInactive: includeInactive,
+      );
     } on SiteFailure {
       rethrow;
     } on FirebaseException catch (e) {

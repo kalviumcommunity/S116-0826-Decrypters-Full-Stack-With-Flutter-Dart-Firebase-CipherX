@@ -17,8 +17,12 @@ abstract class SiteRepository {
     required String siteId,
   });
 
-  /// Retrieves all sites belonging to the specified [organizationId].
-  Future<List<Site>> getSites(String organizationId);
+  /// Retrieves sites belonging to the specified [organizationId].
+  /// By default, soft-deleted (`inactive`) records are excluded unless [includeInactive] is true.
+  Future<List<Site>> getSites(
+    String organizationId, {
+    bool includeInactive = false,
+  });
 
   /// Validates and updates mutable fields of an existing [site].
   ///

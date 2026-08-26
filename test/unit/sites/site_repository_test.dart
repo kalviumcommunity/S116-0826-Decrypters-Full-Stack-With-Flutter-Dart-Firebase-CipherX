@@ -85,14 +85,48 @@ void main() {
     });
 
     test('getSites returns list of sites for specified organization', () async {
-      when(() => mockDataSource.getSites('test-org-001'))
-          .thenAnswer((_) async => [tSite]);
+      when(() => mockDataSource.getSites(
+            'test-org-001',
+            includeInactive: false,
+          )).thenAnswer((_) async => [tSite]);
 
       final result = await repository.getSites('test-org-001');
 
       expect(result, hasLength(1));
       expect(result.first, equals(tSite));
-      verify(() => mockDataSource.getSites('test-org-001')).called(1);
+      verify(() => mockDataSource.getSites(
+            'test-org-001',
+            includeInactive: false,
+          )).called(1);
+    });
+
+    test('getSites with includeInactive: true delegates parameter', () async {
+      when(() => mockDataSource.getSites(
+            'test-org-001',
+            includeInactive: true,
+          )).thenAnswer((_) async => [tSite]);
+
+      final result = await repository.getSites(
+        'test-org-001',
+        includeInactive: true,
+      );
+
+      expect(result, hasLength(1));
+      verify(() => mockDataSource.getSites(
+            'test-org-001',
+            includeInactive: true,
+          )).called(1);
+    });
+
+    test('updateSite validates and delegates to data source', () async {
+      final updatedSite = tSite.copyWith(name: 'Updated Name');
+      when(() => mockDataSource.updateSite(any()))
+          .thenAnswer((_) async => updatedSite);
+
+      final result = await repository.updateSite(tSite);
+
+      expect(result, equals(updatedSite));
+      verify(() => mockDataSource.updateSite(any())).called(1);
     });
 
     test('updateSiteStatus delegates to data source with correct parameters',
@@ -116,6 +150,26 @@ void main() {
             siteId: 'test-site-001',
             status: SiteStatus.inactive,
           )).called(1);
+    });
+
+    test('updateSiteStatus maps not-found FirebaseException to SiteNotFoundFailure',
+        () async {
+      when(() => mockDataSource.updateSiteStatus(
+            organizationId: 'test-org-001',
+            siteId: 'missing-site',
+            status: SiteStatus.inactive,
+          )).thenThrow(
+        FirebaseException(plugin: 'firestore', code: 'not-found'),
+      );
+
+      expect(
+        () => repository.updateSiteStatus(
+          organizationId: 'test-org-001',
+          siteId: 'missing-site',
+          status: SiteStatus.inactive,
+        ),
+        throwsA(isA<SiteNotFoundFailure>()),
+      );
     });
 
     test('deleteSite performs soft deletion via status deactivation', () async {

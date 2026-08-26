@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 enum SiteStatus {
@@ -13,7 +14,7 @@ enum SiteStatus {
       case 'inactive':
         return SiteStatus.inactive;
       default:
-        return SiteStatus.active;
+        throw FormatException('Invalid SiteStatus value: $value');
     }
   }
 }
@@ -82,29 +83,26 @@ class Site {
       'geofenceRadius': geofenceRadius,
       'status': status.toMapString(),
       'isActive': status == SiteStatus.active,
-      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
-      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+      if (createdAt != null) 'createdAt': Timestamp.fromDate(createdAt!),
+      if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
     };
   }
 
   factory Site.fromMap(Map<String, dynamic> map) {
     DateTime? parseDate(dynamic val) {
       if (val == null) return null;
+      if (val is Timestamp) return val.toDate();
       if (val is DateTime) return val;
       if (val is String) return DateTime.tryParse(val);
-      try {
-        return (val as dynamic).toDate();
-      } catch (_) {
-        return null;
-      }
+      return null;
     }
 
-    double parseDouble(dynamic val) {
-      if (val == null) return 0.0;
+    double parseDouble(dynamic val, {double defaultValue = 0.0}) {
+      if (val == null) return defaultValue;
       if (val is double) return val;
       if (val is int) return val.toDouble();
-      if (val is String) return double.tryParse(val) ?? 0.0;
-      return 0.0;
+      if (val is String) return double.tryParse(val) ?? defaultValue;
+      return defaultValue;
     }
 
     final statusStr = map['status'] as String?;
@@ -139,7 +137,9 @@ class Site {
         other.latitude == latitude &&
         other.longitude == longitude &&
         other.geofenceRadius == geofenceRadius &&
-        other.status == status;
+        other.status == status &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt;
   }
 
   @override
@@ -153,6 +153,8 @@ class Site {
       longitude,
       geofenceRadius,
       status,
+      createdAt,
+      updatedAt,
     );
   }
 }
