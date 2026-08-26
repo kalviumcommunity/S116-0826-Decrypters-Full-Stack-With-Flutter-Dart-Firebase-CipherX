@@ -17,7 +17,7 @@ void main() {
   });
 
   group('FirebaseGuardDataSource', () {
-    final testGuard = Guard(
+    const testGuard = Guard(
       guardId: 'g-1',
       organizationId: orgId,
       name: 'Test Guard',
@@ -45,8 +45,10 @@ void main() {
     });
 
     test('getGuards excludes inactive guards', () async {
-      await dataSource.createGuard(testGuard.copyWith(guardId: 'g-1', status: GuardStatus.active));
-      await dataSource.createGuard(testGuard.copyWith(guardId: 'g-2', status: GuardStatus.inactive));
+      await dataSource.createGuard(
+          testGuard.copyWith(guardId: 'g-1', status: GuardStatus.active));
+      await dataSource.createGuard(
+          testGuard.copyWith(guardId: 'g-2', status: GuardStatus.inactive));
 
       final guards = await dataSource.getGuards(orgId);
 
@@ -62,8 +64,7 @@ void main() {
           status: GuardStatus.inactive,
         ),
         throwsA(
-          isA<FirebaseException>()
-              .having((e) => e.code, 'code', 'not-found'),
+          isA<FirebaseException>().having((e) => e.code, 'code', 'not-found'),
         ),
       );
     });

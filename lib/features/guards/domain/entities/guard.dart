@@ -13,7 +13,7 @@ enum GuardStatus {
       case 'inactive':
         return GuardStatus.inactive;
       default:
-        throw FormatException('Invalid GuardStatus value: $value');
+        return GuardStatus.active;
     }
   }
 }
@@ -80,8 +80,8 @@ class Guard {
       if (email != null) 'email': email,
       if (photoUrl != null) 'photoUrl': photoUrl,
       'status': status.toMapString(),
-      if (createdAt != null) 'createdAt': createdAt,
-      if (updatedAt != null) 'updatedAt': updatedAt,
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
     };
   }
 
