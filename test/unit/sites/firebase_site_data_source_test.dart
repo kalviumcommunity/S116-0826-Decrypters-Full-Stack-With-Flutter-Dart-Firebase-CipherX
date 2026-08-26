@@ -31,7 +31,8 @@ void main() {
   });
 
   group('FirebaseSiteDataSource Unit & Integration Tests', () {
-    test('createSite writes document with canonical Firestore Timestamps', () async {
+    test('createSite writes document with canonical Firestore Timestamps',
+        () async {
       final result = await dataSource.createSite(tSite);
 
       expect(result.siteId, equals(tSiteId));
@@ -56,7 +57,8 @@ void main() {
       expect(data['updatedAt'], isA<Timestamp>());
     });
 
-    test('createSite auto-generates document ID when siteId is empty', () async {
+    test('createSite auto-generates document ID when siteId is empty',
+        () async {
       final newSite = tSite.copyWith(siteId: '');
 
       final result = await dataSource.createSite(newSite);
@@ -65,7 +67,9 @@ void main() {
       expect(result.name, equals(tSite.name));
     });
 
-    test('getSite retrieves existing site and deserializes Firestore Timestamps', () async {
+    test(
+        'getSite retrieves existing site and deserializes Firestore Timestamps',
+        () async {
       await dataSource.createSite(tSite);
 
       final result = await dataSource.getSite(
@@ -89,7 +93,8 @@ void main() {
       expect(result, isNull);
     });
 
-    test('getSites filters out soft-deleted (inactive) sites by default', () async {
+    test('getSites filters out soft-deleted (inactive) sites by default',
+        () async {
       final activeSite = tSite.copyWith(siteId: 'active-001');
       final inactiveSite = tSite.copyWith(
         siteId: 'inactive-002',
@@ -106,7 +111,8 @@ void main() {
       expect(activeSites.first.status, equals(SiteStatus.active));
     });
 
-    test('getSites returns all sites including inactive when includeInactive is true',
+    test(
+        'getSites returns all sites including inactive when includeInactive is true',
         () async {
       final activeSite = tSite.copyWith(siteId: 'active-001');
       final inactiveSite = tSite.copyWith(
@@ -149,7 +155,8 @@ void main() {
       expect(doc.data()!['updatedAt'], isA<Timestamp>());
     });
 
-    test('updateSite throws FirebaseException with not-found when document does not exist',
+    test(
+        'updateSite throws FirebaseException with not-found when document does not exist',
         () async {
       final missingSite = tSite.copyWith(siteId: 'missing-site');
 
@@ -198,7 +205,8 @@ void main() {
       );
     });
 
-    test('deleteSite soft-deletes site by setting status to inactive', () async {
+    test('deleteSite soft-deletes site by setting status to inactive',
+        () async {
       await dataSource.createSite(tSite);
 
       await dataSource.deleteSite(

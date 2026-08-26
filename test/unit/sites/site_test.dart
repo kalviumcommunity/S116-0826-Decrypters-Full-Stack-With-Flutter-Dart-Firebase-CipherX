@@ -84,7 +84,8 @@ void main() {
       expect(result.updatedAt, tNow);
     });
 
-    test('fails closed by throwing FormatException for unknown status strings', () {
+    test('fails closed by throwing FormatException for unknown status strings',
+        () {
       expect(SiteStatus.fromMapString('active'), SiteStatus.active);
       expect(SiteStatus.fromMapString('inactive'), SiteStatus.inactive);
       expect(SiteStatus.fromMapString('ACTIVE'), SiteStatus.active);

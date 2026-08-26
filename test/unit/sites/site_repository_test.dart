@@ -152,7 +152,8 @@ void main() {
           )).called(1);
     });
 
-    test('updateSiteStatus maps not-found FirebaseException to SiteNotFoundFailure',
+    test(
+        'updateSiteStatus maps not-found FirebaseException to SiteNotFoundFailure',
         () async {
       when(() => mockDataSource.updateSiteStatus(
             organizationId: 'test-org-001',

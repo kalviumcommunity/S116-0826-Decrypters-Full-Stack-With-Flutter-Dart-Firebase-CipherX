@@ -55,7 +55,8 @@ class FirebaseSiteDataSource {
     final collection = _sitesCollection(organizationId);
     final Query<Map<String, dynamic>> query = includeInactive
         ? collection
-        : collection.where('status', isEqualTo: SiteStatus.active.toMapString());
+        : collection.where('status',
+            isEqualTo: SiteStatus.active.toMapString());
 
     final snapshot = await query.get();
     return snapshot.docs.map((doc) => Site.fromMap(doc.data())).toList();
