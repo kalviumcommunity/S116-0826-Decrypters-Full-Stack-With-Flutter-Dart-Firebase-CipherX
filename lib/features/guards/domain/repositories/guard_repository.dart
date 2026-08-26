@@ -17,19 +17,8 @@ abstract class GuardRepository {
     required String guardId,
   });
 
-  /// Retrieves guards belonging to the specified [organizationId].
-  /// By default, soft-deleted (`inactive`) records are excluded unless [includeInactive] is true.
-  Future<List<Guard>> getGuards(
-    String organizationId, {
-    bool includeInactive = false,
-  });
-
-  /// Watches guards belonging to the specified [organizationId] in real-time.
-  /// By default, soft-deleted (`inactive`) records are excluded unless [includeInactive] is true.
-  Stream<List<Guard>> watchGuards(
-    String organizationId, {
-    bool includeInactive = false,
-  });
+  /// Retrieves all guards belonging to the specified [organizationId].
+  Future<List<Guard>> getGuards(String organizationId);
 
   /// Validates and updates mutable fields of an existing [guard].
   ///
