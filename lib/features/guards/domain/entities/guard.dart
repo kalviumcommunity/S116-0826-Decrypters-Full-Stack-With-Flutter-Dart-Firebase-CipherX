@@ -13,7 +13,7 @@ enum GuardStatus {
       case 'inactive':
         return GuardStatus.inactive;
       default:
-        return GuardStatus.active;
+        return GuardStatus.inactive;
     }
   }
 }

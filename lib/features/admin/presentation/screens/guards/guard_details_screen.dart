@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../../guards/domain/entities/guard.dart';
@@ -131,7 +130,7 @@ class GuardDetailsScreen extends ConsumerWidget {
                 context,
                 Icons.calendar_today_outlined,
                 'Joined',
-                DateFormat.yMMMd().format(guard.createdAt!),
+                '${guard.createdAt!.year}-${guard.createdAt!.month.toString().padLeft(2, '0')}-${guard.createdAt!.day.toString().padLeft(2, '0')}',
               ),
             ],
           ],
@@ -174,20 +173,21 @@ class GuardDetailsScreen extends ConsumerWidget {
 
   Widget _buildStatusBadge(BuildContext context, GuardStatus status) {
     final isActive = status == GuardStatus.active;
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: isActive
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.errorContainer,
+            ? colorScheme.primaryContainer
+            : colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         isActive ? 'ACTIVE' : 'INACTIVE',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: isActive
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                  : Theme.of(context).colorScheme.onErrorContainer,
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onErrorContainer,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
             ),
@@ -214,11 +214,11 @@ class GuardDetailsScreen extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => context.pop(false),
+              onPressed: () => Navigator.of(context).pop(false),
               child: const Text('Cancel'),
             ),
             FilledButton(
-              onPressed: () => context.pop(true),
+              onPressed: () => Navigator.of(context).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor:
                     isActive ? Theme.of(context).colorScheme.error : null,

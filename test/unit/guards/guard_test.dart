@@ -80,7 +80,7 @@ void main() {
       expect(GuardStatus.fromMapString('inactive'), GuardStatus.inactive);
       expect(GuardStatus.fromMapString('ACTIVE'), GuardStatus.active);
       expect(GuardStatus.fromMapString('INACTIVE'), GuardStatus.inactive);
-      expect(GuardStatus.fromMapString('unknown'), GuardStatus.active);
+      expect(GuardStatus.fromMapString('unknown'), GuardStatus.inactive);
     });
 
     test('copyWith creates updated Guard copy', () {

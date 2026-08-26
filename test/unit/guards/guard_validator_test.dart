@@ -28,13 +28,11 @@ void main() {
       final invalid = tValidGuard.copyWith(organizationId: '  ');
       expect(
         () => GuardValidator.validate(invalid),
-        throwsA(
-          isA<GuardValidationFailure>().having(
-            (e) => e.message,
-            'message',
-            contains('Organization ID cannot be empty'),
-          ),
-        ),
+        throwsA(isA<GuardValidationFailure>().having(
+          (e) => e.message,
+          'message',
+          contains('Organization ID cannot be empty'),
+        )),
       );
     });
 
@@ -42,13 +40,11 @@ void main() {
       final invalid = tValidGuard.copyWith(name: '  ');
       expect(
         () => GuardValidator.validate(invalid),
-        throwsA(
-          isA<GuardValidationFailure>().having(
-            (e) => e.message,
-            'message',
-            contains('Guard name cannot be empty'),
-          ),
-        ),
+        throwsA(isA<GuardValidationFailure>().having(
+          (e) => e.message,
+          'message',
+          contains('Guard name cannot be empty'),
+        )),
       );
     });
 
@@ -56,13 +52,11 @@ void main() {
       final invalid = tValidGuard.copyWith(employeeId: '  ');
       expect(
         () => GuardValidator.validate(invalid),
-        throwsA(
-          isA<GuardValidationFailure>().having(
-            (e) => e.message,
-            'message',
-            contains('Employee ID cannot be empty'),
-          ),
-        ),
+        throwsA(isA<GuardValidationFailure>().having(
+          (e) => e.message,
+          'message',
+          contains('Employee ID cannot be empty'),
+        )),
       );
     });
 
@@ -70,32 +64,26 @@ void main() {
       final invalid = tValidGuard.copyWith(phone: '123');
       expect(
         () => GuardValidator.validate(invalid),
-        throwsA(
-          isA<GuardValidationFailure>().having(
-            (e) => e.message,
-            'message',
-            contains('Enter a valid phone number'),
-          ),
-        ),
+        throwsA(isA<GuardValidationFailure>().having(
+          (e) => e.message,
+          'message',
+          contains('Enter a valid phone number'),
+        )),
       );
     });
 
-    test(
-      'throws GuardValidationFailure when email is syntactically invalid',
-      () {
-        final invalid = tValidGuard.copyWith(email: 'invalid-email');
-        expect(
-          () => GuardValidator.validate(invalid),
-          throwsA(
-            isA<GuardValidationFailure>().having(
-              (e) => e.message,
-              'message',
-              contains('Enter a valid email address'),
-            ),
-          ),
-        );
-      },
-    );
+    test('throws GuardValidationFailure when email is syntactically invalid',
+        () {
+      final invalid = tValidGuard.copyWith(email: 'invalid-email');
+      expect(
+        () => GuardValidator.validate(invalid),
+        throwsA(isA<GuardValidationFailure>().having(
+          (e) => e.message,
+          'message',
+          contains('Enter a valid email address'),
+        )),
+      );
+    });
 
     test('allows null or empty email', () {
       const noEmail = Guard(

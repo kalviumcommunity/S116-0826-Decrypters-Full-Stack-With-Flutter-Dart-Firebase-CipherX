@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../../domain/entities/guard.dart';
 
 class FirebaseGuardDataSource {
@@ -9,8 +8,7 @@ class FirebaseGuardDataSource {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> _guardsCollection(
-    String organizationId,
-  ) =>
+          String organizationId) =>
       _firestore
           .collection('organizations')
           .doc(organizationId)
@@ -46,18 +44,35 @@ class FirebaseGuardDataSource {
     return Guard.fromMap(doc.data()!);
   }
 
-  Future<List<Guard>> getGuards(String organizationId) async {
-    final snapshot = await _guardsCollection(organizationId)
-        .where('status', isEqualTo: GuardStatus.active.toMapString())
-        .get();
+  Future<List<Guard>> getGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async {
+    final collection = _guardsCollection(organizationId);
+    final Query<Map<String, dynamic>> query = includeInactive
+        ? collection
+        : collection.where(
+            'status',
+            isEqualTo: GuardStatus.active.toMapString(),
+          );
+
+    final snapshot = await query.get();
     return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
   }
 
-  Stream<List<Guard>> watchGuards(String organizationId) {
-    return _guardsCollection(organizationId)
-        .where('status', isEqualTo: GuardStatus.active.toMapString())
-        .snapshots()
-        .map((snapshot) {
+  Stream<List<Guard>> watchGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) {
+    final collection = _guardsCollection(organizationId);
+    final Query<Map<String, dynamic>> query = includeInactive
+        ? collection
+        : collection.where(
+            'status',
+            isEqualTo: GuardStatus.active.toMapString(),
+          );
+
+    return query.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
     });
   }

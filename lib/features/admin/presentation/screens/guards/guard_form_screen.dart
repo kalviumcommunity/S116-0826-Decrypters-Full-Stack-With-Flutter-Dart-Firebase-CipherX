@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/app_text_field.dart';
 import '../../../../guards/domain/entities/guard.dart';
+import '../../../../guards/domain/failures/guard_failure.dart';
 import '../../../../guards/domain/validators/guard_validator.dart';
 import '../../../../guards/presentation/providers/guard_providers.dart';
 import '../../../../identity/presentation/providers/identity_providers.dart';
@@ -24,6 +25,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
   late TextEditingController _employeeIdController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
+  late TextEditingController _photoUrlController;
 
   bool get isEditing => widget.existingGuard != null;
 
@@ -42,6 +44,9 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
     _emailController = TextEditingController(
       text: widget.existingGuard?.email ?? '',
     );
+    _photoUrlController = TextEditingController(
+      text: widget.existingGuard?.photoUrl ?? '',
+    );
   }
 
   @override
@@ -50,6 +55,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
     _employeeIdController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _photoUrlController.dispose();
     super.dispose();
   }
 
@@ -77,9 +83,11 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
       email: _emailController.text.trim().isEmpty
           ? null
           : _emailController.text.trim(),
+      photoUrl: _photoUrlController.text.trim().isEmpty
+          ? null
+          : _photoUrlController.text.trim(),
       status: isEditing ? widget.existingGuard!.status : GuardStatus.active,
       createdAt: isEditing ? widget.existingGuard!.createdAt : null,
-      // photoUrl: TODO: Add photo upload integration
     );
 
     final controller = ref.read(guardControllerProvider.notifier);
@@ -90,10 +98,19 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
     if (success && mounted) {
       context.pop();
     } else if (mounted) {
-      final errorState = ref.read(guardControllerProvider).error;
-      final errorMessage = errorState != null
-          ? errorState.toString()
-          : 'Failed to save guard. Please try again.';
+      final state = ref.read(guardControllerProvider);
+      final String errorMessage;
+      if (state.hasError && state.error != null) {
+        final err = state.error!;
+        if (err is GuardFailure) {
+          errorMessage = err.message;
+        } else {
+          errorMessage = err.toString().replaceAll('Exception: ', '');
+        }
+      } else {
+        errorMessage = 'Failed to save guard. Please try again.';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
@@ -108,6 +125,8 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
     final controllerState = ref.watch(guardControllerProvider);
     final isLoading = controllerState is AsyncLoading;
 
+    final photoUrlText = _photoUrlController.text.trim();
+
     return Scaffold(
       appBar: AppBar(title: Text(isEditing ? 'Edit Guard' : 'Add New Guard')),
       body: SingleChildScrollView(
@@ -117,22 +136,21 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // TODO: Add Photo Upload Widget here
-              CircleAvatar(
-                radius: 40,
-                backgroundColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: Icon(
-                  Icons.add_a_photo_outlined,
-                  size: 32,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
               Center(
-                child: Text(
-                  'Photo Upload (Coming soon)',
-                  style: Theme.of(context).textTheme.bodySmall,
+                child: CircleAvatar(
+                  radius: 44,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  backgroundImage: photoUrlText.isNotEmpty
+                      ? NetworkImage(photoUrlText)
+                      : null,
+                  child: photoUrlText.isEmpty
+                      ? Icon(
+                          Icons.person_outline,
+                          size: 40,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(height: 32),
@@ -141,12 +159,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 label: 'Full Name',
                 hint: 'e.g., John Doe',
                 prefixIcon: const Icon(Icons.person_outline),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter the guard\'s full name';
-                  }
-                  return null;
-                },
+                validator: (value) => GuardValidator.validateName(value ?? ''),
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -154,12 +167,8 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 label: 'Employee ID',
                 hint: 'e.g., GRD-1024',
                 prefixIcon: const Icon(Icons.badge_outlined),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an employee ID';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    GuardValidator.validateEmployeeId(value ?? ''),
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -168,16 +177,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 hint: 'e.g., +1234567890',
                 keyboardType: TextInputType.phone,
                 prefixIcon: const Icon(Icons.phone_outlined),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a phone number';
-                  }
-                  // Basic phone validation
-                  if (value.length < 7) {
-                    return 'Please enter a valid phone number';
-                  }
-                  return null;
-                },
+                validator: (value) => GuardValidator.validatePhone(value ?? ''),
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -186,13 +186,16 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
                 hint: 'e.g., john@example.com',
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: const Icon(Icons.email_outlined),
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    final err = GuardValidator.validateEmail(value);
-                    if (err != null) return err;
-                  }
-                  return null;
-                },
+                validator: (value) => GuardValidator.validateEmail(value),
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                controller: _photoUrlController,
+                label: 'Photo URL (Optional)',
+                hint: 'e.g., https://example.com/photo.jpg',
+                keyboardType: TextInputType.url,
+                prefixIcon: const Icon(Icons.image_outlined),
+                onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 48),
               FilledButton(

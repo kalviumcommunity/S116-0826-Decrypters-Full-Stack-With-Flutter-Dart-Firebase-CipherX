@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 
 @immutable
-abstract class GuardFailure implements Exception {
+abstract class SiteFailure implements Exception {
   final String message;
-  const GuardFailure(this.message);
+  const SiteFailure(this.message);
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is GuardFailure &&
+    return other is SiteFailure &&
         other.runtimeType == runtimeType &&
         other.message == message;
   }
@@ -20,30 +20,30 @@ abstract class GuardFailure implements Exception {
   String toString() => '$runtimeType: $message';
 }
 
-class GuardNotFoundFailure extends GuardFailure {
-  const GuardNotFoundFailure([
-    super.message = 'Guard was not found.',
+class SiteNotFoundFailure extends SiteFailure {
+  const SiteNotFoundFailure([
+    super.message = 'Site was not found.',
   ]);
 }
 
-class GuardValidationFailure extends GuardFailure {
-  const GuardValidationFailure(super.message);
+class SiteValidationFailure extends SiteFailure {
+  const SiteValidationFailure(super.message);
 }
 
-class PermissionDeniedFailure extends GuardFailure {
+class PermissionDeniedFailure extends SiteFailure {
   const PermissionDeniedFailure([
     super.message = 'You do not have permission to access this resource.',
   ]);
 }
 
-class FirestoreFailure extends GuardFailure {
+class FirestoreFailure extends SiteFailure {
   const FirestoreFailure([
     super.message = 'Database operation failed. Please try again.',
   ]);
 }
 
-class UnknownGuardFailure extends GuardFailure {
-  const UnknownGuardFailure([
-    super.message = 'An unexpected guard domain error occurred.',
+class UnknownSiteFailure extends SiteFailure {
+  const UnknownSiteFailure([
+    super.message = 'An unexpected site domain error occurred.',
   ]);
 }

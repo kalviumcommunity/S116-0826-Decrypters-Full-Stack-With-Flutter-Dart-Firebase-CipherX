@@ -77,12 +77,13 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      await tester.ensureVisible(find.text('Create Guard'));
       await tester.tap(find.text('Create Guard'));
       await tester.pump();
 
-      expect(find.text('Please enter the guard\'s full name'), findsOneWidget);
-      expect(find.text('Please enter an employee ID'), findsOneWidget);
-      expect(find.text('Please enter a phone number'), findsOneWidget);
+      expect(find.text('Guard name cannot be empty.'), findsOneWidget);
+      expect(find.text('Employee ID cannot be empty.'), findsOneWidget);
+      expect(find.text('Phone number cannot be empty.'), findsOneWidget);
     });
 
     testWidgets('GuardDetailsScreen shows guard info and status toggle dialog',

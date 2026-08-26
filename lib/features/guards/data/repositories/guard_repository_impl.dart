@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../../domain/entities/guard.dart';
 import '../../domain/failures/guard_failure.dart';
 import '../../domain/repositories/guard_repository.dart';
@@ -9,8 +8,9 @@ import '../datasources/firebase_guard_data_source.dart';
 class GuardRepositoryImpl implements GuardRepository {
   final FirebaseGuardDataSource _dataSource;
 
-  GuardRepositoryImpl({required FirebaseGuardDataSource dataSource})
-      : _dataSource = dataSource;
+  GuardRepositoryImpl({
+    required FirebaseGuardDataSource dataSource,
+  }) : _dataSource = dataSource;
 
   @override
   Future<Guard> createGuard(Guard guard) async {
@@ -52,12 +52,18 @@ class GuardRepositoryImpl implements GuardRepository {
   }
 
   @override
-  Future<List<Guard>> getGuards(String organizationId) async {
+  Future<List<Guard>> getGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async {
     try {
       if (organizationId.trim().isEmpty) {
         throw const GuardValidationFailure('Organization ID cannot be empty.');
       }
-      return await _dataSource.getGuards(organizationId.trim());
+      return await _dataSource.getGuards(
+        organizationId.trim(),
+        includeInactive: includeInactive,
+      );
     } on GuardFailure {
       rethrow;
     } on FirebaseException catch (e) {
@@ -68,11 +74,19 @@ class GuardRepositoryImpl implements GuardRepository {
   }
 
   @override
-  Stream<List<Guard>> watchGuards(String organizationId) {
+  Stream<List<Guard>> watchGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) {
     if (organizationId.trim().isEmpty) {
       throw const GuardValidationFailure('Organization ID cannot be empty.');
     }
-    return _dataSource.watchGuards(organizationId.trim()).handleError((e) {
+    return _dataSource
+        .watchGuards(
+      organizationId.trim(),
+      includeInactive: includeInactive,
+    )
+        .handleError((e) {
       if (e is FirebaseException) {
         throw _mapFirebaseException(e);
       }
