@@ -44,9 +44,37 @@ class FirebaseGuardDataSource {
     return Guard.fromMap(doc.data()!);
   }
 
-  Future<List<Guard>> getGuards(String organizationId) async {
-    final snapshot = await _guardsCollection(organizationId).get();
+  Future<List<Guard>> getGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async {
+    final collection = _guardsCollection(organizationId);
+    final Query<Map<String, dynamic>> query = includeInactive
+        ? collection
+        : collection.where(
+            'status',
+            isEqualTo: GuardStatus.active.toMapString(),
+          );
+
+    final snapshot = await query.get();
     return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
+  }
+
+  Stream<List<Guard>> watchGuards(
+    String organizationId, {
+    bool includeInactive = false,
+  }) {
+    final collection = _guardsCollection(organizationId);
+    final Query<Map<String, dynamic>> query = includeInactive
+        ? collection
+        : collection.where(
+            'status',
+            isEqualTo: GuardStatus.active.toMapString(),
+          );
+
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => Guard.fromMap(doc.data())).toList();
+    });
   }
 
   Future<Guard> updateGuard(Guard guard) async {

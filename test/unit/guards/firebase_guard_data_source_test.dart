@@ -95,6 +95,8 @@ void main() {
 
     test('getGuards returns list of Guards from query snapshot', () async {
       final mockDoc = MockQueryDocumentSnapshot();
+      when(() => mockGuardsCollection.where(any(),
+          isEqualTo: any(named: 'isEqualTo'))).thenReturn(mockGuardsCollection);
       when(() => mockGuardsCollection.get())
           .thenAnswer((_) async => mockQuerySnapshot);
       when(() => mockQuerySnapshot.docs).thenReturn([mockDoc]);
