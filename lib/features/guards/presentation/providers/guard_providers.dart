@@ -35,6 +35,7 @@ class GuardController extends AutoDisposeAsyncNotifier<void> {
   Future<void> build() async {}
 
   Future<bool> createGuard(Guard guard) async {
+    if (state.isLoading) return false;
     state = const AsyncLoading();
     try {
       final repository = ref.read(guardRepositoryProvider);
@@ -48,6 +49,7 @@ class GuardController extends AutoDisposeAsyncNotifier<void> {
   }
 
   Future<bool> updateGuard(Guard guard) async {
+    if (state.isLoading) return false;
     state = const AsyncLoading();
     try {
       final repository = ref.read(guardRepositoryProvider);
@@ -65,6 +67,7 @@ class GuardController extends AutoDisposeAsyncNotifier<void> {
     required String guardId,
     required GuardStatus status,
   }) async {
+    if (state.isLoading) return false;
     state = const AsyncLoading();
     try {
       final repository = ref.read(guardRepositoryProvider);

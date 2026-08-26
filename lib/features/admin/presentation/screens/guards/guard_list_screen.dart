@@ -117,7 +117,7 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isActive
-            ? Colors.green.withValues(alpha: 0.2)
+            ? Theme.of(context).colorScheme.primaryContainer
             : Theme.of(context).colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(12),
       ),
@@ -125,7 +125,7 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
         isActive ? 'Active' : 'Inactive',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: isActive
-                  ? Colors.green[800]
+                  ? Theme.of(context).colorScheme.onPrimaryContainer
                   : Theme.of(context).colorScheme.onErrorContainer,
               fontWeight: FontWeight.bold,
             ),

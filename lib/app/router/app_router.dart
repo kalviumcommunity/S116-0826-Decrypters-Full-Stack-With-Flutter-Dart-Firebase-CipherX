@@ -193,6 +193,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.adminGuardDetails,
+        redirect: (context, state) {
+          if (state.extra is! Guard) {
+            return AppRoutes.adminGuards;
+          }
+          return null;
+        },
         builder: (BuildContext context, GoRouterState state) {
           final guard = state.extra as Guard;
           return GuardDetailsScreen(guard: guard);
@@ -205,6 +211,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.adminGuardEdit,
+        redirect: (context, state) {
+          if (state.extra is! Guard) {
+            return AppRoutes.adminGuards;
+          }
+          return null;
+        },
         builder: (BuildContext context, GoRouterState state) {
           final guard = state.extra as Guard;
           return GuardFormScreen(existingGuard: guard);

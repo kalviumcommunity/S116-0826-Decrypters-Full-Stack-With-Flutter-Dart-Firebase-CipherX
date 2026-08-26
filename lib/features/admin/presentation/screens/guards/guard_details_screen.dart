@@ -72,7 +72,7 @@ class GuardDetailsScreen extends ConsumerWidget {
                       : Icons.check_circle_outline,
                   color: guard.status == GuardStatus.active
                       ? Theme.of(context).colorScheme.error
-                      : Colors.green,
+                      : Theme.of(context).colorScheme.primary,
                 ),
                 label: Text(
                   guard.status == GuardStatus.active
@@ -81,7 +81,7 @@ class GuardDetailsScreen extends ConsumerWidget {
                   style: TextStyle(
                     color: guard.status == GuardStatus.active
                         ? Theme.of(context).colorScheme.error
-                        : Colors.green,
+                        : Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -177,7 +177,7 @@ class GuardDetailsScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: isActive
-            ? Colors.green.withValues(alpha: 0.2)
+            ? Theme.of(context).colorScheme.primaryContainer
             : Theme.of(context).colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(20),
       ),
@@ -185,7 +185,7 @@ class GuardDetailsScreen extends ConsumerWidget {
         isActive ? 'ACTIVE' : 'INACTIVE',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: isActive
-                  ? Colors.green[800]
+                  ? Theme.of(context).colorScheme.onPrimaryContainer
                   : Theme.of(context).colorScheme.onErrorContainer,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
@@ -248,9 +248,13 @@ class GuardDetailsScreen extends ConsumerWidget {
         // Navigate back as the list will update automatically.
         context.pop();
       } else if (context.mounted) {
+        final errorState = ref.read(guardControllerProvider).error;
+        final errorMessage = errorState != null
+            ? errorState.toString()
+            : 'Failed to update guard status.';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to update guard status.'),
+          SnackBar(
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
