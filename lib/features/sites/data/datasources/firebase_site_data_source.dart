@@ -8,7 +8,8 @@ class FirebaseSiteDataSource {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> _sitesCollection(
-          String organizationId) =>
+    String organizationId,
+  ) =>
       _firestore
           .collection('organizations')
           .doc(organizationId)
@@ -55,8 +56,10 @@ class FirebaseSiteDataSource {
     final collection = _sitesCollection(organizationId);
     final Query<Map<String, dynamic>> query = includeInactive
         ? collection
-        : collection.where('status',
-            isEqualTo: SiteStatus.active.toMapString());
+        : collection.where(
+            'status',
+            isEqualTo: SiteStatus.active.toMapString(),
+          );
 
     final snapshot = await query.get();
     return snapshot.docs.map((doc) => Site.fromMap(doc.data())).toList();
