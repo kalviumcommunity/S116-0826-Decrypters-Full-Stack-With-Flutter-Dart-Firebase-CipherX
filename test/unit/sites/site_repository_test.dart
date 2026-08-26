@@ -42,206 +42,173 @@ void main() {
   });
 
   group('SiteRepositoryImpl Unit Tests', () {
-    test(
-      'createSite validates and delegates to data source',
-      () async {
-        when(() => mockDataSource.createSite(any()))
-            .thenAnswer((_) async => tSite);
+    test('createSite validates and delegates to data source', () async {
+      when(() => mockDataSource.createSite(any()))
+          .thenAnswer((_) async => tSite);
 
-        final result = await repository.createSite(tSite);
+      final result = await repository.createSite(tSite);
 
-        expect(result, equals(tSite));
-        verify(() => mockDataSource.createSite(any())).called(1);
-      },
-    );
+      expect(result, equals(tSite));
+      verify(() => mockDataSource.createSite(any())).called(1);
+    });
 
-    test(
-      'getSite returns site when found in organization scope',
-      () async {
-        when(() => mockDataSource.getSite(
-              organizationId: 'test-org-001',
-              siteId: 'test-site-001',
-            )).thenAnswer((_) async => tSite);
+    test('getSite returns site when found in organization scope', () async {
+      when(() => mockDataSource.getSite(
+            organizationId: 'test-org-001',
+            siteId: 'test-site-001',
+          )).thenAnswer((_) async => tSite);
 
-        final result = await repository.getSite(
-          organizationId: 'test-org-001',
-          siteId: 'test-site-001',
-        );
+      final result = await repository.getSite(
+        organizationId: 'test-org-001',
+        siteId: 'test-site-001',
+      );
 
-        expect(result, equals(tSite));
-        verify(() => mockDataSource.getSite(
-              organizationId: 'test-org-001',
-              siteId: 'test-site-001',
-            )).called(1);
-      },
-    );
+      expect(result, equals(tSite));
+      verify(() => mockDataSource.getSite(
+            organizationId: 'test-org-001',
+            siteId: 'test-site-001',
+          )).called(1);
+    });
 
-    test(
-      'getSite returns null when document does not exist',
-      () async {
-        when(() => mockDataSource.getSite(
-              organizationId: 'test-org-001',
-              siteId: 'missing-site',
-            )).thenAnswer((_) async => null);
+    test('getSite returns null when document does not exist', () async {
+      when(() => mockDataSource.getSite(
+            organizationId: 'test-org-001',
+            siteId: 'missing-site',
+          )).thenAnswer((_) async => null);
 
-        final result = await repository.getSite(
-          organizationId: 'test-org-001',
-          siteId: 'missing-site',
-        );
+      final result = await repository.getSite(
+        organizationId: 'test-org-001',
+        siteId: 'missing-site',
+      );
 
-        expect(result, isNull);
-      },
-    );
+      expect(result, isNull);
+    });
 
-    test(
-      'getSites returns list of sites for specified organization',
-      () async {
-        when(() => mockDataSource.getSites(
-              'test-org-001',
-              includeInactive: false,
-            )).thenAnswer((_) async => [tSite]);
+    test('getSites returns active sites for organization', () async {
+      when(() => mockDataSource.getSites(
+            'test-org-001',
+            includeInactive: false,
+          )).thenAnswer((_) async => [tSite]);
 
-        final result = await repository.getSites('test-org-001');
+      final result = await repository.getSites('test-org-001');
 
-        expect(result, hasLength(1));
-        expect(result.first, equals(tSite));
-        verify(() => mockDataSource.getSites(
-              'test-org-001',
-              includeInactive: false,
-            )).called(1);
-      },
-    );
+      expect(result, hasLength(1));
+      expect(result.first, equals(tSite));
+      verify(() => mockDataSource.getSites(
+            'test-org-001',
+            includeInactive: false,
+          )).called(1);
+    });
 
-    test(
-      'getSites with includeInactive: true delegates parameter',
-      () async {
-        when(() => mockDataSource.getSites(
-              'test-org-001',
-              includeInactive: true,
-            )).thenAnswer((_) async => [tSite]);
+    test('getSites with includeInactive passes parameter', () async {
+      when(() => mockDataSource.getSites(
+            'test-org-001',
+            includeInactive: true,
+          )).thenAnswer((_) async => [tSite]);
 
-        final result = await repository.getSites(
-          'test-org-001',
-          includeInactive: true,
-        );
+      final result = await repository.getSites(
+        'test-org-001',
+        includeInactive: true,
+      );
 
-        expect(result, hasLength(1));
-        verify(() => mockDataSource.getSites(
-              'test-org-001',
-              includeInactive: true,
-            )).called(1);
-      },
-    );
+      expect(result, hasLength(1));
+      verify(() => mockDataSource.getSites(
+            'test-org-001',
+            includeInactive: true,
+          )).called(1);
+    });
 
-    test(
-      'updateSite validates and delegates to data source',
-      () async {
-        final updatedSite = tSite.copyWith(name: 'Updated Name');
-        when(() => mockDataSource.updateSite(any()))
-            .thenAnswer((_) async => updatedSite);
+    test('updateSite validates and delegates to data source', () async {
+      final updatedSite = tSite.copyWith(name: 'Updated Name');
+      when(() => mockDataSource.updateSite(any()))
+          .thenAnswer((_) async => updatedSite);
 
-        final result = await repository.updateSite(tSite);
+      final result = await repository.updateSite(tSite);
 
-        expect(result, equals(updatedSite));
-        verify(() => mockDataSource.updateSite(any())).called(1);
-      },
-    );
+      expect(result, equals(updatedSite));
+      verify(() => mockDataSource.updateSite(any())).called(1);
+    });
 
-    test(
-      'updateSiteStatus delegates to data source with correct parameters',
-      () async {
-        final updatedSite = tSite.copyWith(status: SiteStatus.inactive);
-        when(() => mockDataSource.updateSiteStatus(
-              organizationId: 'test-org-001',
-              siteId: 'test-site-001',
-              status: SiteStatus.inactive,
-            )).thenAnswer((_) async => updatedSite);
+    test('updateSiteStatus delegates to data source', () async {
+      final updatedSite = tSite.copyWith(status: SiteStatus.inactive);
+      when(() => mockDataSource.updateSiteStatus(
+            organizationId: 'test-org-001',
+            siteId: 'test-site-001',
+            status: SiteStatus.inactive,
+          )).thenAnswer((_) async => updatedSite);
 
-        final result = await repository.updateSiteStatus(
-          organizationId: 'test-org-001',
-          siteId: 'test-site-001',
-          status: SiteStatus.inactive,
-        );
+      final result = await repository.updateSiteStatus(
+        organizationId: 'test-org-001',
+        siteId: 'test-site-001',
+        status: SiteStatus.inactive,
+      );
 
-        expect(result.status, SiteStatus.inactive);
-        verify(() => mockDataSource.updateSiteStatus(
-              organizationId: 'test-org-001',
-              siteId: 'test-site-001',
-              status: SiteStatus.inactive,
-            )).called(1);
-      },
-    );
+      expect(result.status, SiteStatus.inactive);
+      verify(() => mockDataSource.updateSiteStatus(
+            organizationId: 'test-org-001',
+            siteId: 'test-site-001',
+            status: SiteStatus.inactive,
+          )).called(1);
+    });
 
-    test(
-      'updateSiteStatus maps not-found FirebaseException to SiteNotFoundFailure',
-      () async {
-        when(() => mockDataSource.updateSiteStatus(
-              organizationId: 'test-org-001',
-              siteId: 'missing-site',
-              status: SiteStatus.inactive,
-            )).thenThrow(
-          FirebaseException(plugin: 'firestore', code: 'not-found'),
-        );
-
-        expect(
-          () => repository.updateSiteStatus(
+    test('updateSiteStatus maps not-found exception to failure', () async {
+      when(() => mockDataSource.updateSiteStatus(
             organizationId: 'test-org-001',
             siteId: 'missing-site',
             status: SiteStatus.inactive,
-          ),
-          throwsA(isA<SiteNotFoundFailure>()),
-        );
-      },
-    );
+          )).thenThrow(
+        FirebaseException(plugin: 'firestore', code: 'not-found'),
+      );
 
-    test(
-      'deleteSite performs soft deletion via status deactivation',
-      () async {
-        when(() => mockDataSource.deleteSite(
-              organizationId: 'test-org-001',
-              siteId: 'test-site-001',
-            )).thenAnswer((_) async {});
-
-        await repository.deleteSite(
+      expect(
+        () => repository.updateSiteStatus(
           organizationId: 'test-org-001',
-          siteId: 'test-site-001',
-        );
+          siteId: 'missing-site',
+          status: SiteStatus.inactive,
+        ),
+        throwsA(isA<SiteNotFoundFailure>()),
+      );
+    });
 
-        verify(() => mockDataSource.deleteSite(
-              organizationId: 'test-org-001',
-              siteId: 'test-site-001',
-            )).called(1);
-      },
-    );
-
-    test(
-      'maps permission-denied FirebaseException to PermissionDeniedFailure',
-      () async {
-        when(() => mockDataSource.getSite(
-              organizationId: 'test-org-001',
-              siteId: 'test-site-001',
-            )).thenThrow(
-          FirebaseException(plugin: 'firestore', code: 'permission-denied'),
-        );
-
-        expect(
-          () => repository.getSite(
+    test('deleteSite performs soft deletion via status deactivation', () async {
+      when(() => mockDataSource.deleteSite(
             organizationId: 'test-org-001',
             siteId: 'test-site-001',
-          ),
-          throwsA(isA<PermissionDeniedFailure>()),
-        );
-      },
-    );
+          )).thenAnswer((_) async {});
 
-    test(
-      'throws SiteValidationFailure when organizationId is empty on query',
-      () async {
-        expect(
-          () => repository.getSites(''),
-          throwsA(isA<SiteValidationFailure>()),
-        );
-      },
-    );
+      await repository.deleteSite(
+        organizationId: 'test-org-001',
+        siteId: 'test-site-001',
+      );
+
+      verify(() => mockDataSource.deleteSite(
+            organizationId: 'test-org-001',
+            siteId: 'test-site-001',
+          )).called(1);
+    });
+
+    test('maps permission-denied exception to failure', () async {
+      when(() => mockDataSource.getSite(
+            organizationId: 'test-org-001',
+            siteId: 'test-site-001',
+          )).thenThrow(
+        FirebaseException(plugin: 'firestore', code: 'permission-denied'),
+      );
+
+      expect(
+        () => repository.getSite(
+          organizationId: 'test-org-001',
+          siteId: 'test-site-001',
+        ),
+        throwsA(isA<PermissionDeniedFailure>()),
+      );
+    });
+
+    test('throws validation failure when organizationId is empty', () async {
+      expect(
+        () => repository.getSites(''),
+        throwsA(isA<SiteValidationFailure>()),
+      );
+    });
   });
 }
