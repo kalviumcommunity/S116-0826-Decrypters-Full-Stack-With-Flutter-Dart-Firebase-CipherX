@@ -15,7 +15,9 @@ void main() {
 
     test('passes validation for valid profile', () {
       expect(
-          () => UserProfileValidator.validate(validProfile), returnsNormally);
+        () => UserProfileValidator.validate(validProfile),
+        returnsNormally,
+      );
     });
 
     test('throws ProfileValidationFailure when UID is empty', () {

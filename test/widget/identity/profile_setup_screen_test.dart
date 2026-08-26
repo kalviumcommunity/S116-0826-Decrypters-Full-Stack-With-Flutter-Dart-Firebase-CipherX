@@ -50,15 +50,14 @@ void main() {
         userProfileRepositoryProvider.overrideWithValue(mockProfileRepository),
         organizationRepositoryProvider.overrideWithValue(mockOrgRepository),
       ],
-      child: const MaterialApp(
-        home: ProfileSetupScreen(),
-      ),
+      child: const MaterialApp(home: ProfileSetupScreen()),
     );
   }
 
   group('ProfileSetupScreen Widget Tests', () {
-    testWidgets('renders all ProfileSetupScreen fields and controls',
-        (WidgetTester tester) async {
+    testWidgets('renders all ProfileSetupScreen fields and controls', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -67,11 +66,14 @@ void main() {
       expect(find.byKey(const Key('phone_field')), findsOneWidget);
       expect(find.byKey(const Key('organization_code_field')), findsOneWidget);
       expect(
-          find.byKey(const Key('setup_profile_submit_button')), findsOneWidget);
+        find.byKey(const Key('setup_profile_submit_button')),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('shows validation errors when submitted empty',
-        (WidgetTester tester) async {
+    testWidgets('shows validation errors when submitted empty', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -84,8 +86,9 @@ void main() {
       verifyNever(() => mockOrgRepository.getOrganizationByCode(any()));
     });
 
-    testWidgets('submits profile setup successfully when input is valid',
-        (WidgetTester tester) async {
+    testWidgets('submits profile setup successfully when input is valid', (
+      WidgetTester tester,
+    ) async {
       when(() => mockOrgRepository.getOrganizationByCode('ORG001'))
           .thenAnswer((_) async => tOrg);
       when(() => mockProfileRepository.createUserProfile(any()))

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/user_profile.dart';
 import '../../domain/failures/identity_failure.dart';
 import '../../domain/repositories/user_profile_repository.dart';
@@ -8,9 +9,8 @@ import '../datasources/firebase_user_profile_data_source.dart';
 class UserProfileRepositoryImpl implements UserProfileRepository {
   final FirebaseUserProfileDataSource _dataSource;
 
-  UserProfileRepositoryImpl({
-    required FirebaseUserProfileDataSource dataSource,
-  }) : _dataSource = dataSource;
+  UserProfileRepositoryImpl({required FirebaseUserProfileDataSource dataSource})
+      : _dataSource = dataSource;
 
   @override
   Future<UserProfile> createUserProfile(UserProfile profile) async {
