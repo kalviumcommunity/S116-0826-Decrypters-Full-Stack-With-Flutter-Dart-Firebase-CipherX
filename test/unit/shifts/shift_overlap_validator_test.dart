@@ -1,13 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cipher_x/features/shifts/domain/entities/shift_time.dart';
 import 'package:cipher_x/features/shifts/domain/validators/shift_overlap_validator.dart';
 
 void main() {
   group('ShiftOverlapValidator Unit Tests — Interval Matrix', () {
-    final baseDate = DateTime(2026, 8, 27);
-
-    DateTime makeTime(int hour, [int minute = 0]) {
-      return DateTime(
-          baseDate.year, baseDate.month, baseDate.day, hour, minute);
+    ShiftTime makeTime(int hour, [int minute = 0]) {
+      return ShiftTime(hour: hour, minute: minute);
     }
 
     test('08:00–10:00 overlaps 09:00–17:00 (Partial start overlap) -> CONFLICT',

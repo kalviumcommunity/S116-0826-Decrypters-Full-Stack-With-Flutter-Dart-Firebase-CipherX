@@ -28,16 +28,20 @@ final shiftRepositoryProvider = Provider<ShiftRepository>((ref) {
   );
 });
 
-final shiftsStreamProvider = StreamProvider.autoDispose<List<Shift>>((ref) {
+final shiftsStreamProvider =
+    StreamProvider.autoDispose<List<Shift>>((ref) async* {
   final profileAsync = ref.watch(currentUserProfileProvider);
   final profile = profileAsync.asData?.value;
 
   if (profile == null) {
-    return const Stream.empty();
+    yield const [];
+    return;
   }
 
   final repository = ref.watch(shiftRepositoryProvider);
-  return repository.watchShifts(profile.organizationId);
+  final shifts =
+      await repository.getShiftsByOrganization(profile.organizationId);
+  yield shifts;
 });
 
 class ShiftCreationController extends AutoDisposeAsyncNotifier<void> {
@@ -49,13 +53,10 @@ class ShiftCreationController extends AutoDisposeAsyncNotifier<void> {
     state = const AsyncLoading();
 
     try {
-      ShiftValidator.validate(
-        guardId: shift.guardId,
-        siteId: shift.siteId,
-        date: DateTime.tryParse(shift.shiftDate),
-        startTime: shift.startTime,
-        endTime: shift.endTime,
-      );
+      final tempShift = shift.shiftId.isEmpty
+          ? shift.copyWith(shiftId: 'temp_create_id')
+          : shift;
+      ShiftValidator.validate(tempShift);
 
       final repository = ref.read(shiftRepositoryProvider);
       await repository.createShift(shift);

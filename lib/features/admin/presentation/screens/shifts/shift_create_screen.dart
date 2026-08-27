@@ -9,8 +9,8 @@ import '../../../../identity/presentation/providers/identity_providers.dart';
 import '../../../../sites/domain/entities/site.dart';
 import '../../../../sites/presentation/providers/site_providers.dart';
 import '../../../../shifts/domain/entities/shift.dart';
+import '../../../../shifts/domain/entities/shift_time.dart';
 import '../../../../shifts/domain/failures/shift_failure.dart';
-import '../../../../shifts/domain/validators/shift_validator.dart';
 import '../../../../shifts/presentation/providers/shift_providers.dart';
 
 class ShiftCreateScreen extends ConsumerStatefulWidget {
@@ -581,24 +581,46 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
     }
   }
 
-  DateTime? _buildDateTime(DateTime? date, TimeOfDay? time) {
-    if (date == null || time == null) return null;
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
+  String? _validateGuard(Guard? guard) {
+    if (guard == null) return 'Please select a guard.';
+    if (guard.status != GuardStatus.active) return 'Selected guard is inactive.';
+    return null;
+  }
+
+  String? _validateSite(Site? site) {
+    if (site == null) return 'Please select a site.';
+    if (site.status != SiteStatus.active) return 'Selected site is inactive.';
+    return null;
+  }
+
+  String? _validateDate(DateTime? date) {
+    if (date == null) return 'Please select a shift date.';
+    return null;
+  }
+
+  String? _validateStartTime(TimeOfDay? time) {
+    if (time == null) return 'Please select a start time.';
+    return null;
+  }
+
+  String? _validateEndTime(TimeOfDay? time) {
+    if (time == null) return 'Please select an end time.';
+    return null;
+  }
+
+  String? _validateTimeOrdering(TimeOfDay? start, TimeOfDay? end) {
+    if (start == null || end == null) return null;
+    final startMinutes = start.hour * 60 + start.minute;
+    final endMinutes = end.hour * 60 + end.minute;
+    if (startMinutes >= endMinutes) {
+      return 'Start time must be before end time';
+    }
+    return null;
   }
 
   bool _validateTimeRange() {
-    final startDateTime = _buildDateTime(_selectedDate, _startTimeOfDay);
-    final endDateTime = _buildDateTime(_selectedDate, _endTimeOfDay);
-
-    if (startDateTime != null && endDateTime != null) {
-      final orderErr =
-          ShiftValidator.validateTimeOrdering(startDateTime, endDateTime);
+    if (_startTimeOfDay != null && _endTimeOfDay != null) {
+      final orderErr = _validateTimeOrdering(_startTimeOfDay, _endTimeOfDay);
       setState(() {
         _timeOrderError = orderErr;
       });
@@ -613,15 +635,11 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
 
   Future<void> _submitForm() async {
     setState(() {
-      _guardError = ShiftValidator.validateGuard(_selectedGuard?.guardId);
-      _siteError = ShiftValidator.validateSite(_selectedSite?.siteId);
-      _dateError = ShiftValidator.validateDate(_selectedDate);
-      _startTimeError = ShiftValidator.validateStartTime(
-        _buildDateTime(_selectedDate, _startTimeOfDay),
-      );
-      _endTimeError = ShiftValidator.validateEndTime(
-        _buildDateTime(_selectedDate, _endTimeOfDay),
-      );
+      _guardError = _validateGuard(_selectedGuard);
+      _siteError = _validateSite(_selectedSite);
+      _dateError = _validateDate(_selectedDate);
+      _startTimeError = _validateStartTime(_startTimeOfDay);
+      _endTimeError = _validateEndTime(_endTimeOfDay);
     });
 
     final isTimeValid = _validateTimeRange();
@@ -637,26 +655,23 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
       return;
     }
 
-    final startDateTime = _buildDateTime(_selectedDate!, _startTimeOfDay!)!;
-    final endDateTime = _buildDateTime(_selectedDate!, _endTimeOfDay!)!;
-
-    final dateStr =
-        '${_selectedDate!.year.toString().padLeft(4, '0')}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}';
-
     final profile = ref.read(currentUserProfileProvider).asData?.value;
     final orgId = profile?.organizationId ?? _selectedGuard!.organizationId;
 
     final shiftInput = Shift(
-      id: '',
+      shiftId: '',
       organizationId: orgId,
       siteId: _selectedSite!.siteId,
-      siteName: _selectedSite!.name,
       guardId: _selectedGuard!.guardId,
-      guardName: _selectedGuard!.name,
-      supervisorId: profile?.uid ?? '',
-      shiftDate: dateStr,
-      startTime: startDateTime,
-      endTime: endDateTime,
+      date: _selectedDate!,
+      startTime: ShiftTime(
+        hour: _startTimeOfDay!.hour,
+        minute: _startTimeOfDay!.minute,
+      ),
+      endTime: ShiftTime(
+        hour: _endTimeOfDay!.hour,
+        minute: _endTimeOfDay!.minute,
+      ),
       status: ShiftStatus.scheduled,
     );
 

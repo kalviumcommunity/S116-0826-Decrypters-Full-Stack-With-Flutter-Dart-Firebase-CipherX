@@ -1,3 +1,5 @@
+import '../entities/shift_time.dart';
+
 /// Pure interval overlap validation logic for shift assignments.
 ///
 /// Uses the half-open interval model `[start, end)`.
@@ -10,8 +12,18 @@
 class ShiftOverlapValidator {
   const ShiftOverlapValidator._();
 
-  /// Determines whether two shift time intervals `[startA, endA)` and `[startB, endB)` overlap.
+  /// Determines whether two [ShiftTime] intervals `[startA, endA)` and `[startB, endB)` overlap.
   static bool hasShiftOverlap({
+    required ShiftTime startA,
+    required ShiftTime endA,
+    required ShiftTime startB,
+    required ShiftTime endB,
+  }) {
+    return startA.isBefore(endB) && startB.isBefore(endA);
+  }
+
+  /// Determines whether two [DateTime] intervals `[startA, endA)` and `[startB, endB)` overlap.
+  static bool hasDateTimeOverlap({
     required DateTime startA,
     required DateTime endA,
     required DateTime startB,

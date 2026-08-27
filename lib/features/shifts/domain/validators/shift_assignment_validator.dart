@@ -46,13 +46,15 @@ class ShiftAssignmentValidator {
 
     // 4. Duplicate assignment check
     final isDuplicate = existingShifts.any((existing) {
-      if (existing.id == shift.id && shift.id.isNotEmpty) {
+      if (existing.shiftId == shift.shiftId && shift.shiftId.isNotEmpty) {
         return false;
       }
       return existing.organizationId == shift.organizationId &&
           existing.guardId == shift.guardId &&
           existing.siteId == shift.siteId &&
-          existing.shiftDate == shift.shiftDate &&
+          existing.date.year == shift.date.year &&
+          existing.date.month == shift.date.month &&
+          existing.date.day == shift.date.day &&
           existing.startTime == shift.startTime &&
           existing.endTime == shift.endTime &&
           existing.status != ShiftStatus.cancelled;
@@ -64,15 +66,20 @@ class ShiftAssignmentValidator {
 
     // 5. Overlapping shift detection for the guard
     final activeGuardShifts = existingShifts.where((existing) {
-      if (existing.id == shift.id && shift.id.isNotEmpty) {
+      if (existing.shiftId == shift.shiftId && shift.shiftId.isNotEmpty) {
         return false;
       }
       if (existing.guardId != shift.guardId) {
         return false;
       }
-      // Only active assignments conflict (scheduled or in-progress)
+      if (existing.date.year != shift.date.year ||
+          existing.date.month != shift.date.month ||
+          existing.date.day != shift.date.day) {
+        return false;
+      }
+      // Only active assignments conflict (scheduled or active)
       return existing.status == ShiftStatus.scheduled ||
-          existing.status == ShiftStatus.inProgress;
+          existing.status == ShiftStatus.active;
     });
 
     for (final existing in activeGuardShifts) {

@@ -23,7 +23,7 @@ class FakeShiftRepository implements ShiftRepository {
   @override
   Future<Shift> createShift(Shift shift) async {
     if (shouldFail) {
-      throw failure ?? const ShiftDatabaseFailure('Database error');
+      throw failure ?? const ShiftValidationFailure('Database error');
     }
     createdShift = shift;
     return shift;
@@ -36,15 +36,52 @@ class FakeShiftRepository implements ShiftRepository {
   }
 
   @override
-  Future<List<Shift>> getShifts(String organizationId,
-      {String? siteId, String? guardId, String? shiftDate}) async {
+  Future<List<Shift>> getShiftsByOrganization(String organizationId,
+      {DateTime? date, ShiftStatus? status}) async {
     return createdShift != null ? [createdShift!] : [];
   }
 
   @override
-  Stream<List<Shift>> watchShifts(String organizationId,
-      {String? siteId, String? guardId, String? shiftDate}) {
-    return Stream.value(createdShift != null ? [createdShift!] : []);
+  Future<List<Shift>> getShiftsByGuard(String organizationId, String guardId,
+      {DateTime? date}) async {
+    return createdShift != null ? [createdShift!] : [];
+  }
+
+  @override
+  Future<List<Shift>> getShiftsBySite(String organizationId, String siteId,
+      {DateTime? date}) async {
+    return createdShift != null ? [createdShift!] : [];
+  }
+
+  @override
+  Future<Shift> updateShift(Shift shift) async {
+    createdShift = shift;
+    return shift;
+  }
+
+  @override
+  Future<Shift> updateShiftStatus({
+    required String organizationId,
+    required String shiftId,
+    required ShiftStatus status,
+  }) async {
+    if (createdShift != null) {
+      createdShift = createdShift!.copyWith(status: status);
+      return createdShift!;
+    }
+    throw const ShiftNotFoundFailure();
+  }
+
+  @override
+  Future<void> cancelShift({
+    required String organizationId,
+    required String shiftId,
+  }) async {
+    await updateShiftStatus(
+      organizationId: organizationId,
+      shiftId: shiftId,
+      status: ShiftStatus.cancelled,
+    );
   }
 }
 

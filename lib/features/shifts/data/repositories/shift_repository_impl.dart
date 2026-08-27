@@ -30,10 +30,10 @@ class ShiftRepositoryImpl implements ShiftRepository {
         siteId: shift.siteId,
       );
 
-      final existingShifts = await _dataSource.getShifts(
+      final existingShifts = await _dataSource.getShiftsByGuard(
         shift.organizationId,
-        guardId: shift.guardId,
-        shiftDate: shift.shiftDate,
+        shift.guardId,
+        date: shift.date,
       );
 
       ShiftAssignmentValidator.validateAssignment(
@@ -59,32 +59,94 @@ class ShiftRepositoryImpl implements ShiftRepository {
   }
 
   @override
-  Future<List<Shift>> getShifts(
+  Future<List<Shift>> getShiftsByOrganization(
     String organizationId, {
-    String? siteId,
-    String? guardId,
-    String? shiftDate,
+    DateTime? date,
+    ShiftStatus? status,
   }) {
-    return _dataSource.getShifts(
+    return _dataSource.getShiftsByOrganization(
       organizationId,
-      siteId: siteId,
-      guardId: guardId,
-      shiftDate: shiftDate,
+      date: date,
+      status: status,
     );
   }
 
   @override
-  Stream<List<Shift>> watchShifts(
-    String organizationId, {
-    String? siteId,
-    String? guardId,
-    String? shiftDate,
+  Future<List<Shift>> getShiftsByGuard(
+    String organizationId,
+    String guardId, {
+    DateTime? date,
   }) {
-    return _dataSource.watchShifts(
+    return _dataSource.getShiftsByGuard(
       organizationId,
-      siteId: siteId,
-      guardId: guardId,
-      shiftDate: shiftDate,
+      guardId,
+      date: date,
+    );
+  }
+
+  @override
+  Future<List<Shift>> getShiftsBySite(
+    String organizationId,
+    String siteId, {
+    DateTime? date,
+  }) {
+    return _dataSource.getShiftsBySite(
+      organizationId,
+      siteId,
+      date: date,
+    );
+  }
+
+  @override
+  Future<Shift> updateShift(Shift shift) async {
+    if (_guardRepository != null && _siteRepository != null) {
+      final guard = await _guardRepository.getGuard(
+        organizationId: shift.organizationId,
+        guardId: shift.guardId,
+      );
+      final site = await _siteRepository.getSite(
+        organizationId: shift.organizationId,
+        siteId: shift.siteId,
+      );
+
+      final existingShifts = await _dataSource.getShiftsByGuard(
+        shift.organizationId,
+        shift.guardId,
+        date: shift.date,
+      );
+
+      ShiftAssignmentValidator.validateAssignment(
+        shift: shift,
+        guard: guard,
+        site: site,
+        existingShifts: existingShifts,
+      );
+    }
+    return await _dataSource.updateShift(shift);
+  }
+
+  @override
+  Future<Shift> updateShiftStatus({
+    required String organizationId,
+    required String shiftId,
+    required ShiftStatus status,
+  }) {
+    return _dataSource.updateShiftStatus(
+      organizationId: organizationId,
+      shiftId: shiftId,
+      status: status,
+    );
+  }
+
+  @override
+  Future<void> cancelShift({
+    required String organizationId,
+    required String shiftId,
+  }) async {
+    await updateShiftStatus(
+      organizationId: organizationId,
+      shiftId: shiftId,
+      status: ShiftStatus.cancelled,
     );
   }
 }

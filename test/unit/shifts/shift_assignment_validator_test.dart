@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cipher_x/features/guards/domain/entities/guard.dart';
 import 'package:cipher_x/features/sites/domain/entities/site.dart';
 import 'package:cipher_x/features/shifts/domain/entities/shift.dart';
+import 'package:cipher_x/features/shifts/domain/entities/shift_time.dart';
 import 'package:cipher_x/features/shifts/domain/failures/shift_failure.dart';
 import 'package:cipher_x/features/shifts/domain/validators/shift_assignment_validator.dart';
 
@@ -39,15 +40,13 @@ void main() {
     );
 
     final validShift = Shift(
-      id: 'shift-100',
+      shiftId: 'shift-100',
       organizationId: 'org-test',
       siteId: 'site-001',
-      siteName: 'Cyber Gateway Tech Park',
       guardId: 'g-101',
-      guardName: 'Rahul Sharma',
-      shiftDate: '2026-08-27',
-      startTime: DateTime(2026, 8, 27, 9, 0),
-      endTime: DateTime(2026, 8, 27, 17, 0),
+      date: DateTime(2026, 8, 27),
+      startTime: const ShiftTime(hour: 9, minute: 0),
+      endTime: const ShiftTime(hour: 17, minute: 0),
       status: ShiftStatus.scheduled,
     );
 
@@ -65,8 +64,8 @@ void main() {
 
     test('Rejects invalid time range where startTime >= endTime', () {
       final invalidTimeShift = validShift.copyWith(
-        startTime: DateTime(2026, 8, 27, 17, 0),
-        endTime: DateTime(2026, 8, 27, 9, 0),
+        startTime: const ShiftTime(hour: 17, minute: 0),
+        endTime: const ShiftTime(hour: 9, minute: 0),
       );
 
       expect(
@@ -162,15 +161,13 @@ void main() {
 
     test('Rejects exact duplicate shift assignment', () {
       final existingDuplicate = Shift(
-        id: 'shift-099',
+        shiftId: 'shift-099',
         organizationId: 'org-test',
         siteId: 'site-001',
-        siteName: 'Cyber Gateway Tech Park',
         guardId: 'g-101',
-        guardName: 'Rahul Sharma',
-        shiftDate: '2026-08-27',
-        startTime: DateTime(2026, 8, 27, 9, 0),
-        endTime: DateTime(2026, 8, 27, 17, 0),
+        date: DateTime(2026, 8, 27),
+        startTime: const ShiftTime(hour: 9, minute: 0),
+        endTime: const ShiftTime(hour: 17, minute: 0),
         status: ShiftStatus.scheduled,
       );
 
@@ -189,28 +186,24 @@ void main() {
         'Rejects overlapping shift for same guard at different site (Critical Scenario #1)',
         () {
       final existingShiftAtSiteA = Shift(
-        id: 'shift-001',
+        shiftId: 'shift-001',
         organizationId: 'org-test',
         siteId: 'site-001',
-        siteName: 'Cyber Gateway Tech Park',
         guardId: 'g-101',
-        guardName: 'Rahul Sharma',
-        shiftDate: '2026-08-27',
-        startTime: DateTime(2026, 8, 27, 9, 0),
-        endTime: DateTime(2026, 8, 27, 17, 0),
+        date: DateTime(2026, 8, 27),
+        startTime: const ShiftTime(hour: 9, minute: 0),
+        endTime: const ShiftTime(hour: 17, minute: 0),
         status: ShiftStatus.scheduled,
       );
 
       final newAttemptAtSiteB = Shift(
-        id: 'shift-002',
+        shiftId: 'shift-002',
         organizationId: 'org-test',
         siteId: 'site-002',
-        siteName: 'Financial District Tower',
         guardId: 'g-101',
-        guardName: 'Rahul Sharma',
-        shiftDate: '2026-08-27',
-        startTime: DateTime(2026, 8, 27, 13, 0),
-        endTime: DateTime(2026, 8, 27, 18, 0),
+        date: DateTime(2026, 8, 27),
+        startTime: const ShiftTime(hour: 13, minute: 0),
+        endTime: const ShiftTime(hour: 18, minute: 0),
         status: ShiftStatus.scheduled,
       );
 
@@ -227,28 +220,24 @@ void main() {
 
     test('Allows adjacent shift for same guard (Critical Scenario #2)', () {
       final existingShift = Shift(
-        id: 'shift-001',
+        shiftId: 'shift-001',
         organizationId: 'org-test',
         siteId: 'site-001',
-        siteName: 'Cyber Gateway Tech Park',
         guardId: 'g-101',
-        guardName: 'Rahul Sharma',
-        shiftDate: '2026-08-27',
-        startTime: DateTime(2026, 8, 27, 9, 0),
-        endTime: DateTime(2026, 8, 27, 12, 0),
+        date: DateTime(2026, 8, 27),
+        startTime: const ShiftTime(hour: 9, minute: 0),
+        endTime: const ShiftTime(hour: 12, minute: 0),
         status: ShiftStatus.scheduled,
       );
 
       final adjacentShift = Shift(
-        id: 'shift-002',
+        shiftId: 'shift-002',
         organizationId: 'org-test',
         siteId: 'site-002',
-        siteName: 'Financial District Tower',
         guardId: 'g-101',
-        guardName: 'Rahul Sharma',
-        shiftDate: '2026-08-27',
-        startTime: DateTime(2026, 8, 27, 12, 0),
-        endTime: DateTime(2026, 8, 27, 17, 0),
+        date: DateTime(2026, 8, 27),
+        startTime: const ShiftTime(hour: 12, minute: 0),
+        endTime: const ShiftTime(hour: 17, minute: 0),
         status: ShiftStatus.scheduled,
       );
 
@@ -265,15 +254,13 @@ void main() {
 
     test('Allows shift when existing shift is CANCELLED', () {
       final cancelledShift = Shift(
-        id: 'shift-001',
+        shiftId: 'shift-001',
         organizationId: 'org-test',
         siteId: 'site-001',
-        siteName: 'Cyber Gateway Tech Park',
         guardId: 'g-101',
-        guardName: 'Rahul Sharma',
-        shiftDate: '2026-08-27',
-        startTime: DateTime(2026, 8, 27, 9, 0),
-        endTime: DateTime(2026, 8, 27, 17, 0),
+        date: DateTime(2026, 8, 27),
+        startTime: const ShiftTime(hour: 9, minute: 0),
+        endTime: const ShiftTime(hour: 17, minute: 0),
         status: ShiftStatus.cancelled,
       );
 
