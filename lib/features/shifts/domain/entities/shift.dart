@@ -112,7 +112,8 @@ class Shift {
       date: parseDate(map['date']) ?? DateTime.now(),
       startTime: parseDate(map['startTime']) ?? DateTime.now(),
       endTime: parseDate(map['endTime']) ?? DateTime.now(),
-      status: ShiftStatus.fromMapString(map['status'] as String? ?? 'scheduled'),
+      status:
+          ShiftStatus.fromMapString(map['status'] as String? ?? 'scheduled'),
       createdAt: parseDate(map['createdAt']),
       updatedAt: parseDate(map['updatedAt']),
     );

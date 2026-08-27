@@ -76,14 +76,16 @@ class GuardShiftsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, {required String message, required IconData icon}) {
+  Widget _buildEmptyState(BuildContext context,
+      {required String message, required IconData icon}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
+        border:
+            Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
       ),
       child: Column(
         children: [

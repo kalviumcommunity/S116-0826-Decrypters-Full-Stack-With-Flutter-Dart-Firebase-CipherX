@@ -6,7 +6,8 @@ class FirebaseShiftDataSource {
 
   FirebaseShiftDataSource(this._firestore);
 
-  Future<List<Shift>> getShiftsByGuard(String organizationId, String guardId) async {
+  Future<List<Shift>> getShiftsByGuard(
+      String organizationId, String guardId) async {
     try {
       final snapshot = await _firestore
           .collection('organizations')

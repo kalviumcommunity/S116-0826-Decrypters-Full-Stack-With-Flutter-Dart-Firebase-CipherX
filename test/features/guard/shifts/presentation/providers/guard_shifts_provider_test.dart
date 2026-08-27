@@ -12,7 +12,8 @@ class MockShiftRepository implements ShiftRepository {
   MockShiftRepository(this.shifts);
 
   @override
-  Future<List<Shift>> getShiftsByGuard(String organizationId, String guardId) async {
+  Future<List<Shift>> getShiftsByGuard(
+      String organizationId, String guardId) async {
     return shifts;
   }
 
@@ -26,7 +27,7 @@ void main() {
   group('guardShiftsProvider Tests', () {
     test('categorizes shifts into today and upcoming correctly', () async {
       final now = DateTime.now();
-      
+
       final todayShift = Shift(
         shiftId: '1',
         organizationId: 'org1',
@@ -50,7 +51,7 @@ void main() {
       );
 
       final mockRepo = MockShiftRepository([todayShift, tomorrowShift]);
-      
+
       final container = ProviderContainer(
         overrides: [
           currentUserProfileProvider.overrideWithValue(

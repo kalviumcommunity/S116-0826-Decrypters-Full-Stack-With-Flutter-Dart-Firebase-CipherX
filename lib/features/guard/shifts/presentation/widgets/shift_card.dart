@@ -33,7 +33,9 @@ class ShiftCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  isToday ? "Today" : DateFormat('MMM d, yyyy').format(shift.date),
+                  isToday
+                      ? "Today"
+                      : DateFormat('MMM d, yyyy').format(shift.date),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isToday ? AppColors.primary : null,
@@ -46,7 +48,8 @@ class ShiftCard extends ConsumerWidget {
             // Site Information
             Row(
               children: [
-                const Icon(Icons.business, color: AppColors.textSecondaryLight, size: 20),
+                const Icon(Icons.business,
+                    color: AppColors.textSecondaryLight, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: siteAsync.when(
@@ -83,7 +86,8 @@ class ShiftCard extends ConsumerWidget {
             // Time Information
             Row(
               children: [
-                const Icon(Icons.access_time, color: AppColors.textSecondaryLight, size: 20),
+                const Icon(Icons.access_time,
+                    color: AppColors.textSecondaryLight, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   '${DateFormat('hh:mm a').format(shift.startTime)} — ${DateFormat('hh:mm a').format(shift.endTime)}',

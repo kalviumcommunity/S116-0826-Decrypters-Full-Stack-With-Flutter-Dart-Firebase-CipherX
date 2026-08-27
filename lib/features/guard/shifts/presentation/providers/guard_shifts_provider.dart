@@ -5,7 +5,8 @@ import '../../../../shifts/data/repositories/shift_repository_impl.dart';
 import '../../../../shifts/domain/entities/shift.dart';
 import '../../../../shifts/domain/repositories/shift_repository.dart';
 
-final firebaseShiftDataSourceProvider = Provider<FirebaseShiftDataSource>((ref) {
+final firebaseShiftDataSourceProvider =
+    Provider<FirebaseShiftDataSource>((ref) {
   final firestore = ref.watch(cloudFirestoreProvider);
   return FirebaseShiftDataSource(firestore);
 });
@@ -25,7 +26,8 @@ class GuardShiftsData {
   });
 }
 
-final guardShiftsProvider = FutureProvider.autoDispose<GuardShiftsData>((ref) async {
+final guardShiftsProvider =
+    FutureProvider.autoDispose<GuardShiftsData>((ref) async {
   final profileAsync = ref.watch(currentUserProfileProvider);
   final profile = profileAsync.asData?.value;
 
@@ -48,7 +50,8 @@ final guardShiftsProvider = FutureProvider.autoDispose<GuardShiftsData>((ref) as
   final List<Shift> upcomingShifts = [];
 
   for (final shift in shifts) {
-    if (shift.date.isAfter(todayStart.subtract(const Duration(milliseconds: 1))) && 
+    if (shift.date
+            .isAfter(todayStart.subtract(const Duration(milliseconds: 1))) &&
         shift.date.isBefore(todayEnd)) {
       // It's today's shift. If there are multiple, just take the first or sort.
       // The prompt says: "If multiple shifts today are possible... handle them using the existing shift data correctly"
@@ -56,7 +59,8 @@ final guardShiftsProvider = FutureProvider.autoDispose<GuardShiftsData>((ref) as
       if (todayShift == null || shift.date.isBefore(todayShift.date)) {
         todayShift = shift;
       }
-    } else if (shift.date.isAfter(todayEnd.subtract(const Duration(milliseconds: 1)))) {
+    } else if (shift.date
+        .isAfter(todayEnd.subtract(const Duration(milliseconds: 1)))) {
       upcomingShifts.add(shift);
     }
   }
