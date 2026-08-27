@@ -11,6 +11,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/profile_loading_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/guard/presentation/screens/guard_home_screen.dart';
+import '../../features/guard/shifts/presentation/screens/guard_shifts_screen.dart';
 import '../../features/identity/domain/entities/user_profile.dart';
 import '../../features/identity/presentation/providers/identity_providers.dart';
 import '../../features/identity/presentation/screens/profile_screen.dart';
@@ -302,10 +303,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.shift,
                 builder: (BuildContext context, GoRouterState state) =>
-                    const PlaceholderPage(
-                  title: 'Shift',
-                  icon: Icons.shield_outlined,
-                ),
+                    const GuardShiftsScreen(),
               ),
             ],
           ),
