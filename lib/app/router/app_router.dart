@@ -48,6 +48,7 @@ abstract class AppRoutes {
   static const String adminSiteDetails = '/admin/sites/details';
   static const String adminSiteCreate = '/admin/sites/create';
   static const String adminSiteEdit = '/admin/sites/edit';
+  static const String adminShiftCreate = '/admin/shifts/create';
 
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
@@ -278,6 +279,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           }
           return const SiteListScreen();
         },
+      ),
+      GoRoute(
+        path: AppRoutes.adminShiftCreate,
+        builder: (BuildContext context, GoRouterState state) =>
+            const ShiftCreateScreen(),
       ),
       GoRoute(
         path: AppRoutes.supervisorDashboard,

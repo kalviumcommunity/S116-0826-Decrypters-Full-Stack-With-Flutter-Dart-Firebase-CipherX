@@ -32,6 +32,18 @@ final sitesListProvider = FutureProvider.family
   );
 });
 
+final sitesStreamProvider = StreamProvider.autoDispose<List<Site>>((ref) {
+  final profileAsync = ref.watch(currentUserProfileProvider);
+  final profile = profileAsync.asData?.value;
+
+  if (profile == null) {
+    return const Stream.empty();
+  }
+
+  final repository = ref.watch(siteRepositoryProvider);
+  return repository.watchSites(profile.organizationId);
+});
+
 class SiteController extends AutoDisposeAsyncNotifier<void> {
   @override
   void build() {}
