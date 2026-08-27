@@ -281,11 +281,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+<<<<<<< HEAD
         path: AppRoutes.adminShiftCreate,
         builder: (BuildContext context, GoRouterState state) =>
             const ShiftCreateScreen(),
       ),
       GoRoute(
+=======
+>>>>>>> origin/feature/shift-domain
         path: AppRoutes.supervisorDashboard,
         builder: (BuildContext context, GoRouterState state) =>
             const SupervisorDashboardScreen(),
