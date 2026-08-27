@@ -1,61 +1,71 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
+enum SiteStatus {
+  active,
+  inactive;
+
+  String toMapString() => name;
+
+  static SiteStatus fromMapString(String value) {
+    switch (value.toLowerCase()) {
+      case 'active':
+        return SiteStatus.active;
+      case 'inactive':
+        return SiteStatus.inactive;
+      default:
+        throw FormatException('Invalid SiteStatus value: $value');
+    }
+  }
+}
+
 @immutable
 class Site {
-  final String id;
+  final String siteId;
   final String organizationId;
   final String name;
   final String address;
   final double latitude;
   final double longitude;
   final double geofenceRadius;
-  final String qrToken;
-  final int requiredGuardCount;
-  final bool isActive;
+  final SiteStatus status;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
   const Site({
-    required this.id,
+    required this.siteId,
     required this.organizationId,
     required this.name,
     required this.address,
-    this.latitude = 0.0,
-    this.longitude = 0.0,
-    this.geofenceRadius = 50.0,
-    this.qrToken = '',
-    this.requiredGuardCount = 1,
-    this.isActive = true,
+    required this.latitude,
+    required this.longitude,
+    required this.geofenceRadius,
+    this.status = SiteStatus.active,
     this.createdAt,
     this.updatedAt,
   });
 
   Site copyWith({
-    String? id,
+    String? siteId,
     String? organizationId,
     String? name,
     String? address,
     double? latitude,
     double? longitude,
     double? geofenceRadius,
-    String? qrToken,
-    int? requiredGuardCount,
-    bool? isActive,
+    SiteStatus? status,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return Site(
-      id: id ?? this.id,
+      siteId: siteId ?? this.siteId,
       organizationId: organizationId ?? this.organizationId,
       name: name ?? this.name,
       address: address ?? this.address,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       geofenceRadius: geofenceRadius ?? this.geofenceRadius,
-      qrToken: qrToken ?? this.qrToken,
-      requiredGuardCount: requiredGuardCount ?? this.requiredGuardCount,
-      isActive: isActive ?? this.isActive,
+      status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -63,17 +73,16 @@ class Site {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'siteId': id,
+      'siteId': siteId,
+      'id': siteId,
       'organizationId': organizationId,
       'name': name,
       'address': address,
       'latitude': latitude,
       'longitude': longitude,
       'geofenceRadius': geofenceRadius,
-      'qrToken': qrToken,
-      'requiredGuardCount': requiredGuardCount,
-      'isActive': isActive,
+      'status': status.toMapString(),
+      'isActive': status == SiteStatus.active,
       if (createdAt != null) 'createdAt': Timestamp.fromDate(createdAt!),
       if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
     };
@@ -88,17 +97,30 @@ class Site {
       return null;
     }
 
+    double parseDouble(dynamic val, {double defaultValue = 0.0}) {
+      if (val == null) return defaultValue;
+      if (val is double) return val;
+      if (val is int) return val.toDouble();
+      if (val is String) return double.tryParse(val) ?? defaultValue;
+      return defaultValue;
+    }
+
+    final statusStr = map['status'] as String?;
+    final isActiveBool = map['isActive'] as bool?;
+
+    final parsedStatus = statusStr != null
+        ? SiteStatus.fromMapString(statusStr)
+        : (isActiveBool == false ? SiteStatus.inactive : SiteStatus.active);
+
     return Site(
-      id: map['id'] as String? ?? map['siteId'] as String? ?? '',
+      siteId: map['siteId'] as String? ?? map['id'] as String? ?? '',
       organizationId: map['organizationId'] as String? ?? '',
       name: map['name'] as String? ?? '',
       address: map['address'] as String? ?? '',
-      latitude: (map['latitude'] as num?)?.toDouble() ?? 0.0,
-      longitude: (map['longitude'] as num?)?.toDouble() ?? 0.0,
-      geofenceRadius: (map['geofenceRadius'] as num?)?.toDouble() ?? 50.0,
-      qrToken: map['qrToken'] as String? ?? '',
-      requiredGuardCount: (map['requiredGuardCount'] as num?)?.toInt() ?? 1,
-      isActive: map['isActive'] as bool? ?? true,
+      latitude: parseDouble(map['latitude']),
+      longitude: parseDouble(map['longitude']),
+      geofenceRadius: parseDouble(map['geofenceRadius']),
+      status: parsedStatus,
       createdAt: parseDate(map['createdAt']),
       updatedAt: parseDate(map['updatedAt']),
     );
@@ -108,16 +130,14 @@ class Site {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is Site &&
-        other.id == id &&
+        other.siteId == siteId &&
         other.organizationId == organizationId &&
         other.name == name &&
         other.address == address &&
         other.latitude == latitude &&
         other.longitude == longitude &&
         other.geofenceRadius == geofenceRadius &&
-        other.qrToken == qrToken &&
-        other.requiredGuardCount == requiredGuardCount &&
-        other.isActive == isActive &&
+        other.status == status &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt;
   }
@@ -125,16 +145,14 @@ class Site {
   @override
   int get hashCode {
     return Object.hash(
-      id,
+      siteId,
       organizationId,
       name,
       address,
       latitude,
       longitude,
       geofenceRadius,
-      qrToken,
-      requiredGuardCount,
-      isActive,
+      status,
       createdAt,
       updatedAt,
     );

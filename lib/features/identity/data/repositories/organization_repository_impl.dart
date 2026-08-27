@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/organization.dart';
 import '../../domain/failures/identity_failure.dart';
 import '../../domain/repositories/organization_repository.dart';
@@ -16,7 +17,8 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
     try {
       if (id.trim().isEmpty) {
         throw const OrganizationValidationFailure(
-            'Organization ID cannot be empty.');
+          'Organization ID cannot be empty.',
+        );
       }
       return await _dataSource.getOrganizationById(id);
     } on IdentityFailure {
@@ -33,7 +35,8 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
     try {
       if (code.trim().isEmpty) {
         throw const OrganizationValidationFailure(
-            'Organization code cannot be empty.');
+          'Organization code cannot be empty.',
+        );
       }
       return await _dataSource.getOrganizationByCode(code);
     } on IdentityFailure {

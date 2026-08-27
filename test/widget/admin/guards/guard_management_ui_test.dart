@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Guard Management UI Widget Tests', () {
-    final testGuard = Guard(
+    const testGuard = Guard(
       guardId: 'g-1',
       organizationId: 'org-1',
       name: 'John Test',
@@ -22,7 +22,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            guardsStreamProvider.overrideWith((ref) => Stream.value([testGuard])),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.value([testGuard])),
           ],
           child: const MaterialApp(home: GuardListScreen()),
         ),
@@ -37,7 +38,7 @@ void main() {
     });
 
     testWidgets('GuardListScreen search filtering works', (tester) async {
-      final guard2 = Guard(
+      const guard2 = Guard(
         guardId: 'g-2',
         organizationId: 'org-1',
         name: 'Alice Smith',
@@ -48,7 +49,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            guardsStreamProvider.overrideWith((ref) => Stream.value([testGuard, guard2])),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.value([testGuard, guard2])),
           ],
           child: const MaterialApp(home: GuardListScreen()),
         ),
@@ -75,17 +77,19 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      await tester.ensureVisible(find.text('Create Guard'));
       await tester.tap(find.text('Create Guard'));
       await tester.pump();
 
-      expect(find.text('Please enter the guard\'s full name'), findsOneWidget);
-      expect(find.text('Please enter an employee ID'), findsOneWidget);
-      expect(find.text('Please enter a phone number'), findsOneWidget);
+      expect(find.text('Guard name cannot be empty.'), findsOneWidget);
+      expect(find.text('Employee ID cannot be empty.'), findsOneWidget);
+      expect(find.text('Phone number cannot be empty.'), findsOneWidget);
     });
 
-    testWidgets('GuardDetailsScreen shows guard info and status toggle dialog', (tester) async {
+    testWidgets('GuardDetailsScreen shows guard info and status toggle dialog',
+        (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(home: GuardDetailsScreen(guard: testGuard)),
         ),
       );

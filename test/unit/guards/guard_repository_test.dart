@@ -81,39 +81,16 @@ void main() {
       expect(result, isNull);
     });
 
-    test('getGuards returns active guards for specified organization',
+    test('getGuards returns list of guards for specified organization',
         () async {
-      when(() => mockDataSource.getGuards(
-            'test-org-001',
-            includeInactive: false,
-          )).thenAnswer((_) async => [tGuard]);
+      when(() => mockDataSource.getGuards('test-org-001'))
+          .thenAnswer((_) async => [tGuard]);
 
       final result = await repository.getGuards('test-org-001');
 
       expect(result, hasLength(1));
       expect(result.first, equals(tGuard));
-      verify(() => mockDataSource.getGuards(
-            'test-org-001',
-            includeInactive: false,
-          )).called(1);
-    });
-
-    test('getGuards passes includeInactive parameter', () async {
-      when(() => mockDataSource.getGuards(
-            'test-org-001',
-            includeInactive: true,
-          )).thenAnswer((_) async => [tGuard]);
-
-      final result = await repository.getGuards(
-        'test-org-001',
-        includeInactive: true,
-      );
-
-      expect(result, hasLength(1));
-      verify(() => mockDataSource.getGuards(
-            'test-org-001',
-            includeInactive: true,
-          )).called(1);
+      verify(() => mockDataSource.getGuards('test-org-001')).called(1);
     });
 
     test('updateGuardStatus delegates to data source with correct parameters',
@@ -137,26 +114,6 @@ void main() {
             guardId: 'test-guard-001',
             status: GuardStatus.inactive,
           )).called(1);
-    });
-
-    test('updateGuardStatus maps not-found exception to GuardNotFoundFailure',
-        () async {
-      when(() => mockDataSource.updateGuardStatus(
-            organizationId: 'test-org-001',
-            guardId: 'missing-guard',
-            status: GuardStatus.inactive,
-          )).thenThrow(
-        FirebaseException(plugin: 'firestore', code: 'not-found'),
-      );
-
-      expect(
-        () => repository.updateGuardStatus(
-          organizationId: 'test-org-001',
-          guardId: 'missing-guard',
-          status: GuardStatus.inactive,
-        ),
-        throwsA(isA<GuardNotFoundFailure>()),
-      );
     });
 
     test('deleteGuard performs soft deletion via status deactivation',

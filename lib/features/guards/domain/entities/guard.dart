@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 enum GuardStatus {
@@ -14,7 +13,7 @@ enum GuardStatus {
       case 'inactive':
         return GuardStatus.inactive;
       default:
-        throw FormatException('Invalid GuardStatus value: $value');
+        return GuardStatus.inactive;
     }
   }
 }
@@ -74,7 +73,6 @@ class Guard {
   Map<String, dynamic> toMap() {
     return {
       'guardId': guardId,
-      'id': guardId,
       'organizationId': organizationId,
       'name': name,
       'employeeId': employeeId,
@@ -82,27 +80,22 @@ class Guard {
       if (email != null) 'email': email,
       if (photoUrl != null) 'photoUrl': photoUrl,
       'status': status.toMapString(),
-      'isActive': status == GuardStatus.active,
-      if (createdAt != null) 'createdAt': Timestamp.fromDate(createdAt!),
-      if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
     };
   }
 
   factory Guard.fromMap(Map<String, dynamic> map) {
     DateTime? parseDate(dynamic val) {
       if (val == null) return null;
-      if (val is Timestamp) return val.toDate();
       if (val is DateTime) return val;
       if (val is String) return DateTime.tryParse(val);
-      return null;
+      try {
+        return (val as dynamic).toDate();
+      } catch (_) {
+        return null;
+      }
     }
-
-    final statusStr = map['status'] as String?;
-    final isActiveBool = map['isActive'] as bool?;
-
-    final parsedStatus = statusStr != null
-        ? GuardStatus.fromMapString(statusStr)
-        : (isActiveBool == false ? GuardStatus.inactive : GuardStatus.active);
 
     return Guard(
       guardId: map['guardId'] as String? ?? map['id'] as String? ?? '',
@@ -112,7 +105,7 @@ class Guard {
       phone: map['phone'] as String? ?? '',
       email: map['email'] as String?,
       photoUrl: map['photoUrl'] as String? ?? map['profilePhotoUrl'] as String?,
-      status: parsedStatus,
+      status: GuardStatus.fromMapString(map['status'] as String? ?? 'active'),
       createdAt: parseDate(map['createdAt']),
       updatedAt: parseDate(map['updatedAt']),
     );

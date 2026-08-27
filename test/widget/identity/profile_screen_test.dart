@@ -31,20 +31,21 @@ void main() {
         userProfileProvider(authUser.uid).overrideWith((ref) => profile),
         userProfileRepositoryProvider.overrideWithValue(mockProfileRepository),
         organizationRepositoryProvider.overrideWithValue(mockOrgRepository),
-        profileControllerProvider.overrideWith((ref) => ProfileController(
-              userProfileRepository: mockProfileRepository,
-              organizationRepository: mockOrgRepository,
-            )),
+        profileControllerProvider.overrideWith(
+          (ref) => ProfileController(
+            userProfileRepository: mockProfileRepository,
+            organizationRepository: mockOrgRepository,
+          ),
+        ),
       ],
-      child: const MaterialApp(
-        home: ProfileScreen(),
-      ),
+      child: const MaterialApp(home: ProfileScreen()),
     );
   }
 
   group('ProfileScreen Widget Tests', () {
-    testWidgets('renders profile data and security boundaries',
-        (WidgetTester tester) async {
+    testWidgets('renders profile data and security boundaries', (
+      WidgetTester tester,
+    ) async {
       const authUser = AuthUser(uid: 'u_screen_1', email: 'guard1@cipherx.com');
       const profile = UserProfile(
         uid: 'u_screen_1',
@@ -69,8 +70,9 @@ void main() {
       expect(find.text('GUARD'), findsOneWidget);
     });
 
-    testWidgets('toggles edit mode and enables fields',
-        (WidgetTester tester) async {
+    testWidgets('toggles edit mode and enables fields', (
+      WidgetTester tester,
+    ) async {
       const authUser = AuthUser(uid: 'u_screen_2', email: 'guard2@cipherx.com');
       const profile = UserProfile(
         uid: 'u_screen_2',
