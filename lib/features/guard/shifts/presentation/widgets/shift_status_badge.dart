@@ -10,15 +10,14 @@ class ShiftStatusBadge extends StatelessWidget {
   Color _getBackgroundColor(BuildContext context) {
     switch (status) {
       case ShiftStatus.scheduled:
-        return AppColors.info.withOpacity(0.1);
+        return AppColors.info.withValues(alpha: 0.1);
       case ShiftStatus.inProgress:
-        return AppColors.accentGold.withOpacity(0.1);
+        return AppColors.accentGold.withValues(alpha: 0.1);
       case ShiftStatus.completed:
-        return AppColors.success.withOpacity(0.1);
+        return AppColors.success.withValues(alpha: 0.1);
       case ShiftStatus.cancelled:
-        return AppColors.error.withOpacity(0.1);
+        return AppColors.error.withValues(alpha: 0.1);
     }
-    return AppColors.info.withOpacity(0.1);
   }
 
   Color _getTextColor(BuildContext context) {
@@ -32,7 +31,6 @@ class ShiftStatusBadge extends StatelessWidget {
       case ShiftStatus.cancelled:
         return AppColors.error;
     }
-    return AppColors.info;
   }
 
   String _getLabel() {
@@ -46,7 +44,6 @@ class ShiftStatusBadge extends StatelessWidget {
       case ShiftStatus.cancelled:
         return 'Cancelled';
     }
-    return 'Unknown';
   }
 
   @override
@@ -56,7 +53,7 @@ class ShiftStatusBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: _getBackgroundColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _getTextColor(context).withOpacity(0.5)),
+        border: Border.all(color: _getTextColor(context).withValues(alpha: 0.5)),
       ),
       child: Text(
         _getLabel(),

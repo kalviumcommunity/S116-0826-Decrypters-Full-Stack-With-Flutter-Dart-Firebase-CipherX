@@ -33,9 +33,7 @@ class ShiftCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  isToday
-                      ? "Today"
-                      : DateFormat('MMM d, yyyy').format(shift.date),
+                  isToday ? 'Today' : DateFormat('MMM d, yyyy').format(shift.date),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isToday ? AppColors.primary : null,

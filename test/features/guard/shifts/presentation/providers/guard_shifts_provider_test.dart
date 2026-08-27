@@ -55,7 +55,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           currentUserProfileProvider.overrideWithValue(
-            AsyncValue.data(
+            const AsyncValue.data(
               UserProfile(
                 uid: 'guard1',
                 email: 'guard@example.com',
