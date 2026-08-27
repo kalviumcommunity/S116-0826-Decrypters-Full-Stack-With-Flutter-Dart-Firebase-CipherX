@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:cipher_x/app/router/app_router.dart';
-import 'package:cipher_x/features/auth/presentation/providers/auth_providers.dart';
+import '../../../../app/router/app_router.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -11,41 +11,56 @@ class AdminDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Dashboard')),
+      appBar: AppBar(
+        title: const Text('Admin Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () =>
+                ref.read(authControllerProvider.notifier).signOut(),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
+            Text(
               'Welcome, Admin!',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              key: const Key('admin_create_shift_btn'),
-              onPressed: () => context.push(AppRoutes.adminShiftCreate),
-              icon: const Icon(Icons.add_alarm),
-              label: const Text('Create Shift'),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.shield_outlined, size: 32),
+                title: const Text('Guard Management'),
+                subtitle: const Text('View and manage security guards'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(AppRoutes.adminGuards),
+              ),
             ),
             const SizedBox(height: 12),
-            OutlinedButton.icon(
-              key: const Key('admin_manage_guards_btn'),
-              onPressed: () => context.push(AppRoutes.adminGuards),
-              icon: const Icon(Icons.people),
-              label: const Text('Manage Guards'),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.location_city_outlined, size: 32),
+                title: const Text('Site Management'),
+                subtitle: const Text('View and manage organization sites'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(AppRoutes.adminSites),
+              ),
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
+            const Spacer(),
+            ElevatedButton.icon(
               onPressed: () =>
                   ref.read(authControllerProvider.notifier).signOut(),
+              icon: const Icon(Icons.logout),
+              label: const Text('Logout'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+                backgroundColor: Colors.red.shade50,
+                foregroundColor: Colors.red,
               ),
-              child: const Text('Logout'),
             ),
           ],
         ),
