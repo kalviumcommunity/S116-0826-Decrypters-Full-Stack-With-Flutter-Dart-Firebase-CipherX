@@ -74,6 +74,17 @@ class SiteRepositoryImpl implements SiteRepository {
   }
 
   @override
+  Stream<List<Site>> watchSites(
+    String organizationId, {
+    bool includeInactive = false,
+  }) {
+    return _dataSource.watchSites(
+      organizationId,
+      includeInactive: includeInactive,
+    );
+  }
+
+  @override
   Future<Site> updateSite(Site site) async {
     try {
       if (site.siteId.trim().isEmpty) {

@@ -62,6 +62,21 @@ class FirebaseSiteDataSource {
     return snapshot.docs.map((doc) => Site.fromMap(doc.data())).toList();
   }
 
+  Stream<List<Site>> watchSites(
+    String organizationId, {
+    bool includeInactive = false,
+  }) {
+    final collection = _sitesCollection(organizationId);
+    final Query<Map<String, dynamic>> query = includeInactive
+        ? collection
+        : collection.where('status',
+            isEqualTo: SiteStatus.active.toMapString());
+
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => Site.fromMap(doc.data())).toList();
+    });
+  }
+
   Future<Site> updateSite(Site site) async {
     final docRef = _sitesCollection(site.organizationId).doc(site.siteId);
     final now = DateTime.now();
