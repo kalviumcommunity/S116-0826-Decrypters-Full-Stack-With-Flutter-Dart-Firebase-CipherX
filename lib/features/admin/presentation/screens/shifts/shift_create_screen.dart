@@ -247,7 +247,8 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
 
     return sitesAsync.when(
       data: (sites) {
-        final activeSites = sites.where((s) => s.isActive).toList();
+        final activeSites =
+            sites.where((s) => s.status == SiteStatus.active).toList();
 
         if (activeSites.isEmpty) {
           return Container(
@@ -614,7 +615,7 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
   Future<void> _submitForm() async {
     setState(() {
       _guardError = ShiftValidator.validateGuard(_selectedGuard?.guardId);
-      _siteError = ShiftValidator.validateSite(_selectedSite?.id);
+      _siteError = ShiftValidator.validateSite(_selectedSite?.siteId);
       _dateError = ShiftValidator.validateDate(_selectedDate);
       _startTimeError = ShiftValidator.validateStartTime(
         _buildDateTime(_selectedDate, _startTimeOfDay),
@@ -649,7 +650,7 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
     final shiftInput = Shift(
       id: '',
       organizationId: orgId,
-      siteId: _selectedSite!.id,
+      siteId: _selectedSite!.siteId,
       siteName: _selectedSite!.name,
       guardId: _selectedGuard!.guardId,
       guardName: _selectedGuard!.name,

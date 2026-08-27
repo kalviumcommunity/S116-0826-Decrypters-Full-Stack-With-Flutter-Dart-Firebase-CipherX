@@ -24,6 +24,12 @@ abstract class SiteRepository {
     bool includeInactive = false,
   });
 
+  /// Watches sites belonging to the specified [organizationId] in real-time.
+  Stream<List<Site>> watchSites(
+    String organizationId, {
+    bool includeInactive = false,
+  });
+
   /// Validates and updates mutable fields of an existing [site].
   ///
   /// Immutable fields (`siteId`, `organizationId`, `createdAt`) are preserved.

@@ -64,11 +64,14 @@ void main() {
   );
 
   const testSite = Site(
-    id: 'site-202',
+    siteId: 'site-202',
     organizationId: 'org-test',
     name: 'Cyber Gateway Tech Park',
     address: '123 Cyber Way',
-    isActive: true,
+    latitude: 17.44,
+    longitude: 78.38,
+    geofenceRadius: 50.0,
+    status: SiteStatus.active,
   );
 
   group('ShiftCreateScreen Widget Tests', () {

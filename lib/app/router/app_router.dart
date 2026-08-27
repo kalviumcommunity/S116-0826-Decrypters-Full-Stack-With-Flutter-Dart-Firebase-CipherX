@@ -235,6 +235,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (BuildContext context, GoRouterState state) =>
             const ShiftCreateScreen(),
       ),
+      GoRoute(
         path: AppRoutes.supervisorDashboard,
         builder: (BuildContext context, GoRouterState state) =>
             const SupervisorDashboardScreen(),
