@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../identity/presentation/providers/identity_providers.dart';
 import '../../data/datasources/firebase_site_data_source.dart';
 import '../../data/repositories/site_repository_impl.dart';
@@ -119,4 +118,16 @@ class SiteController extends AutoDisposeAsyncNotifier<void> {
 final siteControllerProvider =
     AutoDisposeAsyncNotifierProvider<SiteController, void>(() {
   return SiteController();
+});
+
+final siteProvider = FutureProvider.family<Site?, String>((ref, siteId) async {
+  final profileAsync = ref.watch(currentUserProfileProvider);
+  final profile = profileAsync.asData?.value;
+  if (profile == null) return null;
+
+  final repository = ref.watch(siteRepositoryProvider);
+  return await repository.getSite(
+    organizationId: profile.organizationId,
+    siteId: siteId,
+  );
 });
