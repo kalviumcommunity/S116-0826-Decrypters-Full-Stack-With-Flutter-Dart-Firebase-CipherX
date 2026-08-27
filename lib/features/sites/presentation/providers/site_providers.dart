@@ -43,6 +43,7 @@ final sitesStreamProvider = StreamProvider.autoDispose<List<Site>>((ref) {
   final repository = ref.watch(siteRepositoryProvider);
   return repository.watchSites(profile.organizationId);
 });
+
 class SiteController extends AutoDisposeAsyncNotifier<void> {
   @override
   void build() {}
