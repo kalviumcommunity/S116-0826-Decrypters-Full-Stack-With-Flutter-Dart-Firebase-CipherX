@@ -1,73 +1,49 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
+import 'shift_time.dart';
 
 enum ShiftStatus {
   scheduled,
-  inProgress,
+  active,
   completed,
-  missed,
   cancelled;
 
-  String toMapString() {
-    switch (this) {
-      case ShiftStatus.scheduled:
-        return 'scheduled';
-      case ShiftStatus.inProgress:
-        return 'in_progress';
-      case ShiftStatus.completed:
-        return 'completed';
-      case ShiftStatus.missed:
-        return 'missed';
-      case ShiftStatus.cancelled:
-        return 'cancelled';
-    }
-  }
+  String toMapString() => name;
 
   static ShiftStatus fromMapString(String value) {
     switch (value.toLowerCase()) {
       case 'scheduled':
         return ShiftStatus.scheduled;
-      case 'in_progress':
-      case 'inprogress':
-        return ShiftStatus.inProgress;
+      case 'active':
+        return ShiftStatus.active;
       case 'completed':
         return ShiftStatus.completed;
-      case 'missed':
-        return ShiftStatus.missed;
       case 'cancelled':
-      case 'canceled':
         return ShiftStatus.cancelled;
       default:
-        return ShiftStatus.scheduled;
+        throw FormatException('Invalid ShiftStatus value: $value');
     }
   }
 }
 
 @immutable
 class Shift {
-  final String id;
+  final String shiftId;
   final String organizationId;
-  final String siteId;
-  final String siteName;
   final String guardId;
-  final String guardName;
-  final String supervisorId;
-  final String shiftDate; // YYYY-MM-DD
-  final DateTime startTime;
-  final DateTime endTime;
+  final String siteId;
+  final DateTime date;
+  final ShiftTime startTime;
+  final ShiftTime endTime;
   final ShiftStatus status;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
   const Shift({
-    required this.id,
+    required this.shiftId,
     required this.organizationId,
-    required this.siteId,
-    required this.siteName,
     required this.guardId,
-    required this.guardName,
-    this.supervisorId = '',
-    required this.shiftDate,
+    required this.siteId,
+    required this.date,
     required this.startTime,
     required this.endTime,
     this.status = ShiftStatus.scheduled,
@@ -76,29 +52,23 @@ class Shift {
   });
 
   Shift copyWith({
-    String? id,
+    String? shiftId,
     String? organizationId,
-    String? siteId,
-    String? siteName,
     String? guardId,
-    String? guardName,
-    String? supervisorId,
-    String? shiftDate,
-    DateTime? startTime,
-    DateTime? endTime,
+    String? siteId,
+    DateTime? date,
+    ShiftTime? startTime,
+    ShiftTime? endTime,
     ShiftStatus? status,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return Shift(
-      id: id ?? this.id,
+      shiftId: shiftId ?? this.shiftId,
       organizationId: organizationId ?? this.organizationId,
-      siteId: siteId ?? this.siteId,
-      siteName: siteName ?? this.siteName,
       guardId: guardId ?? this.guardId,
-      guardName: guardName ?? this.guardName,
-      supervisorId: supervisorId ?? this.supervisorId,
-      shiftDate: shiftDate ?? this.shiftDate,
+      siteId: siteId ?? this.siteId,
+      date: date ?? this.date,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       status: status ?? this.status,
@@ -107,57 +77,82 @@ class Shift {
     );
   }
 
+  Shift activate({DateTime? updatedAt}) {
+    return copyWith(
+      status: ShiftStatus.active,
+      updatedAt: updatedAt ?? DateTime.now(),
+    );
+  }
+
+  Shift complete({DateTime? updatedAt}) {
+    return copyWith(
+      status: ShiftStatus.completed,
+      updatedAt: updatedAt ?? DateTime.now(),
+    );
+  }
+
+  Shift cancel({DateTime? updatedAt}) {
+    return copyWith(
+      status: ShiftStatus.cancelled,
+      updatedAt: updatedAt ?? DateTime.now(),
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'shiftId': id,
+      'shiftId': shiftId,
       'organizationId': organizationId,
-      'siteId': siteId,
-      'siteName': siteName,
       'guardId': guardId,
-      'guardName': guardName,
-      'supervisorId': supervisorId,
-      'shiftDate': shiftDate,
-      'startTime': Timestamp.fromDate(startTime),
-      'endTime': Timestamp.fromDate(endTime),
+      'siteId': siteId,
+      'date': date.toIso8601String().split('T')[0],
+      'startTime': startTime.toMapString(),
+      'endTime': endTime.toMapString(),
       'status': status.toMapString(),
-      if (createdAt != null) 'createdAt': Timestamp.fromDate(createdAt!),
-      if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
     };
   }
 
   factory Shift.fromMap(Map<String, dynamic> map) {
-    DateTime parseDate(dynamic val, DateTime fallback) {
-      if (val == null) return fallback;
-      if (val is Timestamp) return val.toDate();
+    DateTime parseDate(dynamic val) {
       if (val is DateTime) return val;
-      if (val is String) return DateTime.tryParse(val) ?? fallback;
-      return fallback;
+      if (val is String) {
+        final parsed = DateTime.tryParse(val);
+        if (parsed != null) return parsed;
+      }
+      try {
+        return (val as dynamic).toDate();
+      } catch (_) {}
+      return DateTime.now();
     }
 
     DateTime? parseNullableDate(dynamic val) {
       if (val == null) return null;
-      if (val is Timestamp) return val.toDate();
       if (val is DateTime) return val;
       if (val is String) return DateTime.tryParse(val);
-      return null;
+      try {
+        return (val as dynamic).toDate();
+      } catch (_) {
+        return null;
+      }
     }
 
-    final now = DateTime.now();
-    final statusStr = map['status'] as String? ?? 'scheduled';
+    final rawDate = parseDate(map['date']);
+    final dateOnly = DateTime.utc(rawDate.year, rawDate.month, rawDate.day);
+
+    final startTimeStr = map['startTime'] as String? ?? '00:00';
+    final endTimeStr = map['endTime'] as String? ?? '00:00';
 
     return Shift(
-      id: map['id'] as String? ?? map['shiftId'] as String? ?? '',
+      shiftId: map['shiftId'] as String? ?? map['id'] as String? ?? '',
       organizationId: map['organizationId'] as String? ?? '',
-      siteId: map['siteId'] as String? ?? '',
-      siteName: map['siteName'] as String? ?? '',
       guardId: map['guardId'] as String? ?? '',
-      guardName: map['guardName'] as String? ?? '',
-      supervisorId: map['supervisorId'] as String? ?? '',
-      shiftDate: map['shiftDate'] as String? ?? '',
-      startTime: parseDate(map['startTime'], now),
-      endTime: parseDate(map['endTime'], now.add(const Duration(hours: 8))),
-      status: ShiftStatus.fromMapString(statusStr),
+      siteId: map['siteId'] as String? ?? '',
+      date: dateOnly,
+      startTime: ShiftTime.fromMapString(startTimeStr),
+      endTime: ShiftTime.fromMapString(endTimeStr),
+      status:
+          ShiftStatus.fromMapString(map['status'] as String? ?? 'scheduled'),
       createdAt: parseNullableDate(map['createdAt']),
       updatedAt: parseNullableDate(map['updatedAt']),
     );
@@ -167,14 +162,13 @@ class Shift {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is Shift &&
-        other.id == id &&
+        other.shiftId == shiftId &&
         other.organizationId == organizationId &&
-        other.siteId == siteId &&
-        other.siteName == siteName &&
         other.guardId == guardId &&
-        other.guardName == guardName &&
-        other.supervisorId == supervisorId &&
-        other.shiftDate == shiftDate &&
+        other.siteId == siteId &&
+        other.date.year == date.year &&
+        other.date.month == date.month &&
+        other.date.day == date.day &&
         other.startTime == startTime &&
         other.endTime == endTime &&
         other.status == status &&
@@ -185,14 +179,13 @@ class Shift {
   @override
   int get hashCode {
     return Object.hash(
-      id,
+      shiftId,
       organizationId,
-      siteId,
-      siteName,
       guardId,
-      guardName,
-      supervisorId,
-      shiftDate,
+      siteId,
+      date.year,
+      date.month,
+      date.day,
       startTime,
       endTime,
       status,
