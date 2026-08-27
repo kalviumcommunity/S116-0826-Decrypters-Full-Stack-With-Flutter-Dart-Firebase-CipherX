@@ -473,9 +473,8 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
         ? '${_selectedDate!.year.toString().padLeft(4, '0')}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}'
         : 'Not selected';
 
-    final startText = _startTimeOfDay != null
-        ? _startTimeOfDay!.format(context)
-        : 'Not set';
+    final startText =
+        _startTimeOfDay != null ? _startTimeOfDay!.format(context) : 'Not set';
     final endText =
         _endTimeOfDay != null ? _endTimeOfDay!.format(context) : 'Not set';
 

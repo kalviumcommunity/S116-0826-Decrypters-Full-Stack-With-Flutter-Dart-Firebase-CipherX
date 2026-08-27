@@ -29,17 +29,20 @@ class FakeShiftRepository implements ShiftRepository {
   }
 
   @override
-  Future<Shift?> getShift({required String organizationId, required String shiftId}) async {
+  Future<Shift?> getShift(
+      {required String organizationId, required String shiftId}) async {
     return createdShift;
   }
 
   @override
-  Future<List<Shift>> getShifts(String organizationId, {String? siteId, String? guardId, String? shiftDate}) async {
+  Future<List<Shift>> getShifts(String organizationId,
+      {String? siteId, String? guardId, String? shiftDate}) async {
     return createdShift != null ? [createdShift!] : [];
   }
 
   @override
-  Stream<List<Shift>> watchShifts(String organizationId, {String? siteId, String? guardId, String? shiftDate}) {
+  Stream<List<Shift>> watchShifts(String organizationId,
+      {String? siteId, String? guardId, String? shiftDate}) {
     return Stream.value(createdShift != null ? [createdShift!] : []);
   }
 }
@@ -79,8 +82,10 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            currentUserProfileProvider.overrideWith((ref) => const AsyncData(testProfile)),
-            guardsStreamProvider.overrideWith((ref) => Stream.value([testGuard])),
+            currentUserProfileProvider
+                .overrideWith((ref) => const AsyncData(testProfile)),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.value([testGuard])),
             sitesStreamProvider.overrideWith((ref) => Stream.value([testSite])),
           ],
           child: const MaterialApp(home: ShiftCreateScreen()),
@@ -98,12 +103,15 @@ void main() {
       expect(find.byKey(const Key('create_shift_button')), findsOneWidget);
     });
 
-    testWidgets('Shows validation errors when submitting unselected form', (tester) async {
+    testWidgets('Shows validation errors when submitting unselected form',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            currentUserProfileProvider.overrideWith((ref) => const AsyncData(testProfile)),
-            guardsStreamProvider.overrideWith((ref) => Stream.value([testGuard])),
+            currentUserProfileProvider
+                .overrideWith((ref) => const AsyncData(testProfile)),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.value([testGuard])),
             sitesStreamProvider.overrideWith((ref) => Stream.value([testSite])),
           ],
           child: const MaterialApp(home: ShiftCreateScreen()),
@@ -124,11 +132,13 @@ void main() {
       expect(find.text('Please select an end time.'), findsOneWidget);
     });
 
-    testWidgets('Displays empty state message when no active guards available', (tester) async {
+    testWidgets('Displays empty state message when no active guards available',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            currentUserProfileProvider.overrideWith((ref) => const AsyncData(testProfile)),
+            currentUserProfileProvider
+                .overrideWith((ref) => const AsyncData(testProfile)),
             guardsStreamProvider.overrideWith((ref) => Stream.value(<Guard>[])),
             sitesStreamProvider.overrideWith((ref) => Stream.value([testSite])),
           ],
@@ -138,15 +148,19 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('No active guards available.'), findsOneWidget);
+      expect(
+          find.textContaining('No active guards available.'), findsOneWidget);
     });
 
-    testWidgets('Displays empty state message when no active sites available', (tester) async {
+    testWidgets('Displays empty state message when no active sites available',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            currentUserProfileProvider.overrideWith((ref) => const AsyncData(testProfile)),
-            guardsStreamProvider.overrideWith((ref) => Stream.value([testGuard])),
+            currentUserProfileProvider
+                .overrideWith((ref) => const AsyncData(testProfile)),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.value([testGuard])),
             sitesStreamProvider.overrideWith((ref) => Stream.value(<Site>[])),
           ],
           child: const MaterialApp(home: ShiftCreateScreen()),
@@ -158,12 +172,15 @@ void main() {
       expect(find.textContaining('No active sites available.'), findsOneWidget);
     });
 
-    testWidgets('Displays error UI and retry button when guards stream fails', (tester) async {
+    testWidgets('Displays error UI and retry button when guards stream fails',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            currentUserProfileProvider.overrideWith((ref) => const AsyncData(testProfile)),
-            guardsStreamProvider.overrideWith((ref) => Stream.error('Network Error')),
+            currentUserProfileProvider
+                .overrideWith((ref) => const AsyncData(testProfile)),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.error('Network Error')),
             sitesStreamProvider.overrideWith((ref) => Stream.value([testSite])),
           ],
           child: const MaterialApp(home: ShiftCreateScreen()),
@@ -176,13 +193,17 @@ void main() {
       expect(find.text('Retry'), findsOneWidget);
     });
 
-    testWidgets('Displays error UI and retry button when sites stream fails', (tester) async {
+    testWidgets('Displays error UI and retry button when sites stream fails',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            currentUserProfileProvider.overrideWith((ref) => const AsyncData(testProfile)),
-            guardsStreamProvider.overrideWith((ref) => Stream.value([testGuard])),
-            sitesStreamProvider.overrideWith((ref) => Stream.error('Network Error')),
+            currentUserProfileProvider
+                .overrideWith((ref) => const AsyncData(testProfile)),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.value([testGuard])),
+            sitesStreamProvider
+                .overrideWith((ref) => Stream.error('Network Error')),
           ],
           child: const MaterialApp(home: ShiftCreateScreen()),
         ),
@@ -194,12 +215,16 @@ void main() {
       expect(find.text('Retry'), findsOneWidget);
     });
 
-    testWidgets('Selecting guard and site updates form state and displays summary card', (tester) async {
+    testWidgets(
+        'Selecting guard and site updates form state and displays summary card',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            currentUserProfileProvider.overrideWith((ref) => const AsyncData(testProfile)),
-            guardsStreamProvider.overrideWith((ref) => Stream.value([testGuard])),
+            currentUserProfileProvider
+                .overrideWith((ref) => const AsyncData(testProfile)),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.value([testGuard])),
             sitesStreamProvider.overrideWith((ref) => Stream.value([testSite])),
           ],
           child: const MaterialApp(home: ShiftCreateScreen()),
@@ -220,7 +245,8 @@ void main() {
       await tester.tap(siteDropdown);
       await tester.pumpAndSettle();
 
-      final siteOption = find.text('Cyber Gateway Tech Park — 123 Cyber Way').last;
+      final siteOption =
+          find.text('Cyber Gateway Tech Park — 123 Cyber Way').last;
       await tester.tap(siteOption);
       await tester.pumpAndSettle();
 
