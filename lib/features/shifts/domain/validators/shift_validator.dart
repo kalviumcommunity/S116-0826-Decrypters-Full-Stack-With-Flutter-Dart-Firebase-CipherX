@@ -1,74 +1,102 @@
+import '../entities/shift.dart';
 import '../failures/shift_failure.dart';
 
 class ShiftValidator {
-  static String? validateGuard(String? guardId) {
-    if (guardId == null || guardId.trim().isEmpty) {
-      return 'Please select a guard.';
+  static String? validateShiftId(String shiftId) {
+    if (shiftId.trim().isEmpty) {
+      return 'Shift ID cannot be empty.';
     }
     return null;
   }
 
-  static String? validateSite(String? siteId) {
-    if (siteId == null || siteId.trim().isEmpty) {
-      return 'Please select a site.';
+  static String? validateOrganizationId(String organizationId) {
+    if (organizationId.trim().isEmpty) {
+      return 'Organization ID cannot be empty.';
     }
     return null;
   }
 
-  static String? validateDate(DateTime? date) {
-    if (date == null) {
-      return 'Please select a shift date.';
+  static String? validateGuardId(String guardId) {
+    if (guardId.trim().isEmpty) {
+      return 'Guard ID cannot be empty.';
     }
     return null;
   }
 
-  static String? validateStartTime(DateTime? startTime) {
-    if (startTime == null) {
-      return 'Please select a start time.';
+  static String? validateSiteId(String siteId) {
+    if (siteId.trim().isEmpty) {
+      return 'Site ID cannot be empty.';
     }
     return null;
   }
 
-  static String? validateEndTime(DateTime? endTime) {
-    if (endTime == null) {
-      return 'Please select an end time.';
+  static String? validateTimeRange(Shift shift) {
+    if (!shift.startTime.isBefore(shift.endTime)) {
+      return 'Start time must be strictly before end time for same-day shifts.';
     }
     return null;
   }
 
-  static String? validateTimeOrdering(DateTime? startTime, DateTime? endTime) {
-    if (startTime == null || endTime == null) {
-      return null; // Checked by presence validators
-    }
-    if (!endTime.isAfter(startTime)) {
-      return 'End time must be after start time.';
-    }
-    return null;
-  }
-
-  static void validate({
-    required String? guardId,
-    required String? siteId,
-    required DateTime? date,
-    required DateTime? startTime,
-    required DateTime? endTime,
+  static String? validateStatusTransition({
+    required ShiftStatus from,
+    required ShiftStatus to,
   }) {
-    final guardErr = validateGuard(guardId);
-    if (guardErr != null) throw ShiftValidationFailure(guardErr);
+    if (from == to) return null;
 
-    final siteErr = validateSite(siteId);
-    if (siteErr != null) throw ShiftValidationFailure(siteErr);
+    switch (from) {
+      case ShiftStatus.scheduled:
+        if (to == ShiftStatus.active || to == ShiftStatus.cancelled) {
+          return null;
+        }
+        return 'Cannot transition shift from SCHEDULED to ${to.name.toUpperCase()}.';
 
-    final dateErr = validateDate(date);
-    if (dateErr != null) throw ShiftValidationFailure(dateErr);
+      case ShiftStatus.active:
+        if (to == ShiftStatus.completed || to == ShiftStatus.cancelled) {
+          return null;
+        }
+        return 'Cannot transition shift from ACTIVE to ${to.name.toUpperCase()}.';
 
-    final startErr = validateStartTime(startTime);
-    if (startErr != null) throw ShiftValidationFailure(startErr);
+      case ShiftStatus.completed:
+        return 'Cannot transition shift from COMPLETED to any other status.';
 
-    final endErr = validateEndTime(endTime);
-    if (endErr != null) throw ShiftValidationFailure(endErr);
+      case ShiftStatus.cancelled:
+        return 'Cannot transition shift from CANCELLED to any other status.';
+    }
+  }
 
-    final orderErr = validateTimeOrdering(startTime, endTime);
-    if (orderErr != null) throw ShiftValidationFailure(orderErr);
+  /// Normalizes shift IDs and calendar date representation.
+  static Shift normalize(Shift shift) {
+    final d = shift.date;
+    final normalizedDate = DateTime.utc(d.year, d.month, d.day);
+
+    return shift.copyWith(
+      shiftId: shift.shiftId.trim(),
+      organizationId: shift.organizationId.trim(),
+      guardId: shift.guardId.trim(),
+      siteId: shift.siteId.trim(),
+      date: normalizedDate,
+    );
+  }
+
+  /// Validates all domain invariants of [shift].
+  /// Throws a concrete [ShiftFailure] if invalid.
+  /// Returns normalized [Shift] if valid.
+  static Shift validate(Shift shift) {
+    final shiftIdErr = validateShiftId(shift.shiftId);
+    if (shiftIdErr != null) throw InvalidShiftIdFailure(shiftIdErr);
+
+    final orgErr = validateOrganizationId(shift.organizationId);
+    if (orgErr != null) throw InvalidOrganizationIdFailure(orgErr);
+
+    final guardErr = validateGuardId(shift.guardId);
+    if (guardErr != null) throw InvalidGuardIdFailure(guardErr);
+
+    final siteErr = validateSiteId(shift.siteId);
+    if (siteErr != null) throw InvalidSiteIdFailure(siteErr);
+
+    final timeRangeErr = validateTimeRange(shift);
+    if (timeRangeErr != null) throw InvalidTimeRangeFailure(timeRangeErr);
+
+    return normalize(shift);
   }
 }
