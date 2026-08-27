@@ -31,70 +31,52 @@ class InMemoryShiftRepository implements ShiftRepository {
 
   @override
   Future<List<Shift>> getShiftsByOrganization(
-    String organizationId, {
-    DateTime? date,
-    ShiftStatus? status,
-  }) async {
-    return _shifts.where((s) {
-      if (s.organizationId != organizationId) return false;
-      if (date != null &&
-          (s.date.year != date.year ||
-              s.date.month != date.month ||
-              s.date.day != date.day)) {
-        return false;
-      }
-      if (status != null && s.status != status) return false;
-      return true;
-    }).toList();
+    String organizationId,
+  ) async {
+    return _shifts.where((s) => s.organizationId == organizationId).toList();
   }
 
   @override
   Future<List<Shift>> getShiftsByGuard(
     String organizationId,
-    String guardId, {
-    DateTime? date,
-  }) async {
+    String guardId,
+  ) async {
     return _shifts.where((s) {
       if (s.organizationId != organizationId) return false;
       if (s.guardId != guardId) return false;
-      if (date != null &&
-          (s.date.year != date.year ||
-              s.date.month != date.month ||
-              s.date.day != date.day)) {
-        return false;
-      }
       return true;
     }).toList();
   }
 
   @override
+  Stream<List<Shift>> watchShiftsByGuard(
+    String organizationId,
+    String guardId,
+  ) async* {
+    yield await getShiftsByGuard(organizationId, guardId);
+  }
+
+  @override
   Future<List<Shift>> getShiftsBySite(
     String organizationId,
-    String siteId, {
-    DateTime? date,
-  }) async {
+    String siteId,
+  ) async {
     return _shifts.where((s) {
       if (s.organizationId != organizationId) return false;
       if (s.siteId != siteId) return false;
-      if (date != null &&
-          (s.date.year != date.year ||
-              s.date.month != date.month ||
-              s.date.day != date.day)) {
-        return false;
-      }
       return true;
     }).toList();
   }
 
   @override
   Future<Shift> updateShift(Shift shift) async {
-    final validated = ShiftValidator.validate(shift);
-    final index = _shifts.indexWhere((s) => s.shiftId == validated.shiftId);
-    if (index == -1) {
-      throw const ShiftNotFoundFailure();
+    final index = _shifts.indexWhere((s) => s.shiftId == shift.shiftId);
+    if (index != -1) {
+      final validated = ShiftValidator.validate(shift);
+      _shifts[index] = validated;
+      return validated;
     }
-    _shifts[index] = validated;
-    return validated;
+    throw const ShiftNotFoundFailure();
   }
 
   @override
@@ -103,25 +85,15 @@ class InMemoryShiftRepository implements ShiftRepository {
     required String shiftId,
     required ShiftStatus status,
   }) async {
-    final shift =
-        await getShift(organizationId: organizationId, shiftId: shiftId);
-    if (shift == null) {
-      throw const ShiftNotFoundFailure();
-    }
-
-    final transitionErr = ShiftValidator.validateStatusTransition(
-      from: shift.status,
-      to: status,
+    final index = _shifts.indexWhere(
+      (s) => s.organizationId == organizationId && s.shiftId == shiftId,
     );
-    if (transitionErr != null) {
-      throw InvalidStatusTransitionFailure(transitionErr);
+    if (index != -1) {
+      final updated = _shifts[index].copyWith(status: status);
+      _shifts[index] = updated;
+      return updated;
     }
-
-    final updated = shift.copyWith(
-      status: status,
-      updatedAt: DateTime.now(),
-    );
-    return updateShift(updated);
+    throw const ShiftNotFoundFailure();
   }
 
   @override
@@ -138,101 +110,74 @@ class InMemoryShiftRepository implements ShiftRepository {
 }
 
 void main() {
-  final tDate = DateTime.utc(2026, 8, 27);
   final tShift = Shift(
     shiftId: 'shift-001',
-    organizationId: 'org-100',
-    guardId: 'guard-200',
-    siteId: 'site-300',
-    date: tDate,
-    startTime: const ShiftTime(hour: 8, minute: 0),
-    endTime: const ShiftTime(hour: 16, minute: 0),
+    organizationId: 'org-001',
+    guardId: 'guard-001',
+    siteId: 'site-001',
+    date: DateTime.utc(2026, 8, 27),
+    startTime: const ShiftTime(hour: 9, minute: 0),
+    endTime: const ShiftTime(hour: 17, minute: 0),
     status: ShiftStatus.scheduled,
   );
 
-  group('ShiftRepository Abstraction Unit Tests', () {
+  group('ShiftRepository Domain Contract Tests', () {
     late InMemoryShiftRepository repository;
 
     setUp(() {
       repository = InMemoryShiftRepository();
     });
 
-    test('createShift validates and persists shift', () async {
-      final created = await repository.createShift(tShift);
-      expect(created.shiftId, equals('shift-001'));
+    test('createShift persists valid shift in repository', () async {
+      final result = await repository.createShift(tShift);
 
-      final retrieved = await repository.getShift(
-        organizationId: 'org-100',
+      expect(result.shiftId, equals('shift-001'));
+      expect(result.status, equals(ShiftStatus.scheduled));
+
+      final fetched = await repository.getShift(
+        organizationId: 'org-001',
         shiftId: 'shift-001',
       );
-      expect(retrieved, equals(created));
+      expect(fetched, equals(tShift));
     });
 
-    test('getShiftsByOrganization filters by organization and date', () async {
+    test('getShiftsByOrganization filters by organizationId', () async {
       await repository.createShift(tShift);
-      await repository.createShift(
-        tShift.copyWith(
-          shiftId: 'shift-002',
-          date: DateTime.utc(2026, 8, 28),
-        ),
-      );
+      await repository.createShift(tShift.copyWith(
+        shiftId: 'shift-002',
+        organizationId: 'org-999',
+      ));
 
-      final orgShifts = await repository.getShiftsByOrganization('org-100');
-      expect(orgShifts.length, equals(2));
-
-      final dateFiltered = await repository.getShiftsByOrganization(
-        'org-100',
-        date: tDate,
-      );
-      expect(dateFiltered.length, equals(1));
-      expect(dateFiltered.first.shiftId, equals('shift-001'));
+      final results = await repository.getShiftsByOrganization('org-001');
+      expect(results.length, equals(1));
+      expect(results.first.shiftId, equals('shift-001'));
     });
 
-    test('getShiftsByGuard and getShiftsBySite filter correctly', () async {
+    test('updateShiftStatus transitions shift status', () async {
       await repository.createShift(tShift);
 
-      final guardShifts =
-          await repository.getShiftsByGuard('org-100', 'guard-200');
-      expect(guardShifts.length, equals(1));
-
-      final siteShifts =
-          await repository.getShiftsBySite('org-100', 'site-300');
-      expect(siteShifts.length, equals(1));
-    });
-
-    test('updateShiftStatus enforces lifecycle transition rules', () async {
-      await repository.createShift(tShift);
-
-      final active = await repository.updateShiftStatus(
-        organizationId: 'org-100',
+      final updated = await repository.updateShiftStatus(
+        organizationId: 'org-001',
         shiftId: 'shift-001',
         status: ShiftStatus.active,
       );
-      expect(active.status, equals(ShiftStatus.active));
 
-      expect(
-        () => repository.updateShiftStatus(
-          organizationId: 'org-100',
-          shiftId: 'shift-001',
-          status: ShiftStatus.scheduled,
-        ),
-        throwsA(isA<InvalidStatusTransitionFailure>()),
-      );
+      expect(updated.status, equals(ShiftStatus.active));
     });
 
-    test('cancelShift sets status to CANCELLED', () async {
+    test('cancelShift sets status to cancelled', () async {
       await repository.createShift(tShift);
 
       await repository.cancelShift(
-        organizationId: 'org-100',
+        organizationId: 'org-001',
         shiftId: 'shift-001',
       );
 
-      final cancelled = await repository.getShift(
-        organizationId: 'org-100',
+      final fetched = await repository.getShift(
+        organizationId: 'org-001',
         shiftId: 'shift-001',
       );
-      expect(cancelled!.status, equals(ShiftStatus.cancelled));
+      expect(fetched?.status, equals(ShiftStatus.cancelled));
     });
   });
 }

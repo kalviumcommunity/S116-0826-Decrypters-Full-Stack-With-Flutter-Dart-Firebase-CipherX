@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/shift.dart';
 
 class FirebaseShiftDataSource {
@@ -7,106 +8,90 @@ class FirebaseShiftDataSource {
   FirebaseShiftDataSource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  CollectionReference<Map<String, dynamic>> get _shiftsCollection =>
-      _firestore.collection('shifts');
+  CollectionReference<Map<String, dynamic>> _shiftsCollection(
+    String organizationId,
+  ) {
+    return _firestore
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('shifts');
+  }
 
   Future<Shift> createShift(Shift shift) async {
+    final collection = _shiftsCollection(shift.organizationId);
     final docRef = shift.shiftId.trim().isNotEmpty
-        ? _shiftsCollection.doc(shift.shiftId.trim())
-        : _shiftsCollection.doc();
+        ? collection.doc(shift.shiftId.trim())
+        : collection.doc();
 
     final assignedId = docRef.id;
     final now = DateTime.now();
-    final preparedShift = shift.copyWith(
+    final prepared = shift.copyWith(
       shiftId: assignedId,
       createdAt: shift.createdAt ?? now,
       updatedAt: shift.updatedAt ?? now,
     );
 
-    final data = preparedShift.toMap();
-    await docRef.set(data);
-    final snapshot = await docRef.get();
-    if (!snapshot.exists || snapshot.data() == null) {
-      return preparedShift;
-    }
-    return Shift.fromMap(snapshot.data()!);
+    await docRef.set(prepared.toMap());
+    return prepared;
   }
 
   Future<Shift?> getShift({
     required String organizationId,
     required String shiftId,
   }) async {
-    final doc = await _shiftsCollection.doc(shiftId).get();
-    if (!doc.exists || doc.data() == null) {
-      return null;
-    }
-    final shift = Shift.fromMap(doc.data()!);
-    if (shift.organizationId != organizationId) {
-      return null;
-    }
-    return shift;
+    final doc = await _shiftsCollection(organizationId).doc(shiftId).get();
+    if (!doc.exists || doc.data() == null) return null;
+    return Shift.fromMap(doc.data()!, doc.id);
   }
 
-  Future<List<Shift>> getShiftsByOrganization(
-    String organizationId, {
-    DateTime? date,
-    ShiftStatus? status,
-  }) async {
-    Query<Map<String, dynamic>> query =
-        _shiftsCollection.where('organizationId', isEqualTo: organizationId);
-
-    if (date != null) {
-      final dateStr = date.toIso8601String().split('T')[0];
-      query = query.where('date', isEqualTo: dateStr);
-    }
-    if (status != null) {
-      query = query.where('status', isEqualTo: status.toMapString());
-    }
-
-    final snapshot = await query.get();
-    return snapshot.docs.map((doc) => Shift.fromMap(doc.data())).toList();
+  Future<List<Shift>> getShiftsByOrganization(String organizationId) async {
+    final snapshot = await _shiftsCollection(organizationId).get();
+    return snapshot.docs
+        .map((doc) => Shift.fromMap(doc.data(), doc.id))
+        .toList();
   }
 
   Future<List<Shift>> getShiftsByGuard(
     String organizationId,
-    String guardId, {
-    DateTime? date,
-  }) async {
-    Query<Map<String, dynamic>> query = _shiftsCollection
-        .where('organizationId', isEqualTo: organizationId)
-        .where('guardId', isEqualTo: guardId);
+    String guardId,
+  ) async {
+    final snapshot = await _shiftsCollection(organizationId)
+        .where('guardId', isEqualTo: guardId)
+        .get();
+    return snapshot.docs
+        .map((doc) => Shift.fromMap(doc.data(), doc.id))
+        .toList();
+  }
 
-    if (date != null) {
-      final dateStr = date.toIso8601String().split('T')[0];
-      query = query.where('date', isEqualTo: dateStr);
-    }
-
-    final snapshot = await query.get();
-    return snapshot.docs.map((doc) => Shift.fromMap(doc.data())).toList();
+  Stream<List<Shift>> watchShiftsByGuard(
+    String organizationId,
+    String guardId,
+  ) {
+    return _shiftsCollection(organizationId)
+        .where('guardId', isEqualTo: guardId)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => Shift.fromMap(doc.data(), doc.id))
+          .toList();
+    });
   }
 
   Future<List<Shift>> getShiftsBySite(
     String organizationId,
-    String siteId, {
-    DateTime? date,
-  }) async {
-    Query<Map<String, dynamic>> query = _shiftsCollection
-        .where('organizationId', isEqualTo: organizationId)
-        .where('siteId', isEqualTo: siteId);
-
-    if (date != null) {
-      final dateStr = date.toIso8601String().split('T')[0];
-      query = query.where('date', isEqualTo: dateStr);
-    }
-
-    final snapshot = await query.get();
-    return snapshot.docs.map((doc) => Shift.fromMap(doc.data())).toList();
+    String siteId,
+  ) async {
+    final snapshot = await _shiftsCollection(organizationId)
+        .where('siteId', isEqualTo: siteId)
+        .get();
+    return snapshot.docs
+        .map((doc) => Shift.fromMap(doc.data(), doc.id))
+        .toList();
   }
 
   Future<Shift> updateShift(Shift shift) async {
-    final docRef = _shiftsCollection.doc(shift.shiftId);
-    final now = DateTime.now();
-    final updated = shift.copyWith(updatedAt: now);
+    final docRef = _shiftsCollection(shift.organizationId).doc(shift.shiftId);
+    final updated = shift.copyWith(updatedAt: DateTime.now());
     await docRef.update(updated.toMap());
     return updated;
   }
@@ -116,21 +101,24 @@ class FirebaseShiftDataSource {
     required String shiftId,
     required ShiftStatus status,
   }) async {
-    final shift = await getShift(
+    final docRef = _shiftsCollection(organizationId).doc(shiftId);
+    final now = DateTime.now();
+    await docRef.update({
+      'status': status.toMapString(),
+      'updatedAt': Timestamp.fromDate(now),
+    });
+    final doc = await docRef.get();
+    return Shift.fromMap(doc.data()!, doc.id);
+  }
+
+  Future<void> cancelShift({
+    required String organizationId,
+    required String shiftId,
+  }) async {
+    await updateShiftStatus(
       organizationId: organizationId,
       shiftId: shiftId,
+      status: ShiftStatus.cancelled,
     );
-    if (shift == null) {
-      throw Exception('Shift not found');
-    }
-    final updated = shift.copyWith(
-      status: status,
-      updatedAt: DateTime.now(),
-    );
-    await _shiftsCollection.doc(shiftId).update({
-      'status': status.toMapString(),
-      'updatedAt': DateTime.now().toIso8601String()
-    });
-    return updated;
   }
 }

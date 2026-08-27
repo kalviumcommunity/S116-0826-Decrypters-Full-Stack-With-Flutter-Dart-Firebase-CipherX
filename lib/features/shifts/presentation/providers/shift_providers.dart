@@ -7,9 +7,6 @@ import '../../domain/entities/shift.dart';
 import '../../domain/repositories/shift_repository.dart';
 import '../../domain/validators/shift_validator.dart';
 
-import '../../../guards/presentation/providers/guard_providers.dart';
-import '../../../sites/presentation/providers/site_providers.dart';
-
 final firebaseShiftDataSourceProvider = Provider<FirebaseShiftDataSource>((
   ref,
 ) {
@@ -19,13 +16,7 @@ final firebaseShiftDataSourceProvider = Provider<FirebaseShiftDataSource>((
 
 final shiftRepositoryProvider = Provider<ShiftRepository>((ref) {
   final dataSource = ref.watch(firebaseShiftDataSourceProvider);
-  final guardRepository = ref.watch(guardRepositoryProvider);
-  final siteRepository = ref.watch(siteRepositoryProvider);
-  return ShiftRepositoryImpl(
-    dataSource: dataSource,
-    guardRepository: guardRepository,
-    siteRepository: siteRepository,
-  );
+  return ShiftRepositoryImpl(dataSource: dataSource);
 });
 
 final shiftsStreamProvider =

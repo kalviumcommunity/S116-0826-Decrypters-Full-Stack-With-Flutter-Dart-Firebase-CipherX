@@ -14,48 +14,86 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeShiftRepository implements ShiftRepository {
-  final bool shouldFail;
-  final ShiftFailure? failure;
-  Shift? createdShift;
+  final List<Shift> shifts = [];
+  bool shouldFail = false;
+  ShiftFailure? failure;
 
   FakeShiftRepository({this.shouldFail = false, this.failure});
 
   @override
   Future<Shift> createShift(Shift shift) async {
     if (shouldFail) {
-      throw failure ?? const ShiftValidationFailure('Database error');
+      throw failure ?? const UnknownShiftFailure();
     }
-    createdShift = shift;
-    return shift;
+    final created = shift.copyWith(
+      shiftId: shift.shiftId.isEmpty ? 'shift-101' : shift.shiftId,
+    );
+    shifts.add(created);
+    return created;
   }
 
   @override
-  Future<Shift?> getShift(
-      {required String organizationId, required String shiftId}) async {
-    return createdShift;
+  Future<Shift?> getShift({
+    required String organizationId,
+    required String shiftId,
+  }) async {
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
+    try {
+      return shifts.firstWhere(
+        (s) => s.organizationId == organizationId && s.shiftId == shiftId,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
-  Future<List<Shift>> getShiftsByOrganization(String organizationId,
-      {DateTime? date, ShiftStatus? status}) async {
-    return createdShift != null ? [createdShift!] : [];
+  Future<List<Shift>> getShiftsByOrganization(String organizationId) async {
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
+    return shifts.where((s) => s.organizationId == organizationId).toList();
   }
 
   @override
-  Future<List<Shift>> getShiftsByGuard(String organizationId, String guardId,
-      {DateTime? date}) async {
-    return createdShift != null ? [createdShift!] : [];
+  Future<List<Shift>> getShiftsByGuard(
+    String organizationId,
+    String guardId,
+  ) async {
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
+    return shifts
+        .where(
+            (s) => s.organizationId == organizationId && s.guardId == guardId)
+        .toList();
   }
 
   @override
-  Future<List<Shift>> getShiftsBySite(String organizationId, String siteId,
-      {DateTime? date}) async {
-    return createdShift != null ? [createdShift!] : [];
+  Stream<List<Shift>> watchShiftsByGuard(
+    String organizationId,
+    String guardId,
+  ) async* {
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
+    yield await getShiftsByGuard(organizationId, guardId);
+  }
+
+  @override
+  Future<List<Shift>> getShiftsBySite(
+    String organizationId,
+    String siteId,
+  ) async {
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
+    return shifts
+        .where((s) => s.organizationId == organizationId && s.siteId == siteId)
+        .toList();
   }
 
   @override
   Future<Shift> updateShift(Shift shift) async {
-    createdShift = shift;
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
+    final index = shifts.indexWhere((s) => s.shiftId == shift.shiftId);
+    if (index != -1) {
+      shifts[index] = shift;
+    } else {
+      shifts.add(shift);
+    }
     return shift;
   }
 
@@ -65,9 +103,12 @@ class FakeShiftRepository implements ShiftRepository {
     required String shiftId,
     required ShiftStatus status,
   }) async {
-    if (createdShift != null) {
-      createdShift = createdShift!.copyWith(status: status);
-      return createdShift!;
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
+    final index = shifts.indexWhere((s) => s.shiftId == shiftId);
+    if (index != -1) {
+      final updated = shifts[index].copyWith(status: status);
+      shifts[index] = updated;
+      return updated;
     }
     throw const ShiftNotFoundFailure();
   }
@@ -77,6 +118,7 @@ class FakeShiftRepository implements ShiftRepository {
     required String organizationId,
     required String shiftId,
   }) async {
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
     await updateShiftStatus(
       organizationId: organizationId,
       shiftId: shiftId,

@@ -26,7 +26,7 @@ void main() {
       expect(map['organizationId'], equals('org-decrypters'));
       expect(map['siteId'], equals('site-alpha'));
       expect(map['guardId'], equals('guard-77'));
-      expect(map['date'], equals('2026-08-27'));
+      expect(map['date'], equals(now.toIso8601String()));
       expect(map['startTime'], equals('09:00'));
       expect(map['endTime'], equals('17:00'));
       expect(map['status'], equals('scheduled'));

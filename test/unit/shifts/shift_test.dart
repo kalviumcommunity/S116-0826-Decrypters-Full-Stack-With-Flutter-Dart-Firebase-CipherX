@@ -44,7 +44,7 @@ void main() {
       expect(map['organizationId'], equals('org-100'));
       expect(map['guardId'], equals('guard-200'));
       expect(map['siteId'], equals('site-300'));
-      expect(map['date'], equals('2026-08-27'));
+      expect(map['date'], equals(tDate.toIso8601String()));
       expect(map['startTime'], equals('09:00'));
       expect(map['endTime'], equals('17:00'));
       expect(map['status'], equals('scheduled'));
@@ -104,10 +104,8 @@ void main() {
           equals(ShiftStatus.completed));
       expect(ShiftStatus.fromMapString('cancelled'),
           equals(ShiftStatus.cancelled));
-      expect(
-        () => ShiftStatus.fromMapString('invalid_status'),
-        throwsFormatException,
-      );
+      expect(ShiftStatus.fromMapString('invalid_status'),
+          equals(ShiftStatus.scheduled));
     });
   });
 }

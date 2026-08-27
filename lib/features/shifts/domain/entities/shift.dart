@@ -14,13 +14,15 @@ enum ShiftStatus {
       case 'scheduled':
         return ShiftStatus.scheduled;
       case 'active':
+      case 'in_progress':
+      case 'inprogress':
         return ShiftStatus.active;
       case 'completed':
         return ShiftStatus.completed;
       case 'cancelled':
         return ShiftStatus.cancelled;
       default:
-        throw FormatException('Invalid ShiftStatus value: $value');
+        return ShiftStatus.scheduled;
     }
   }
 }
@@ -51,6 +53,27 @@ class Shift {
     this.updatedAt,
   });
 
+  Shift activate() {
+    return copyWith(
+      status: ShiftStatus.active,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Shift complete() {
+    return copyWith(
+      status: ShiftStatus.completed,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Shift cancel() {
+    return copyWith(
+      status: ShiftStatus.cancelled,
+      updatedAt: DateTime.now(),
+    );
+  }
+
   Shift copyWith({
     String? shiftId,
     String? organizationId,
@@ -77,34 +100,13 @@ class Shift {
     );
   }
 
-  Shift activate({DateTime? updatedAt}) {
-    return copyWith(
-      status: ShiftStatus.active,
-      updatedAt: updatedAt ?? DateTime.now(),
-    );
-  }
-
-  Shift complete({DateTime? updatedAt}) {
-    return copyWith(
-      status: ShiftStatus.completed,
-      updatedAt: updatedAt ?? DateTime.now(),
-    );
-  }
-
-  Shift cancel({DateTime? updatedAt}) {
-    return copyWith(
-      status: ShiftStatus.cancelled,
-      updatedAt: updatedAt ?? DateTime.now(),
-    );
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'shiftId': shiftId,
       'organizationId': organizationId,
       'guardId': guardId,
       'siteId': siteId,
-      'date': date.toIso8601String().split('T')[0],
+      'date': DateTime.utc(date.year, date.month, date.day).toIso8601String(),
       'startTime': startTime.toMapString(),
       'endTime': endTime.toMapString(),
       'status': status.toMapString(),
@@ -113,7 +115,7 @@ class Shift {
     };
   }
 
-  factory Shift.fromMap(Map<String, dynamic> map) {
+  factory Shift.fromMap(Map<String, dynamic> map, [String? fallbackId]) {
     DateTime parseDate(dynamic val) {
       if (val is DateTime) return val;
       if (val is String) {
@@ -122,39 +124,36 @@ class Shift {
       }
       try {
         return (val as dynamic).toDate();
-      } catch (_) {}
-      return DateTime.now();
-    }
-
-    DateTime? parseNullableDate(dynamic val) {
-      if (val == null) return null;
-      if (val is DateTime) return val;
-      if (val is String) return DateTime.tryParse(val);
-      try {
-        return (val as dynamic).toDate();
       } catch (_) {
-        return null;
+        return DateTime.now();
       }
     }
 
     final rawDate = parseDate(map['date']);
-    final dateOnly = DateTime.utc(rawDate.year, rawDate.month, rawDate.day);
+    final normDate = DateTime.utc(rawDate.year, rawDate.month, rawDate.day);
 
-    final startTimeStr = map['startTime'] as String? ?? '00:00';
-    final endTimeStr = map['endTime'] as String? ?? '00:00';
+    final rawStart = map['startTime'];
+    final startShiftTime = rawStart is String
+        ? ShiftTime.fromMapString(rawStart)
+        : const ShiftTime(hour: 9, minute: 0);
+
+    final rawEnd = map['endTime'];
+    final endShiftTime = rawEnd is String
+        ? ShiftTime.fromMapString(rawEnd)
+        : const ShiftTime(hour: 17, minute: 0);
 
     return Shift(
-      shiftId: map['shiftId'] as String? ?? map['id'] as String? ?? '',
-      organizationId: map['organizationId'] as String? ?? '',
-      guardId: map['guardId'] as String? ?? '',
-      siteId: map['siteId'] as String? ?? '',
-      date: dateOnly,
-      startTime: ShiftTime.fromMapString(startTimeStr),
-      endTime: ShiftTime.fromMapString(endTimeStr),
+      shiftId: (map['shiftId'] as String?) ?? fallbackId ?? '',
+      organizationId: (map['organizationId'] as String?) ?? '',
+      guardId: (map['guardId'] as String?) ?? '',
+      siteId: (map['siteId'] as String?) ?? '',
+      date: normDate,
+      startTime: startShiftTime,
+      endTime: endShiftTime,
       status:
-          ShiftStatus.fromMapString(map['status'] as String? ?? 'scheduled'),
-      createdAt: parseNullableDate(map['createdAt']),
-      updatedAt: parseNullableDate(map['updatedAt']),
+          ShiftStatus.fromMapString((map['status'] as String?) ?? 'scheduled'),
+      createdAt: map['createdAt'] != null ? parseDate(map['createdAt']) : null,
+      updatedAt: map['updatedAt'] != null ? parseDate(map['updatedAt']) : null,
     );
   }
 
@@ -171,9 +170,7 @@ class Shift {
         other.date.day == date.day &&
         other.startTime == startTime &&
         other.endTime == endTime &&
-        other.status == status &&
-        other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
+        other.status == status;
   }
 
   @override
@@ -189,8 +186,6 @@ class Shift {
       startTime,
       endTime,
       status,
-      createdAt,
-      updatedAt,
     );
   }
 }
