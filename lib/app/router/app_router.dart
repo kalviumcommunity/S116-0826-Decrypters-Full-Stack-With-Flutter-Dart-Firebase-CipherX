@@ -20,6 +20,7 @@ import '../../features/supervisor/presentation/screens/supervisor_dashboard_scre
 import '../../features/admin/presentation/screens/guards/guard_list_screen.dart';
 import '../../features/admin/presentation/screens/guards/guard_details_screen.dart';
 import '../../features/admin/presentation/screens/guards/guard_form_screen.dart';
+import '../../features/admin/presentation/screens/shifts/shift_create_screen.dart';
 import '../../features/guards/domain/entities/guard.dart';
 import '../../features/sites/domain/entities/site.dart';
 import '../../features/sites/presentation/screens/site_details_screen.dart';
@@ -47,6 +48,7 @@ abstract class AppRoutes {
   static const String adminSiteDetails = '/admin/sites/details';
   static const String adminSiteCreate = '/admin/sites/create';
   static const String adminSiteEdit = '/admin/sites/edit';
+  static const String adminShiftCreate = '/admin/shifts/create';
 
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
@@ -277,6 +279,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           }
           return const SiteListScreen();
         },
+      ),
+      GoRoute(
+        path: AppRoutes.adminShiftCreate,
+        builder: (BuildContext context, GoRouterState state) =>
+            const ShiftCreateScreen(),
       ),
       GoRoute(
         path: AppRoutes.supervisorDashboard,
