@@ -582,9 +582,7 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
   }
 
   String? _validateGuard(Guard? guard) {
-    if (guard == null) {
-      return 'Please select a guard.';
-    }
+    if (guard == null) return 'Please select a guard.';
     if (guard.status != GuardStatus.active) {
       return 'Selected guard is inactive.';
     }
@@ -592,19 +590,13 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
   }
 
   String? _validateSite(Site? site) {
-    if (site == null) {
-      return 'Please select a site.';
-    }
-    if (site.status != SiteStatus.active) {
-      return 'Selected site is inactive.';
-    }
+    if (site == null) return 'Please select a site.';
+    if (site.status != SiteStatus.active) return 'Selected site is inactive.';
     return null;
   }
 
   String? _validateDate(DateTime? date) {
-    if (date == null) {
-      return 'Please select a shift date.';
-    }
+    if (date == null) return 'Please select a shift date.';
     return null;
   }
 
