@@ -6,9 +6,7 @@ import '../../data/repositories/site_repository_impl.dart';
 import '../../domain/entities/site.dart';
 import '../../domain/repositories/site_repository.dart';
 
-final firebaseSiteDataSourceProvider = Provider<FirebaseSiteDataSource>((
-  ref,
-) {
+final firebaseSiteDataSourceProvider = Provider<FirebaseSiteDataSource>((ref) {
   final firestore = ref.watch(cloudFirestoreProvider);
   return FirebaseSiteDataSource(firestore: firestore);
 });
@@ -18,14 +16,107 @@ final siteRepositoryProvider = Provider<SiteRepository>((ref) {
   return SiteRepositoryImpl(dataSource: dataSource);
 });
 
-final sitesStreamProvider = StreamProvider.autoDispose<List<Site>>((ref) {
+final sitesListProvider = FutureProvider.family
+    .autoDispose<List<Site>, bool>((ref, includeInactive) async {
   final profileAsync = ref.watch(currentUserProfileProvider);
   final profile = profileAsync.asData?.value;
 
-  if (profile == null) {
-    return const Stream.empty();
+  if (profile == null || profile.organizationId.trim().isEmpty) {
+    return const [];
   }
 
   final repository = ref.watch(siteRepositoryProvider);
-  return repository.watchSites(profile.organizationId);
+  return await repository.getSites(
+    profile.organizationId,
+    includeInactive: includeInactive,
+  );
+});
+
+class SiteController extends AutoDisposeAsyncNotifier<void> {
+  @override
+  void build() {}
+
+  void _invalidateSites() {
+    ref.invalidate(sitesListProvider(true));
+    ref.invalidate(sitesListProvider(false));
+  }
+
+  Future<bool> createSite(Site site) async {
+    if (state.isLoading) return false;
+    state = const AsyncLoading();
+    try {
+      final repository = ref.read(siteRepositoryProvider);
+      await repository.createSite(site);
+      state = const AsyncData(null);
+      _invalidateSites();
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+
+  Future<bool> updateSite(Site site) async {
+    if (state.isLoading) return false;
+    state = const AsyncLoading();
+    try {
+      final repository = ref.read(siteRepositoryProvider);
+      await repository.updateSite(site);
+      state = const AsyncData(null);
+      _invalidateSites();
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+
+  Future<bool> updateSiteStatus({
+    required String organizationId,
+    required String siteId,
+    required SiteStatus status,
+  }) async {
+    if (state.isLoading) return false;
+    state = const AsyncLoading();
+    try {
+      final repository = ref.read(siteRepositoryProvider);
+      await repository.updateSiteStatus(
+        organizationId: organizationId,
+        siteId: siteId,
+        status: status,
+      );
+      state = const AsyncData(null);
+      _invalidateSites();
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+
+  Future<bool> deleteSite({
+    required String organizationId,
+    required String siteId,
+  }) async {
+    if (state.isLoading) return false;
+    state = const AsyncLoading();
+    try {
+      final repository = ref.read(siteRepositoryProvider);
+      await repository.deleteSite(
+        organizationId: organizationId,
+        siteId: siteId,
+      );
+      state = const AsyncData(null);
+      _invalidateSites();
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+}
+
+final siteControllerProvider =
+    AutoDisposeAsyncNotifierProvider<SiteController, void>(() {
+  return SiteController();
 });
