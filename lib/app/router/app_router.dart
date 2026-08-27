@@ -21,6 +21,10 @@ import '../../features/admin/presentation/screens/guards/guard_list_screen.dart'
 import '../../features/admin/presentation/screens/guards/guard_details_screen.dart';
 import '../../features/admin/presentation/screens/guards/guard_form_screen.dart';
 import '../../features/guards/domain/entities/guard.dart';
+import '../../features/sites/domain/entities/site.dart';
+import '../../features/sites/presentation/screens/site_details_screen.dart';
+import '../../features/sites/presentation/screens/site_form_screen.dart';
+import '../../features/sites/presentation/screens/site_list_screen.dart';
 import '../navigation_shell.dart';
 import 'router_notifier.dart';
 
@@ -39,6 +43,10 @@ abstract class AppRoutes {
   static const String adminGuardDetails = '/admin/guards/details';
   static const String adminGuardCreate = '/admin/guards/create';
   static const String adminGuardEdit = '/admin/guards/edit';
+  static const String adminSites = '/admin/sites';
+  static const String adminSiteDetails = '/admin/sites/details';
+  static const String adminSiteCreate = '/admin/sites/create';
+  static const String adminSiteEdit = '/admin/sites/edit';
 
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
@@ -226,6 +234,48 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             return GuardFormScreen(existingGuard: extra);
           }
           return const GuardListScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminSites,
+        builder: (BuildContext context, GoRouterState state) =>
+            const SiteListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminSiteDetails,
+        redirect: (context, state) {
+          if (state.extra is! Site) {
+            return AppRoutes.adminSites;
+          }
+          return null;
+        },
+        builder: (BuildContext context, GoRouterState state) {
+          final extra = state.extra;
+          if (extra is Site) {
+            return SiteDetailsScreen(site: extra);
+          }
+          return const SiteListScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminSiteCreate,
+        builder: (BuildContext context, GoRouterState state) =>
+            const SiteFormScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminSiteEdit,
+        redirect: (context, state) {
+          if (state.extra is! Site) {
+            return AppRoutes.adminSites;
+          }
+          return null;
+        },
+        builder: (BuildContext context, GoRouterState state) {
+          final extra = state.extra;
+          if (extra is Site) {
+            return SiteFormScreen(existingSite: extra);
+          }
+          return const SiteListScreen();
         },
       ),
       GoRoute(
