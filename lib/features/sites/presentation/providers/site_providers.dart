@@ -36,12 +36,15 @@ final sitesStreamProvider = StreamProvider.autoDispose<List<Site>>((ref) {
   final profileAsync = ref.watch(currentUserProfileProvider);
   final profile = profileAsync.asData?.value;
 
-  if (profile == null) {
+  if (profile == null || profile.organizationId.trim().isEmpty) {
     return const Stream.empty();
   }
 
   final repository = ref.watch(siteRepositoryProvider);
-  return repository.watchSites(profile.organizationId);
+  return repository.watchSites(
+    profile.organizationId,
+    includeInactive: false,
+  );
 });
 
 class SiteController extends AutoDisposeAsyncNotifier<void> {
@@ -51,6 +54,7 @@ class SiteController extends AutoDisposeAsyncNotifier<void> {
   void _invalidateSites() {
     ref.invalidate(sitesListProvider(true));
     ref.invalidate(sitesListProvider(false));
+    ref.invalidate(sitesStreamProvider);
   }
 
   Future<bool> createSite(Site site) async {

@@ -32,8 +32,10 @@ class FakeSiteRepository implements SiteRepository {
   }
 
   @override
-  Future<List<Site>> getSites(String organizationId,
-      {bool includeInactive = false}) async {
+  Future<List<Site>> getSites(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async {
     if (shouldThrow) throw Exception('Failed to get sites');
     return sites.where((s) {
       if (s.organizationId != organizationId) return false;
@@ -43,14 +45,12 @@ class FakeSiteRepository implements SiteRepository {
   }
 
   @override
-  Stream<List<Site>> watchSites(String organizationId,
-      {bool includeInactive = false}) {
+  Stream<List<Site>> watchSites(
+    String organizationId, {
+    bool includeInactive = false,
+  }) async* {
     if (shouldThrow) throw Exception('Failed to watch sites');
-    return Stream.value(sites.where((s) {
-      if (s.organizationId != organizationId) return false;
-      if (!includeInactive && s.status != SiteStatus.active) return false;
-      return true;
-    }).toList());
+    yield await getSites(organizationId, includeInactive: includeInactive);
   }
 
   @override
@@ -112,12 +112,13 @@ void main() {
     late ProviderContainer container;
 
     const tProfile = UserProfile(
-        uid: 'user-100',
-        email: 'admin@cipherx.com',
-        displayName: 'Admin',
-        phone: '+1 555-0100',
-        role: UserRole.admin,
-        organizationId: 'org-001');
+      uid: 'user-100',
+      email: 'admin@cipherx.com',
+      displayName: 'Admin',
+      phone: '+1 555-0100',
+      role: UserRole.admin,
+      organizationId: 'org-001',
+    );
 
     setUp(() {
       fakeRepo = FakeSiteRepository();
