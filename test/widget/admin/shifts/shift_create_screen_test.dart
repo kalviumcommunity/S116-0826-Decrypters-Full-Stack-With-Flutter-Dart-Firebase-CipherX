@@ -8,6 +8,7 @@ import 'package:cipher_x/features/sites/presentation/providers/site_providers.da
 import 'package:cipher_x/features/shifts/domain/entities/shift.dart';
 import 'package:cipher_x/features/shifts/domain/failures/shift_failure.dart';
 import 'package:cipher_x/features/shifts/domain/repositories/shift_repository.dart';
+import 'package:cipher_x/features/shifts/presentation/providers/shift_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -253,6 +254,91 @@ void main() {
       expect(find.text('Shift Summary'), findsOneWidget);
       expect(find.text('Rahul Sharma'), findsOneWidget);
       expect(find.text('Cyber Gateway Tech Park'), findsOneWidget);
+    });
+
+    testWidgets(
+        'Displays SnackBar on ShiftConflictFailure and retains form values',
+        (tester) async {
+      final fakeRepo = FakeShiftRepository(
+        shouldFail: true,
+        failure: const ShiftConflictFailure(
+            'This guard already has another shift during the selected time.'),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider
+                .overrideWith((ref) => const AsyncData(testProfile)),
+            guardsStreamProvider
+                .overrideWith((ref) => Stream.value([testGuard])),
+            sitesStreamProvider.overrideWith((ref) => Stream.value([testSite])),
+            shiftRepositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: const MaterialApp(home: ShiftCreateScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final guardDropdown = find.byKey(const Key('guard_dropdown'));
+      await tester.tap(guardDropdown);
+      await tester.pumpAndSettle();
+
+      final guardOption = find.text('Rahul Sharma (G-1024)').last;
+      await tester.tap(guardOption);
+      await tester.pumpAndSettle();
+
+      final siteDropdown = find.byKey(const Key('site_dropdown'));
+      await tester.tap(siteDropdown);
+      await tester.pumpAndSettle();
+
+      final siteOption =
+          find.text('Cyber Gateway Tech Park — 123 Cyber Way').last;
+      await tester.tap(siteOption);
+      await tester.pumpAndSettle();
+
+      final dateTile = find.byKey(const Key('date_picker_button'));
+      await tester.ensureVisible(dateTile);
+      await tester.tap(dateTile);
+      await tester.pumpAndSettle();
+      final okBtn = find.text('OK');
+      if (okBtn.evaluate().isNotEmpty) {
+        await tester.tap(okBtn.last);
+        await tester.pumpAndSettle();
+      }
+
+      final startTimeTile = find.byKey(const Key('start_time_picker_button'));
+      await tester.ensureVisible(startTimeTile);
+      await tester.tap(startTimeTile);
+      await tester.pumpAndSettle();
+      if (okBtn.evaluate().isNotEmpty) {
+        await tester.tap(okBtn.last);
+        await tester.pumpAndSettle();
+      }
+
+      final endTimeTile = find.byKey(const Key('end_time_picker_button'));
+      await tester.ensureVisible(endTimeTile);
+      await tester.tap(endTimeTile);
+      await tester.pumpAndSettle();
+      if (okBtn.evaluate().isNotEmpty) {
+        await tester.tap(okBtn.last);
+        await tester.pumpAndSettle();
+      }
+
+      final createBtn = find.byKey(const Key('create_shift_button'));
+      await tester.ensureVisible(createBtn);
+      await tester.tap(createBtn);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+            'This guard already has another shift during the selected time.'),
+        findsOneWidget,
+      );
+      // Form values are preserved
+      expect(find.text('Shift Summary'), findsOneWidget);
+      expect(find.text('Rahul Sharma'), findsOneWidget);
     });
   });
 }

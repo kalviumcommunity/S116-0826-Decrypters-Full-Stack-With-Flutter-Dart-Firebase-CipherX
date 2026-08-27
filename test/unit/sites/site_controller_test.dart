@@ -43,6 +43,17 @@ class FakeSiteRepository implements SiteRepository {
   }
 
   @override
+  Stream<List<Site>> watchSites(String organizationId,
+      {bool includeInactive = false}) {
+    if (shouldThrow) throw Exception('Failed to watch sites');
+    return Stream.value(sites.where((s) {
+      if (s.organizationId != organizationId) return false;
+      if (!includeInactive && s.status != SiteStatus.active) return false;
+      return true;
+    }).toList());
+  }
+
+  @override
   Future<Site> updateSite(Site site) async {
     if (shouldThrow) throw Exception('Failed to update site');
     final index = sites.indexWhere((s) => s.siteId == site.siteId);
