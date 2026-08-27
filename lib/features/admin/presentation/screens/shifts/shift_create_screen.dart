@@ -583,7 +583,8 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
 
   String? _validateGuard(Guard? guard) {
     if (guard == null) return 'Please select a guard.';
-    if (guard.status != GuardStatus.active) return 'Selected guard is inactive.';
+    if (guard.status != GuardStatus.active)
+      return 'Selected guard is inactive.';
     return null;
   }
 
