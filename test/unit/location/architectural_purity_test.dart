@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Location Domain Architectural Purity Tests', () {
-    test('domain files must not depend on Flutter SDK, UI, Riverpod, or geolocator', () {
+    test(
+        'domain files must not depend on Flutter SDK, UI, Riverpod, or geolocator',
+        () {
       final domainDir = Directory('lib/features/location/domain');
       expect(domainDir.existsSync(), isTrue);
 

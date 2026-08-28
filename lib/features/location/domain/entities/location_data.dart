@@ -81,7 +81,8 @@ class LocationData {
       longitude: longitude,
       accuracy: accuracy,
       timestamp: timestamp,
-      altitude: map['altitude'] is num ? (map['altitude'] as num).toDouble() : null,
+      altitude:
+          map['altitude'] is num ? (map['altitude'] as num).toDouble() : null,
       speed: map['speed'] is num ? (map['speed'] as num).toDouble() : null,
     );
   }

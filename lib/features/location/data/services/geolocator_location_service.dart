@@ -61,10 +61,8 @@ class GeolocatorLocationService implements LocationService {
 
     try {
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: timeout ?? const Duration(seconds: 15),
-        ),
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: timeout ?? const Duration(seconds: 15),
       );
 
       return LocationData(

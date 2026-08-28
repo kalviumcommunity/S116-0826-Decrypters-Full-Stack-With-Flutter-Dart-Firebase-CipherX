@@ -25,8 +25,7 @@ final class LocationPermissionDeniedFailure extends LocationFailure {
   ]);
 }
 
-final class LocationPermissionPermanentlyDeniedFailure
-    extends LocationFailure {
+final class LocationPermissionPermanentlyDeniedFailure extends LocationFailure {
   const LocationPermissionPermanentlyDeniedFailure([
     super.message =
         'Location permission is permanently denied. Please enable it in device settings.',

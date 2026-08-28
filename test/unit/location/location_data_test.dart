@@ -20,7 +20,8 @@ void main() {
       expect(loc.timestamp, equals(now));
     });
 
-    test('throws InvalidLocationCoordinatesFailure for out of range latitude', () {
+    test('throws InvalidLocationCoordinatesFailure for out of range latitude',
+        () {
       expect(
         () => LocationData(
           latitude: 90.1,
@@ -42,7 +43,8 @@ void main() {
       );
     });
 
-    test('throws InvalidLocationCoordinatesFailure for out of range longitude', () {
+    test('throws InvalidLocationCoordinatesFailure for out of range longitude',
+        () {
       expect(
         () => LocationData(
           latitude: 18.5204,
@@ -64,7 +66,8 @@ void main() {
       );
     });
 
-    test('throws InvalidLocationCoordinatesFailure for NaN or Infinity values', () {
+    test('throws InvalidLocationCoordinatesFailure for NaN or Infinity values',
+        () {
       expect(
         () => LocationData(
           latitude: double.nan,

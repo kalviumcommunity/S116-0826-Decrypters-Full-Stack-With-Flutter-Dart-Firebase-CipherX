@@ -18,7 +18,8 @@ void main() {
       expect(state, equals(LocationPermissionState.granted));
     });
 
-    test('requestPermission transitions denied to granted in fake service', () async {
+    test('requestPermission transitions denied to granted in fake service',
+        () async {
       service.permissionState = LocationPermissionState.denied;
       final state = await service.requestPermission();
       expect(state, equals(LocationPermissionState.granted));
@@ -30,7 +31,9 @@ void main() {
       expect(await service.isLocationServiceEnabled(), isFalse);
     });
 
-    test('getCurrentLocation returns LocationData when service & permissions are valid', () async {
+    test(
+        'getCurrentLocation returns LocationData when service & permissions are valid',
+        () async {
       final expected = LocationData(
         latitude: 19.0760,
         longitude: 72.8777,
@@ -43,7 +46,9 @@ void main() {
       expect(result, equals(expected));
     });
 
-    test('getCurrentLocation throws LocationServiceDisabledFailure when GPS is off', () async {
+    test(
+        'getCurrentLocation throws LocationServiceDisabledFailure when GPS is off',
+        () async {
       service.isServiceEnabled = false;
       expect(
         () => service.getCurrentLocation(),
@@ -51,7 +56,9 @@ void main() {
       );
     });
 
-    test('getCurrentLocation throws LocationPermissionDeniedFailure when permission denied', () async {
+    test(
+        'getCurrentLocation throws LocationPermissionDeniedFailure when permission denied',
+        () async {
       service.permissionState = LocationPermissionState.denied;
       expect(
         () => service.getCurrentLocation(),
@@ -59,7 +66,9 @@ void main() {
       );
     });
 
-    test('getCurrentLocation throws LocationPermissionPermanentlyDeniedFailure when permanently denied', () async {
+    test(
+        'getCurrentLocation throws LocationPermissionPermanentlyDeniedFailure when permanently denied',
+        () async {
       service.permissionState = LocationPermissionState.permanentlyDenied;
       expect(
         () => service.getCurrentLocation(),

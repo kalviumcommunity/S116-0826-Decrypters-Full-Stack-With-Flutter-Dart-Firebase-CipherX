@@ -29,7 +29,7 @@ class LocationStatusCard extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+          color: theme.colorScheme.outlineVariant.withAlpha(128),
         ),
       ),
       child: Padding(
@@ -58,7 +58,8 @@ class LocationStatusCard extends ConsumerWidget {
                   ],
                 ),
                 permissionAsync.when(
-                  data: (permission) => _PermissionBadge(permission: permission),
+                  data: (permission) =>
+                      _PermissionBadge(permission: permission),
                   loading: () => const SizedBox(
                     width: 16,
                     height: 16,
@@ -72,8 +73,9 @@ class LocationStatusCard extends ConsumerWidget {
             serviceEnabledAsync.when(
               data: (enabled) {
                 if (!enabled) {
-                  return _ErrorBanner(
-                    message: 'GPS location services are disabled on this device.',
+                  return const _ErrorBanner(
+                    message:
+                        'GPS location services are disabled on this device.',
                     icon: Icons.location_off_rounded,
                   );
                 }
@@ -161,22 +163,22 @@ class _PermissionBadge extends StatelessWidget {
 
     switch (permission) {
       case LocationPermissionState.granted:
-        bg = Colors.green.withOpacity(0.15);
+        bg = Colors.green.withAlpha(38);
         fg = Colors.green.shade800;
         label = 'Granted';
         break;
       case LocationPermissionState.denied:
-        bg = Colors.orange.withOpacity(0.15);
+        bg = Colors.orange.withAlpha(38);
         fg = Colors.orange.shade900;
         label = 'Denied';
         break;
       case LocationPermissionState.permanentlyDenied:
-        bg = Colors.red.withOpacity(0.15);
+        bg = Colors.red.withAlpha(38);
         fg = Colors.red.shade900;
         label = 'Blocked';
         break;
       case LocationPermissionState.unableToDetermine:
-        bg = Colors.grey.withOpacity(0.15);
+        bg = Colors.grey.withAlpha(38);
         fg = Colors.grey.shade800;
         label = 'Unknown';
         break;
@@ -212,7 +214,7 @@ class _LocationDetails extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
+        color: theme.colorScheme.surfaceContainerHighest.withAlpha(102),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

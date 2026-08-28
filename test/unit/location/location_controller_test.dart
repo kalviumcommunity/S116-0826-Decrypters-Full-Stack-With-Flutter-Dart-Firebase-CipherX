@@ -31,7 +31,8 @@ void main() {
       expect(state, equals(const AsyncData<LocationData?>(null)));
     });
 
-    test('fetchLocation sets state to AsyncData(LocationData) on success', () async {
+    test('fetchLocation sets state to AsyncData(LocationData) on success',
+        () async {
       final expected = LocationData(
         latitude: 18.5204,
         longitude: 73.8567,
@@ -48,7 +49,9 @@ void main() {
       expect(state.value, equals(expected));
     });
 
-    test('fetchLocation sets state to AsyncError on LocationServiceDisabledFailure', () async {
+    test(
+        'fetchLocation sets state to AsyncError on LocationServiceDisabledFailure',
+        () async {
       fakeService.isServiceEnabled = false;
 
       final controller = container.read(locationControllerProvider.notifier);
@@ -60,7 +63,9 @@ void main() {
       expect(state.error, isA<LocationServiceDisabledFailure>());
     });
 
-    test('requestPermission requests permission and invalidates permission provider', () async {
+    test(
+        'requestPermission requests permission and invalidates permission provider',
+        () async {
       fakeService.permissionState = LocationPermissionState.denied;
 
       final controller = container.read(locationControllerProvider.notifier);

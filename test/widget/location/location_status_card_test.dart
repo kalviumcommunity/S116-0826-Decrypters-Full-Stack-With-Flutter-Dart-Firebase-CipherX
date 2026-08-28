@@ -31,7 +31,8 @@ void main() {
       );
     }
 
-    testWidgets('renders GPS Location Service card header & button', (tester) async {
+    testWidgets('renders GPS Location Service card header & button',
+        (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
@@ -40,7 +41,8 @@ void main() {
       expect(find.text('Granted'), findsOneWidget);
     });
 
-    testWidgets('displays coordinates after tapping Acquire Current Location', (tester) async {
+    testWidgets('displays coordinates after tapping Acquire Current Location',
+        (tester) async {
       fakeService.currentLocationData = LocationData(
         latitude: 18.5204,
         longitude: 73.8567,
@@ -73,7 +75,8 @@ void main() {
       );
     });
 
-    testWidgets('displays permission badge as Denied when permission is denied', (tester) async {
+    testWidgets('displays permission badge as Denied when permission is denied',
+        (tester) async {
       fakeService.permissionState = LocationPermissionState.denied;
 
       await tester.pumpWidget(createWidgetUnderTest());
