@@ -28,7 +28,7 @@ void main() {
 
     test('initial state is AsyncData(null)', () {
       final state = container.read(locationControllerProvider);
-      expect(state, equals(const AsyncData<LocationData?>(null)));
+      expect(state, equals(const AsyncLoading<LocationData?>()));
     });
 
     test('fetchLocation sets state to AsyncData(LocationData) on success',
