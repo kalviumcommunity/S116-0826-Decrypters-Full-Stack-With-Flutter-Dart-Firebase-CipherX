@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../identity/presentation/providers/identity_providers.dart';
-import '../../../sites/domain/repositories/site_repository.dart';
 import '../../../sites/presentation/providers/site_providers.dart';
 import '../../domain/entities/qr_validation_result.dart';
 import '../../domain/services/qr_validator.dart';

@@ -15,7 +15,7 @@ void main() {
   late MockSiteRepository mockSiteRepository;
 
   const orgId = 'org_123';
-  final sampleSite = Site(
+  const sampleSite = Site(
     siteId: 'site_123',
     organizationId: orgId,
     name: 'Main Tech Park',

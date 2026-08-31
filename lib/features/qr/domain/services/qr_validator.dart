@@ -1,4 +1,3 @@
-import '../../../sites/domain/entities/site.dart';
 import '../../../sites/domain/repositories/site_repository.dart';
 import '../entities/qr_validation_result.dart';
 import '../entities/site_qr_payload.dart';
