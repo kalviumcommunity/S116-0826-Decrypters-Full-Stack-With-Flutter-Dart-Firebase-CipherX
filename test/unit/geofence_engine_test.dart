@@ -201,7 +201,7 @@ void main() {
         timestamp: DateTime.now(),
       );
 
-      final site = Site(
+      final site = const Site(
         siteId: 'site_1',
         organizationId: 'org_1',
         name: 'Headquarters',
