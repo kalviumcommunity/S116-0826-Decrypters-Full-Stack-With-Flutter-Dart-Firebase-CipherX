@@ -84,26 +84,11 @@ class _SiteQrScannerScreenState extends ConsumerState<SiteQrScannerScreen> {
         title: const Text('Site QR Verification'),
         actions: [
           IconButton(
-            icon: ValueListenableBuilder<TorchState>(
-              valueListenable: _scannerController.torchState,
-              builder: (context, state, child) {
-                switch (state) {
-                  case TorchState.off:
-                    return const Icon(Icons.flash_off, color: Colors.grey);
-                  case TorchState.on:
-                    return const Icon(Icons.flash_on, color: Colors.amber);
-                }
-              },
-            ),
+            icon: const Icon(Icons.flash_on),
             onPressed: () => _scannerController.toggleTorch(),
           ),
           IconButton(
-            icon: ValueListenableBuilder<CameraFacing>(
-              valueListenable: _scannerController.cameraFacingState,
-              builder: (context, state, child) {
-                return const Icon(Icons.cameraswitch);
-              },
-            ),
+            icon: const Icon(Icons.cameraswitch),
             onPressed: () => _scannerController.switchCamera(),
           ),
         ],
@@ -144,7 +129,7 @@ class _SiteQrScannerScreenState extends ConsumerState<SiteQrScannerScreen> {
           // Loading View Overlay
           if (_isLoading)
             Container(
-              color: Colors.black70,
+              color: Colors.black.withValues(alpha: 0.7),
               child: Center(
                 child: Card(
                   margin: const EdgeInsets.symmetric(horizontal: 32),

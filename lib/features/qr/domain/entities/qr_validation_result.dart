@@ -24,7 +24,7 @@ class QrValidationResult {
     required this.message,
   });
 
-  const QrValidationResult.valid(Site validSite)
+  QrValidationResult.valid(Site validSite)
       : status = QrValidationStatus.valid,
         site = validSite,
         siteId = validSite.siteId,
