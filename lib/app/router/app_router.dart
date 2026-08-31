@@ -27,6 +27,7 @@ import '../../features/sites/domain/entities/site.dart';
 import '../../features/sites/presentation/screens/site_details_screen.dart';
 import '../../features/sites/presentation/screens/site_form_screen.dart';
 import '../../features/sites/presentation/screens/site_list_screen.dart';
+import '../../features/qr/presentation/screens/site_qr_scanner_screen.dart';
 import '../navigation_shell.dart';
 import 'router_notifier.dart';
 
@@ -53,6 +54,7 @@ abstract class AppRoutes {
 
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
+  static const String guardQrScanner = '/guard/qr-scanner';
 
   static const String shift = '/guard/shift';
   static const String checkIn = '/guard/check-in';
@@ -295,6 +297,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.guardHome,
         builder: (BuildContext context, GoRouterState state) =>
             const GuardHomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.guardQrScanner,
+        builder: (BuildContext context, GoRouterState state) =>
+            const SiteQrScannerScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (
