@@ -31,6 +31,8 @@ import '../../features/qr/presentation/screens/site_qr_scanner_screen.dart';
 import '../../features/attendance/domain/entities/attendance_record.dart';
 import '../../features/attendance/presentation/screens/attendance_details_screen.dart';
 import '../../features/attendance/presentation/screens/attendance_history_screen.dart';
+import '../../features/incidents/presentation/screens/incident_list_screen.dart';
+import '../../features/incidents/presentation/screens/incident_report_screen.dart';
 import '../navigation_shell.dart';
 import 'router_notifier.dart';
 
@@ -64,6 +66,7 @@ abstract class AppRoutes {
   static const String attendanceHistory = '/guard/attendance-history';
   static const String attendanceDetails = '/guard/attendance-history/details';
   static const String incidents = '/guard/incidents';
+  static const String reportIncident = '/guard/incidents/report';
   static const String profile = '/guard/profile';
 }
 
@@ -329,6 +332,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return const AttendanceHistoryScreen();
         },
       ),
+      GoRoute(
+        path: AppRoutes.reportIncident,
+        builder: (BuildContext context, GoRouterState state) =>
+            const IncidentReportScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (
           BuildContext context,
@@ -361,10 +369,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.incidents,
                 builder: (BuildContext context, GoRouterState state) =>
-                    const PlaceholderPage(
-                  title: 'Incidents',
-                  icon: Icons.warning_amber_outlined,
-                ),
+                    const IncidentListScreen(),
               ),
             ],
           ),
