@@ -113,6 +113,12 @@ class ShiftDatabaseFailure extends ShiftFailure {
   const ShiftDatabaseFailure(super.message);
 }
 
+class ExpiredShiftFailure extends ShiftFailure {
+  const ExpiredShiftFailure([
+    super.message = 'This shift has expired or is no longer active.',
+  ]);
+}
+
 class UnknownShiftFailure extends ShiftFailure {
   const UnknownShiftFailure(
       [super.message = 'An unexpected shift domain error occurred.']);
