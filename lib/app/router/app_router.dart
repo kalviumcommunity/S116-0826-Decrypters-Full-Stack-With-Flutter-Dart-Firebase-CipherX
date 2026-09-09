@@ -352,7 +352,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.checkIn,
                 builder: (BuildContext context, GoRouterState state) =>
-                    const AttendanceHistoryScreen(),
+                    const PlaceholderPage(
+                  title: 'Check-In',
+                  icon: Icons.location_on_outlined,
+                ),
               ),
             ],
           ),

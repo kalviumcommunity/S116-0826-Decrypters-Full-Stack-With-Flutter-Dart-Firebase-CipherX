@@ -132,29 +132,31 @@ class FirebaseAttendanceDataSource {
     required LocationData location,
   }) async {
     final docRef = _attendanceCollection(organizationId).doc(attendanceId);
-    final doc = await docRef.get();
 
-    if (!doc.exists || doc.data() == null) {
-      throw const AttendanceNotFoundFailure();
-    }
+    return await db.runTransaction<AttendanceRecord>((transaction) async {
+      final doc = await transaction.get(docRef);
 
-    final existing = AttendanceRecord.fromMap(doc.data()!, doc.id);
-    if (existing.isCheckedOut) {
-      throw const DuplicateCheckOutFailure();
-    }
+      if (!doc.exists || doc.data() == null) {
+        throw const AttendanceNotFoundFailure();
+      }
 
-    await docRef.update({
-      'checkOutTime': FieldValue.serverTimestamp(),
-      'checkOutLocation': location.toMap(),
-      'status': AttendanceStatus.completed.toMapString(),
-      'updatedAt': FieldValue.serverTimestamp(),
+      final existing = AttendanceRecord.fromMap(doc.data()!, doc.id);
+      if (existing.isCheckedOut) {
+        throw const DuplicateCheckOutFailure();
+      }
+
+      final now = DateTime.now();
+      transaction.update(docRef, {
+        'checkOutTime': FieldValue.serverTimestamp(),
+        'checkOutLocation': location.toMap(),
+        'status': AttendanceStatus.completed.toMapString(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      return existing.checkOut(
+        location: location,
+        timestamp: now,
+      );
     });
-
-    final updatedDoc = await docRef.get();
-    if (updatedDoc.exists && updatedDoc.data() != null) {
-      return AttendanceRecord.fromMap(updatedDoc.data()!, updatedDoc.id);
-    }
-
-    return existing.checkOut(location: location);
   }
 }

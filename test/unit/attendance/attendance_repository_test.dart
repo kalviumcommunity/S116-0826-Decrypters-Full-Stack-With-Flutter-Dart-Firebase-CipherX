@@ -68,5 +68,24 @@ void main() {
 
       expect(await stream.first, isNull);
     });
+
+    test('handles DuplicateCheckOutFailure propagation', () async {
+      final repository = AttendanceRepositoryImpl();
+      final location = LocationData(
+        latitude: 18.5,
+        longitude: 73.8,
+        accuracy: 5.0,
+        timestamp: DateTime.now(),
+      );
+
+      expect(
+        () => repository.checkOutGuard(
+          organizationId: '',
+          attendanceId: '',
+          location: location,
+        ),
+        throwsA(isA<UnknownAttendanceFailure>()),
+      );
+    });
   });
 }

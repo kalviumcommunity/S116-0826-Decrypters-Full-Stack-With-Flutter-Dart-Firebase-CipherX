@@ -126,17 +126,16 @@ class CheckOutController extends StateNotifier<CheckOutState> {
 
       // 1. Capture Location using existing LocationService
       final locationService = _ref.read(locationServiceProvider);
-      LocationData location;
+      final LocationData location;
       try {
         location = await locationService.getCurrentLocation();
       } catch (locErr) {
-        // Fallback location if location service fails or in testing environment
-        location = LocationData(
-          latitude: 0.0,
-          longitude: 0.0,
-          accuracy: 10.0,
-          timestamp: DateTime.now(),
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage:
+              'Location verification failed. Please ensure GPS is enabled and location permissions are granted.',
         );
+        return false;
       }
 
       // 2. Perform Check-Out via repository
