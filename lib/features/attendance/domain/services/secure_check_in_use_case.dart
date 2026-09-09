@@ -5,7 +5,7 @@ import '../../../guards/domain/entities/guard.dart';
 import '../../../guards/domain/repositories/guard_repository.dart';
 import '../../../identity/domain/entities/user_profile.dart';
 import '../../../location/domain/entities/location_data.dart';
-import '../../../location/domain/failures/location_failure.dart';
+import '../../../location/domain/failures/location_failure.dart' as loc_fail;
 import '../../../location/domain/services/location_service.dart';
 import '../../../qr/domain/services/qr_validator.dart';
 import '../../../shifts/domain/entities/shift.dart';
@@ -147,15 +147,15 @@ class SecureCheckInUseCase {
     final LocationData location;
     try {
       location = await _locationService.getCurrentLocation();
-    } on LocationServiceDisabledFailure {
+    } on loc_fail.LocationServiceDisabledFailure {
       throw const LocationDisabledFailure();
-    } on LocationPermissionDeniedFailure {
+    } on loc_fail.LocationPermissionDeniedFailure {
       throw const LocationPermissionDeniedFailure();
-    } on LocationPermissionPermanentlyDeniedFailure {
+    } on loc_fail.LocationPermissionPermanentlyDeniedFailure {
       throw const LocationPermissionDeniedFailure(
         'Location permission permanently denied. Please enable in device settings.',
       );
-    } on LocationTimeoutFailure {
+    } on loc_fail.LocationTimeoutFailure {
       throw const LocationUnavailableFailure('Location acquisition timed out.');
     } catch (e) {
       throw LocationUnavailableFailure(e.toString());
