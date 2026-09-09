@@ -23,6 +23,7 @@ void main() {
     latitude: 37.7749,
     longitude: -122.4194,
     geofenceRadius: 100.0,
+    status: SiteStatus.active,
   );
 
   setUp(() {
@@ -31,7 +32,7 @@ void main() {
     mockSiteRepository = MockSiteRepository();
   });
 
-  group('SiteQrPayload — Serialization & Deserialization', () {
+  group('SiteQrPayload - Serialization & Deserialization', () {
     test('creates payload for site cleanly', () {
       final payload = SiteQrPayload.createForSite('site_123');
 
@@ -50,9 +51,9 @@ void main() {
     });
   });
 
-  group('PR #22 Required Automated Tests — QR Verification', () {
+  group('PR #22 Required Automated Tests - QR Verification', () {
     test(
-        'TEST 1 — VALID QR: Valid JSON payload and existing site returns valid result',
+        'TEST 1 - VALID QR: Valid JSON payload and existing active site returns valid result',
         () async {
       const rawJson =
           '{"type": "cipher_x_site", "siteId": "site_123", "version": 1}';
@@ -75,7 +76,7 @@ void main() {
     });
 
     test(
-        'TEST 2 — INVALID JSON: Malformed non-JSON returns invalidFormat result',
+        'TEST 2 - INVALID JSON: Malformed non-JSON returns invalidFormat result',
         () async {
       const rawText = 'not-json-string';
 
@@ -91,7 +92,7 @@ void main() {
     });
 
     test(
-        'TEST 3 — WRONG TYPE: Unexpected payload type returns invalidType result',
+        'TEST 3 - WRONG TYPE: Unexpected payload type returns invalidType result',
         () async {
       const rawJson =
           '{"type": "random_type", "siteId": "site_123", "version": 1}';
@@ -108,7 +109,7 @@ void main() {
     });
 
     test(
-        'TEST 4 — MISSING SITE ID: Payload missing siteId returns missingSiteId result',
+        'TEST 4 - MISSING SITE ID: Payload missing siteId returns missingSiteId result',
         () async {
       const rawJson = '{"type": "cipher_x_site", "version": 1}';
 
@@ -124,7 +125,7 @@ void main() {
     });
 
     test(
-        'TEST 5 — UNSUPPORTED VERSION: Future version number returns unsupportedVersion result',
+        'TEST 5 - UNSUPPORTED VERSION: Future version number returns unsupportedVersion result',
         () async {
       const rawJson =
           '{"type": "cipher_x_site", "siteId": "site_123", "version": 999}';
@@ -141,7 +142,7 @@ void main() {
     });
 
     test(
-        'TEST 6 — GENERATION -> PARSING COMPATIBILITY: Roundtrip from site payload to parser retains exact siteId',
+        'TEST 6 - GENERATION -> PARSING COMPATIBILITY: Roundtrip from site payload to parser retains exact siteId',
         () async {
       final generatedPayload = SiteQrPayload.createForSite('site_123');
       final serializedJson = generatedPayload.toJson();
@@ -163,7 +164,7 @@ void main() {
     });
 
     test(
-        'TEST 7 — SITE NOT FOUND: Valid QR format for non-existent site returns siteNotFound result',
+        'TEST 7 - SITE NOT FOUND: Valid QR format for non-existent site returns siteNotFound result',
         () async {
       const rawJson =
           '{"type": "cipher_x_site", "siteId": "site_nonexistent", "version": 1}';
@@ -183,6 +184,39 @@ void main() {
       expect(result.isSiteNotFound, isTrue);
       expect(result.isValid, isFalse);
       expect(result.siteId, equals('site_nonexistent'));
+    });
+
+    test(
+        'TEST 8 - INACTIVE SITE: Valid QR for inactive/deactivated site returns inactiveSite result',
+        () async {
+      const rawJson =
+          '{"type": "cipher_x_site", "siteId": "site_inactive", "version": 1}';
+      const inactiveSite = Site(
+        siteId: 'site_inactive',
+        organizationId: orgId,
+        name: 'Decommissioned Facility',
+        address: '200 Old Road',
+        latitude: 37.7749,
+        longitude: -122.4194,
+        geofenceRadius: 100.0,
+        status: SiteStatus.inactive,
+      );
+
+      when(() => mockSiteRepository.getSite(
+            organizationId: orgId,
+            siteId: 'site_inactive',
+          )).thenAnswer((_) async => inactiveSite);
+
+      final result = await validator.validateRawQr(
+        rawQrData: rawJson,
+        organizationId: orgId,
+        siteRepository: mockSiteRepository,
+      );
+
+      expect(result.status, equals(QrValidationStatus.inactiveSite));
+      expect(result.isInactiveSite, isTrue);
+      expect(result.isValid, isFalse);
+      expect(result.siteId, equals('site_inactive'));
     });
   });
 
