@@ -56,7 +56,8 @@ void main() {
       expect(distance, lessThan(1510.0));
     });
 
-    test('clamps floating-point precision on extreme antipodal coordinates', () {
+    test('clamps floating-point precision on extreme antipodal coordinates',
+        () {
       // North pole to South pole (~20,015 km)
       final distance = engine.calculateDistanceMeters(
         startLatitude: 90.0,
