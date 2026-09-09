@@ -1,3 +1,5 @@
+import 'package:go_router/go_router.dart';
+import '../../../../app/router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,6 +17,13 @@ class GuardShiftsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('My Shifts'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Attendance History',
+            onPressed: () => context.push(AppRoutes.attendanceHistory),
+          ),
+        ],
       ),
       body: guardShiftsAsync.when(
         data: (data) {
