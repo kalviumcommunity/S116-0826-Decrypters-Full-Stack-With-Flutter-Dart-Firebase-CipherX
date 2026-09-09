@@ -23,5 +23,7 @@
 	<string>Cipher-X requires location access to verify guard presence at assigned duty sites during attendance operations.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Cipher-X requires location access to verify guard presence at assigned duty sites during attendance operations.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Cipher-X requires camera access to scan site QR codes for attendance verification.</string>
 </dict>
 </plist>

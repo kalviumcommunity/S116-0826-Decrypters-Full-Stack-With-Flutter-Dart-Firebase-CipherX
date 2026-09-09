@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
+import '../../../qr/presentation/widgets/site_qr_widget.dart';
 import '../../domain/entities/site.dart';
 import '../providers/site_providers.dart';
 
@@ -222,6 +223,39 @@ class SiteDetailsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (ctx) => Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SiteQrWidget(site: site),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.qr_code_2),
+                label: const Text('View Site QR Code'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
