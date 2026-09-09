@@ -4,6 +4,11 @@ import '../entities/attendance_record.dart';
 abstract class AttendanceRepository {
   Future<AttendanceRecord> createAttendanceRecord(AttendanceRecord record);
 
+  /// Atomically checks in a guard for a shift, enforcing single-attendance invariants.
+  Future<AttendanceRecord> checkInGuard({
+    required AttendanceRecord record,
+  });
+
   Future<AttendanceRecord?> getActiveAttendanceForGuard({
     required String organizationId,
     required String guardId,
