@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../location/domain/entities/location_data.dart';
 import '../../domain/entities/attendance_record.dart';
 import '../../domain/failures/attendance_failure.dart';
+import '../../domain/failures/check_in_failure.dart';
 
 class FirebaseAttendanceDataSource {
   final FirebaseFirestore? _firestore;
@@ -50,6 +51,44 @@ class FirebaseAttendanceDataSource {
     return prepared;
   }
 
+  /// Atomically creates an attendance check-in record using a deterministic document ID.
+  ///
+  /// Enforces single-attendance per shift at the database transaction layer.
+  Future<AttendanceRecord> checkInGuard({
+    required AttendanceRecord record,
+  }) async {
+    final deterministicId = record.attendanceId.trim().isNotEmpty
+        ? record.attendanceId.trim()
+        : 'att_${record.shiftId}';
+
+    final docRef =
+        _attendanceCollection(record.organizationId).doc(deterministicId);
+
+    return await db.runTransaction<AttendanceRecord>((transaction) async {
+      final doc = await transaction.get(docRef);
+
+      if (doc.exists && doc.data() != null) {
+        throw const AlreadyCheckedInFailure();
+      }
+
+      final now = DateTime.now();
+      final prepared = record.copyWith(
+        attendanceId: deterministicId,
+        createdAt: record.createdAt ?? now,
+        updatedAt: record.updatedAt ?? now,
+      );
+
+      final mapData = prepared.toMap();
+      mapData['checkInTime'] = FieldValue.serverTimestamp();
+      mapData['createdAt'] = FieldValue.serverTimestamp();
+      mapData['updatedAt'] = FieldValue.serverTimestamp();
+
+      transaction.set(docRef, mapData);
+
+      return prepared;
+    });
+  }
+
   Future<AttendanceRecord?> getActiveAttendanceForGuard({
     required String organizationId,
     required String guardId,
@@ -74,6 +113,7 @@ class FirebaseAttendanceDataSource {
     return _attendanceCollection(organizationId)
         .where('guardId', isEqualTo: guardId)
         .where('status', isEqualTo: AttendanceStatus.active.toMapString())
+        .limit(1)
         .snapshots()
         .map((snapshot) {
       if (snapshot.docs.isEmpty) return null;

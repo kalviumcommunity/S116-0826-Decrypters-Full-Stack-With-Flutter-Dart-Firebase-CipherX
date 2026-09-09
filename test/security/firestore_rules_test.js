@@ -22,7 +22,17 @@ assert(rules.includes('request.resource.data.role == resource.data.role'), 'role
 assert(rules.includes('match /organizations/{organizationId}'), 'Rules must define /organizations match');
 assert(rules.includes('allow write: if false;'), 'Organization writes must be denied for clients');
 
-// 5. Default deny rule
+// 5. Must secure /organizations/{organizationId}/attendance/{attendanceId}
+assert(rules.includes('match /attendance/{attendanceId}'), 'Rules must define /attendance/{attendanceId} subcollection');
+assert(rules.includes("data.role == 'guard'"), 'Must require guard role for attendance creation');
+assert(rules.includes('request.resource.data.guardId == request.auth.uid'), 'Must require guard self-ownership');
+assert(rules.includes('request.resource.data.organizationId == organizationId'), 'Must enforce tenant isolation');
+assert(rules.includes('request.resource.data.shiftId is string'), 'Must validate shiftId');
+assert(rules.includes('request.resource.data.siteId is string'), 'Must validate siteId');
+assert(rules.includes('request.resource.data.checkInTime == resource.data.checkInTime'), 'checkInTime must be immutable on update');
+assert(rules.includes('allow delete: if false;'), 'Attendance deletion must be strictly forbidden');
+
+// 6. Default deny rule
 assert(rules.includes('match /{document=**}'), 'Default deny rule must exist');
 
 console.log('✅ Firestore Security Rules Structural & Boundary Verification PASSED!');
