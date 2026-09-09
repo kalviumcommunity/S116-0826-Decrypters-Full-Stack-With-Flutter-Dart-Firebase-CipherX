@@ -51,7 +51,8 @@ class GeofenceEngine {
             sin(dLng / 2) *
             sin(dLng / 2);
 
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    final aClamped = a.clamp(0.0, 1.0);
+    final c = 2 * atan2(sqrt(aClamped), sqrt(1 - aClamped));
     return earthRadiusMeters * c;
   }
 
@@ -155,16 +156,15 @@ class GeofenceEngine {
     }
 
     // 3. Evaluate GPS accuracy threshold rule
-    // If reported GPS accuracy is worse than maxAccuracyThreshold or exceeds site radius, return poor accuracy
-    final effectiveAccuracyLimit = min(maxAccuracyThreshold, siteRadius);
-    if (guardAccuracy > effectiveAccuracyLimit) {
+    // If reported GPS accuracy is worse than maxAccuracyThreshold, return poor accuracy
+    if (guardAccuracy > maxAccuracyThreshold) {
       return GeofenceResult(
         status: GeofenceStatus.poorAccuracy,
         distanceMeters: distance,
         radiusMeters: siteRadius,
         accuracyMeters: guardAccuracy,
         message:
-            'GPS accuracy (${guardAccuracy.toStringAsFixed(1)}m) is too poor for a reliable geofence decision (threshold: ${effectiveAccuracyLimit.toStringAsFixed(1)}m).',
+            'GPS accuracy (${guardAccuracy.toStringAsFixed(1)}m) is too poor for a reliable geofence decision (threshold: ${maxAccuracyThreshold.toStringAsFixed(1)}m).',
       );
     }
 

@@ -40,6 +40,34 @@ void main() {
       expect(distance, greaterThan(110.0));
       expect(distance, lessThan(112.0));
     });
+
+    test('calculates known real-world benchmark distance between two landmarks',
+        () {
+      // SF Union Square (37.7879, -122.4075) to SF Ferry Building (37.7955, -122.3937)
+      // Known geodesic distance is approximately 1.48 km (1470-1500m)
+      final distance = engine.calculateDistanceMeters(
+        startLatitude: 37.7879,
+        startLongitude: -122.4075,
+        endLatitude: 37.7955,
+        endLongitude: -122.3937,
+      );
+
+      expect(distance, greaterThan(1450.0));
+      expect(distance, lessThan(1510.0));
+    });
+
+    test('clamps floating-point precision on extreme antipodal coordinates', () {
+      // North pole to South pole (~20,015 km)
+      final distance = engine.calculateDistanceMeters(
+        startLatitude: 90.0,
+        startLongitude: 0.0,
+        endLatitude: -90.0,
+        endLongitude: 0.0,
+      );
+
+      expect(distance.isFinite, isTrue);
+      expect(distance, closeTo(20015086.0, 1000.0));
+    });
   });
 
   group('GeofenceEngine — Required PR #21 Engine Tests', () {
@@ -129,6 +157,26 @@ void main() {
       expect(result.isPoorAccuracy, isTrue);
       expect(result.isWithinGeofence, isFalse);
       expect(result.message, contains('GPS accuracy (80.0m) is too poor'));
+    });
+
+    test(
+        'Small site radius (e.g. 15m) does not falsely trigger poorAccuracy when GPS accuracy is within threshold',
+        () {
+      // Guard standing 5m from site center with normal 12m mobile GPS accuracy
+      final result = engine.evaluate(
+        guardLatitude: siteLat + 0.000045,
+        guardLongitude: siteLng,
+        guardAccuracy: 12.0,
+        siteLatitude: siteLat,
+        siteLongitude: siteLng,
+        siteRadius: 15.0, // 15 meter small radius
+        maxAccuracyThreshold: 50.0,
+      );
+
+      // 12m <= 50m max threshold, and 5m <= 15m radius -> successfully INSIDE
+      expect(result.status, equals(GeofenceStatus.inside));
+      expect(result.isWithinGeofence, isTrue);
+      expect(result.distanceMeters, lessThan(15.0));
     });
   });
 
