@@ -1,3 +1,4 @@
+import '../../../sites/domain/entities/site.dart';
 import '../../../sites/domain/repositories/site_repository.dart';
 import '../entities/qr_validation_result.dart';
 import '../entities/site_qr_payload.dart';
@@ -53,6 +54,10 @@ class QrValidator {
 
       if (site == null) {
         return QrValidationResult.siteNotFound(payload.siteId);
+      }
+
+      if (site.status != SiteStatus.active) {
+        return QrValidationResult.inactiveSite(payload.siteId);
       }
 
       return QrValidationResult.valid(site);

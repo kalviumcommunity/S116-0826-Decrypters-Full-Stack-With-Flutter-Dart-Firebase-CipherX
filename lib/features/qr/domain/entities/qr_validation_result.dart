@@ -8,6 +8,7 @@ enum QrValidationStatus {
   missingSiteId,
   unsupportedVersion,
   siteNotFound,
+  inactiveSite,
 }
 
 @immutable
@@ -60,6 +61,13 @@ class QrValidationResult {
         siteId = id,
         message = msg ?? 'This QR refers to a site that could not be found.';
 
+  const QrValidationResult.inactiveSite(String id, [String? msg])
+      : status = QrValidationStatus.inactiveSite,
+        site = null,
+        siteId = id,
+        message =
+            msg ?? 'This site is currently inactive and cannot be verified.';
+
   bool get isValid => status == QrValidationStatus.valid;
   bool get isInvalidFormat => status == QrValidationStatus.invalidFormat;
   bool get isInvalidType => status == QrValidationStatus.invalidType;
@@ -67,6 +75,7 @@ class QrValidationResult {
   bool get isUnsupportedVersion =>
       status == QrValidationStatus.unsupportedVersion;
   bool get isSiteNotFound => status == QrValidationStatus.siteNotFound;
+  bool get isInactiveSite => status == QrValidationStatus.inactiveSite;
 
   @override
   bool operator ==(Object other) =>

@@ -282,6 +282,53 @@ class _SiteQrScannerScreenState extends ConsumerState<SiteQrScannerScreen> {
       );
     }
 
+    if (result.isInactiveSite) {
+      return Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.block, color: Colors.orange, size: 64),
+              const SizedBox(height: 12),
+              Text(
+                'Site Inactive',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange[900],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                result.message,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+              if (result.siteId != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Site ID: ${result.siteId}',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _resetScanner,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Scan Again'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (result.isSiteNotFound) {
       return Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
