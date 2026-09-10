@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 import '../../../geofence/domain/services/geofence_engine.dart';
 import '../../../guards/domain/entities/guard.dart';
 import '../../../guards/domain/repositories/guard_repository.dart';
@@ -157,6 +155,8 @@ class SecureCheckInUseCase {
       );
     } on loc_fail.LocationTimeoutFailure {
       throw const LocationUnavailableFailure('Location acquisition timed out.');
+    } on loc_fail.InvalidLocationCoordinatesFailure {
+      throw const InvalidLocationCoordinatesFailure();
     } catch (e) {
       throw LocationUnavailableFailure(e.toString());
     }

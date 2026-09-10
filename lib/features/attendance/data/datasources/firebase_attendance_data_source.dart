@@ -7,6 +7,7 @@ import '../../domain/failures/check_in_failure.dart';
 
 class FirebaseAttendanceDataSource {
   final FirebaseFirestore? _firestore;
+  final Set<String> _inFlightCheckIns = <String>{};
 
   FirebaseAttendanceDataSource({FirebaseFirestore? firestore})
       : _firestore = firestore;
@@ -53,7 +54,8 @@ class FirebaseAttendanceDataSource {
 
   /// Atomically creates an attendance check-in record using a deterministic document ID.
   ///
-  /// Enforces single-attendance per shift at the database transaction layer.
+  /// Enforces single-attendance per shift at both in-flight concurrent execution
+  /// and database transaction layers.
   Future<AttendanceRecord> checkInGuard({
     required AttendanceRecord record,
   }) async {
@@ -61,32 +63,42 @@ class FirebaseAttendanceDataSource {
         ? record.attendanceId.trim()
         : 'att_${record.shiftId}';
 
-    final docRef =
-        _attendanceCollection(record.organizationId).doc(deterministicId);
+    final lockKey = '${record.organizationId}_$deterministicId';
+    if (_inFlightCheckIns.contains(lockKey)) {
+      throw const AlreadyCheckedInFailure();
+    }
+    _inFlightCheckIns.add(lockKey);
 
-    return await db.runTransaction<AttendanceRecord>((transaction) async {
-      final doc = await transaction.get(docRef);
+    try {
+      final docRef =
+          _attendanceCollection(record.organizationId).doc(deterministicId);
 
-      if (doc.exists && doc.data() != null) {
-        throw const AlreadyCheckedInFailure();
-      }
+      return await db.runTransaction<AttendanceRecord>((transaction) async {
+        final doc = await transaction.get(docRef);
 
-      final now = DateTime.now();
-      final prepared = record.copyWith(
-        attendanceId: deterministicId,
-        createdAt: record.createdAt ?? now,
-        updatedAt: record.updatedAt ?? now,
-      );
+        if (doc.exists && doc.data() != null) {
+          throw const AlreadyCheckedInFailure();
+        }
 
-      final mapData = prepared.toMap();
-      mapData['checkInTime'] = FieldValue.serverTimestamp();
-      mapData['createdAt'] = FieldValue.serverTimestamp();
-      mapData['updatedAt'] = FieldValue.serverTimestamp();
+        final now = DateTime.now();
+        final prepared = record.copyWith(
+          attendanceId: deterministicId,
+          createdAt: record.createdAt ?? now,
+          updatedAt: record.updatedAt ?? now,
+        );
 
-      transaction.set(docRef, mapData);
+        final mapData = prepared.toMap();
+        mapData['checkInTime'] = FieldValue.serverTimestamp();
+        mapData['createdAt'] = FieldValue.serverTimestamp();
+        mapData['updatedAt'] = FieldValue.serverTimestamp();
 
-      return prepared;
-    });
+        transaction.set(docRef, mapData);
+
+        return prepared;
+      });
+    } finally {
+      _inFlightCheckIns.remove(lockKey);
+    }
   }
 
   Future<AttendanceRecord?> getActiveAttendanceForGuard({

@@ -441,7 +441,8 @@ class _GuardCheckInScreenState extends ConsumerState<GuardCheckInScreen> {
       children: [
         Container(
           padding: const EdgeInsets.all(16.0),
-          color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+          color:
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           child: Row(
             children: [
               const Icon(Icons.qr_code_scanner, color: Colors.blue),
