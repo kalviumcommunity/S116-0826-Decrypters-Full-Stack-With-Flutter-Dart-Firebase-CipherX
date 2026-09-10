@@ -37,6 +37,43 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
       
       allow write: if false;
+
+      // Attendance records subcollection security boundaries
+      match /attendance/{attendanceId} {
+        // Read: authenticated members of the organization
+        allow read: if isAuthenticated() 
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+
+        // Create: Authenticated guard checking in for themselves within their own organization
+        allow create: if isAuthenticated()
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'guard'
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.guardId == request.auth.uid
+          && request.resource.data.shiftId is string
+          && request.resource.data.shiftId != ''
+          && request.resource.data.siteId is string
+          && request.resource.data.siteId != ''
+          && request.resource.data.status == 'active'
+          && request.resource.data.checkInTime == request.time;
+
+        // Update: Guard updating check-out for themselves, strictly preserving immutable check-in audit fields
+        allow update: if isAuthenticated()
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && request.auth.uid == resource.data.guardId
+          && request.resource.data.organizationId == resource.data.organizationId
+          && request.resource.data.guardId == resource.data.guardId
+          && request.resource.data.shiftId == resource.data.shiftId
+          && request.resource.data.siteId == resource.data.siteId
+          && request.resource.data.checkInTime == resource.data.checkInTime
+          && request.resource.data.verificationMethod == resource.data.verificationMethod
+          && request.resource.data.checkInLatitude == resource.data.checkInLatitude
+          && request.resource.data.checkInLongitude == resource.data.checkInLongitude
+          && request.resource.data.checkInAccuracy == resource.data.checkInAccuracy;
+
+        // Delete: strictly forbidden (audit attendance records are immutable and permanent)
+        allow delete: if false;
+      }
     }
 
     // Default deny all other paths

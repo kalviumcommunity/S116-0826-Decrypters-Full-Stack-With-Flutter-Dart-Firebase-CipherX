@@ -31,6 +31,26 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   }
 
   @override
+  Future<AttendanceRecord> checkInGuard({
+    required AttendanceRecord record,
+  }) async {
+    try {
+      if (record.organizationId.trim().isEmpty ||
+          record.shiftId.trim().isEmpty ||
+          record.guardId.trim().isEmpty ||
+          record.siteId.trim().isEmpty) {
+        throw const UnknownAttendanceFailure(
+          'Organization, shift, guard, and site IDs are required for check-in.',
+        );
+      }
+      return await dataSource.checkInGuard(record: record);
+    } catch (e) {
+      if (e is AttendanceFailure) rethrow;
+      throw UnknownAttendanceFailure(e.toString());
+    }
+  }
+
+  @override
   Future<AttendanceRecord?> getActiveAttendanceForGuard({
     required String organizationId,
     required String guardId,

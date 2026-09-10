@@ -1,13 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../geofence/domain/services/geofence_engine.dart';
+import '../../../guards/presentation/providers/guard_providers.dart';
 import '../../../identity/presentation/providers/identity_providers.dart';
 import '../../../location/domain/entities/location_data.dart';
 import '../../../location/presentation/providers/location_providers.dart';
+import '../../../qr/domain/services/qr_validator.dart';
+import '../../../shifts/presentation/providers/shift_providers.dart';
+import '../../../sites/presentation/providers/site_providers.dart';
 import '../../data/datasources/firebase_attendance_data_source.dart';
 import '../../data/repositories/attendance_repository_impl.dart';
 import '../../domain/entities/attendance_record.dart';
+import '../../domain/entities/check_in_entities.dart';
 import '../../domain/failures/attendance_failure.dart';
+import '../../domain/failures/check_in_failure.dart';
 import '../../domain/repositories/attendance_repository.dart';
+import '../../domain/services/secure_check_in_use_case.dart';
 
 final attendanceDataSourceProvider =
     Provider<FirebaseAttendanceDataSource>((ref) {
@@ -17,6 +25,20 @@ final attendanceDataSourceProvider =
 final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
   final dataSource = ref.watch(attendanceDataSourceProvider);
   return AttendanceRepositoryImpl(dataSource: dataSource);
+});
+
+final secureCheckInUseCaseProvider = Provider<SecureCheckInUseCase>((ref) {
+  final profileAsync = ref.watch(currentUserProfileProvider);
+  return SecureCheckInUseCase(
+    getCurrentUserProfile: () => profileAsync.asData?.value,
+    guardRepository: ref.watch(guardRepositoryProvider),
+    shiftRepository: ref.watch(shiftRepositoryProvider),
+    siteRepository: ref.watch(siteRepositoryProvider),
+    locationService: ref.watch(locationServiceProvider),
+    qrValidator: const QrValidator(),
+    geofenceEngine: const GeofenceEngine(),
+    attendanceRepository: ref.watch(attendanceRepositoryProvider),
+  );
 });
 
 final activeAttendanceProvider =
@@ -68,6 +90,123 @@ final attendanceDetailsProvider = FutureProvider.family
     attendanceId: attendanceId,
   );
 });
+
+// =============================================================================
+// CHECK-IN CONTROLLER & STATE
+// =============================================================================
+
+enum CheckInVerificationPhase {
+  idle,
+  verifyingIdentity,
+  verifyingShift,
+  verifyingLocation,
+  verifyingQr,
+  evaluatingGeofence,
+  persisting,
+  success,
+  failure,
+}
+
+class CheckInState {
+  final CheckInVerificationPhase phase;
+  final bool isLoading;
+  final String? errorMessage;
+  final CheckInResult? result;
+
+  const CheckInState({
+    this.phase = CheckInVerificationPhase.idle,
+    this.isLoading = false,
+    this.errorMessage,
+    this.result,
+  });
+
+  bool get isSuccess => phase == CheckInVerificationPhase.success;
+  bool get isFailure => phase == CheckInVerificationPhase.failure;
+
+  CheckInState copyWith({
+    CheckInVerificationPhase? phase,
+    bool? isLoading,
+    String? errorMessage,
+    CheckInResult? result,
+    bool clearResult = false,
+  }) {
+    return CheckInState(
+      phase: phase ?? this.phase,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage,
+      result: clearResult ? null : (result ?? this.result),
+    );
+  }
+}
+
+class CheckInController extends StateNotifier<CheckInState> {
+  final Ref _ref;
+
+  CheckInController(this._ref) : super(const CheckInState());
+
+  Future<bool> checkIn({
+    required String shiftId,
+    required String rawQrData,
+  }) async {
+    if (state.isLoading) return false;
+
+    state = state.copyWith(
+      isLoading: true,
+      phase: CheckInVerificationPhase.verifyingIdentity,
+      errorMessage: null,
+    );
+
+    try {
+      final useCase = _ref.read(secureCheckInUseCaseProvider);
+      final request = CheckInRequest(
+        shiftId: shiftId,
+        rawQrData: rawQrData,
+      );
+
+      final result = await useCase.execute(request);
+
+      _ref.invalidate(activeAttendanceProvider);
+      _ref.invalidate(attendanceHistoryProvider);
+
+      state = state.copyWith(
+        isLoading: false,
+        phase: CheckInVerificationPhase.success,
+        result: result,
+      );
+      return true;
+    } on CheckInFailure catch (failure) {
+      state = state.copyWith(
+        isLoading: false,
+        phase: CheckInVerificationPhase.failure,
+        errorMessage: failure.message,
+        clearResult: true,
+      );
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        phase: CheckInVerificationPhase.failure,
+        errorMessage:
+            'An unexpected error occurred during check-in: ${e.toString()}',
+        clearResult: true,
+      );
+      return false;
+    }
+  }
+
+  void reset() {
+    state = const CheckInState();
+  }
+}
+
+final checkInControllerProvider =
+    StateNotifierProvider.autoDispose<CheckInController, CheckInState>((ref) {
+  return CheckInController(ref);
+});
+
+// =============================================================================
+// CHECK-OUT CONTROLLER & STATE
+// =============================================================================
 
 class CheckOutState {
   final bool isLoading;

@@ -53,10 +53,15 @@ class AttendanceRecord {
     this.checkInLocation,
     this.checkOutLocation,
     this.status = AttendanceStatus.active,
-    this.verificationMethod = 'qr_gps',
+    this.verificationMethod = 'qr_gps_geofence',
     this.createdAt,
     this.updatedAt,
   });
+
+  /// Convenience getters for direct coordinate and accuracy access
+  double? get checkInLatitude => checkInLocation?.latitude;
+  double? get checkInLongitude => checkInLocation?.longitude;
+  double? get checkInAccuracy => checkInLocation?.accuracy;
 
   bool get isCheckedOut =>
       checkOutTime != null || status == AttendanceStatus.completed;
@@ -122,6 +127,9 @@ class AttendanceRecord {
       if (checkInLocation != null) 'checkInLocation': checkInLocation!.toMap(),
       if (checkOutLocation != null)
         'checkOutLocation': checkOutLocation!.toMap(),
+      'checkInLatitude': checkInLatitude,
+      'checkInLongitude': checkInLongitude,
+      'checkInAccuracy': checkInAccuracy,
       'status': status.toMapString(),
       'verificationMethod': verificationMethod,
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
@@ -161,6 +169,29 @@ class AttendanceRecord {
       return null;
     }
 
+    LocationData? parsedCheckIn = parseLocation(map['checkInLocation']);
+    if (parsedCheckIn == null &&
+        map['checkInLatitude'] != null &&
+        map['checkInLongitude'] != null) {
+      double? tryParseDouble(dynamic v) {
+        if (v is num) return v.toDouble();
+        if (v is String) return double.tryParse(v);
+        return null;
+      }
+
+      final lat = tryParseDouble(map['checkInLatitude']);
+      final lng = tryParseDouble(map['checkInLongitude']);
+      if (lat != null && lng != null) {
+        final acc = tryParseDouble(map['checkInAccuracy']) ?? 0.0;
+        parsedCheckIn = LocationData(
+          latitude: lat,
+          longitude: lng,
+          accuracy: acc,
+          timestamp: rawCheckIn,
+        );
+      }
+    }
+
     return AttendanceRecord(
       attendanceId: (map['attendanceId'] as String?) ?? fallbackId ?? '',
       organizationId: (map['organizationId'] as String?) ?? '',
@@ -169,11 +200,12 @@ class AttendanceRecord {
       guardId: (map['guardId'] as String?) ?? '',
       checkInTime: rawCheckIn,
       checkOutTime: rawCheckOut,
-      checkInLocation: parseLocation(map['checkInLocation']),
+      checkInLocation: parsedCheckIn,
       checkOutLocation: parseLocation(map['checkOutLocation']),
       status: AttendanceStatus.fromMapString(
           (map['status'] as String?) ?? 'active'),
-      verificationMethod: (map['verificationMethod'] as String?) ?? 'qr_gps',
+      verificationMethod:
+          (map['verificationMethod'] as String?) ?? 'qr_gps_geofence',
       createdAt: map['createdAt'] != null ? parseDate(map['createdAt']) : null,
       updatedAt: map['updatedAt'] != null ? parseDate(map['updatedAt']) : null,
     );

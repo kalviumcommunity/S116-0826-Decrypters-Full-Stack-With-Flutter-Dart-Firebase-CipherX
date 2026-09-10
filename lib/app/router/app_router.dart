@@ -1,3 +1,4 @@
+import '../../features/attendance/presentation/screens/guard_check_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -352,10 +353,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.checkIn,
                 builder: (BuildContext context, GoRouterState state) =>
-                    const PlaceholderPage(
-                  title: 'Check-In',
-                  icon: Icons.location_on_outlined,
-                ),
+                    const GuardCheckInScreen(),
               ),
             ],
           ),
