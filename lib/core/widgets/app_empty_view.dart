@@ -1,55 +1,41 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_constants.dart';
-import '../errors/failure_mapper.dart';
 
-class AppErrorView extends StatelessWidget {
+class AppEmptyView extends StatelessWidget {
   final String title;
   final String message;
   final IconData icon;
-  final VoidCallback? onRetry;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
-  const AppErrorView({
+  const AppEmptyView({
     super.key,
-    this.title = 'Something Went Wrong',
+    required this.title,
     required this.message,
-    this.icon = Icons.error_outline,
-    this.onRetry,
+    this.icon = Icons.inbox_outlined,
+    this.actionLabel,
+    this.onAction,
   });
-
-  factory AppErrorView.fromError({
-    Key? key,
-    required dynamic error,
-    String title = 'Error',
-    IconData icon = Icons.error_outline,
-    VoidCallback? onRetry,
-  }) {
-    return AppErrorView(
-      key: key,
-      title: title,
-      message: FailureMapper.mapToMessage(error),
-      icon: icon,
-      onRetry: onRetry,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
 
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(icon, size: 64, color: theme.colorScheme.error),
+          children: [
+            Icon(icon, size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
               ),
             ),
             const SizedBox(height: 8),
@@ -57,15 +43,15 @@ class AppErrorView extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Colors.grey.shade600,
               ),
             ),
-            if (onRetry != null) ...<Widget>[
+            if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: onRetry,
+                onPressed: onAction,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Try Again'),
+                label: Text(actionLabel!),
               ),
             ],
           ],
