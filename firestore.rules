@@ -74,6 +74,37 @@ service cloud.firestore {
         // Delete: strictly forbidden (audit attendance records are immutable and permanent)
         allow delete: if false;
       }
+
+      // Incident reporting subcollection security boundaries (PR #26)
+      match /incidents/{incidentId} {
+        // Read: authenticated members of the organization
+        allow read: if isAuthenticated() 
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+
+        // Create: Authenticated member reporting an incident for themselves within their own organization
+        allow create: if isAuthenticated()
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.reportedBy == request.auth.uid
+          && request.resource.data.siteId is string
+          && request.resource.data.siteId != ''
+          && request.resource.data.type is string
+          && request.resource.data.type != ''
+          && request.resource.data.description is string
+          && request.resource.data.description != ''
+          && request.resource.data.severity in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
+          && request.resource.data.status == 'OPEN'
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time
+          && (!('resolvedAt' in request.resource.data) || request.resource.data.resolvedAt == null)
+          && (!('resolvedBy' in request.resource.data) || request.resource.data.resolvedBy == null);
+
+        // Update: Reserved for Incident Management (PR #28)
+        allow update: if false;
+
+        // Delete: Strictly forbidden (incident audit trail is immutable)
+        allow delete: if false;
+      }
     }
 
     // Default deny all other paths
