@@ -150,5 +150,27 @@ void main() {
       expect(res1.toString(), contains('12.5m'));
       expect(res1.toString(), contains('5.0m'));
     });
+    test(
+        'AttendanceRecord.fromMap treats unparsable coordinates as null instead of (0,0)',
+        () {
+      final mapWithUnparsable = {
+        'attendanceId': 'att_123',
+        'organizationId': 'org_1',
+        'shiftId': 'shift_1',
+        'siteId': 'site_1',
+        'guardId': 'guard_1',
+        'checkInTime': DateTime.now().toIso8601String(),
+        'checkInLatitude': 'not_a_valid_lat',
+        'checkInLongitude': 'not_a_valid_lng',
+        'checkInAccuracy': 'invalid_acc',
+        'status': 'active',
+      };
+
+      final record = AttendanceRecord.fromMap(mapWithUnparsable);
+      expect(record.checkInLocation, isNull);
+      expect(record.checkInLatitude, isNull);
+      expect(record.checkInLongitude, isNull);
+      expect(record.checkInAccuracy, isNull);
+    });
   });
 }

@@ -128,12 +128,13 @@ class CheckInState {
     bool? isLoading,
     String? errorMessage,
     CheckInResult? result,
+    bool clearResult = false,
   }) {
     return CheckInState(
       phase: phase ?? this.phase,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
-      result: result ?? this.result,
+      result: clearResult ? null : (result ?? this.result),
     );
   }
 }
@@ -178,6 +179,7 @@ class CheckInController extends StateNotifier<CheckInState> {
         isLoading: false,
         phase: CheckInVerificationPhase.failure,
         errorMessage: failure.message,
+        clearResult: true,
       );
       return false;
     } catch (e) {
@@ -186,6 +188,7 @@ class CheckInController extends StateNotifier<CheckInState> {
         phase: CheckInVerificationPhase.failure,
         errorMessage:
             'An unexpected error occurred during check-in: ${e.toString()}',
+        clearResult: true,
       );
       return false;
     }

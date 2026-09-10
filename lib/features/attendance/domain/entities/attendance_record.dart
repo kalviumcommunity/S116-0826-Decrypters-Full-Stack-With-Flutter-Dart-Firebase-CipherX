@@ -173,18 +173,23 @@ class AttendanceRecord {
     if (parsedCheckIn == null &&
         map['checkInLatitude'] != null &&
         map['checkInLongitude'] != null) {
-      double parseDouble(dynamic v) {
+      double? tryParseDouble(dynamic v) {
         if (v is num) return v.toDouble();
-        if (v is String) return double.tryParse(v) ?? 0.0;
-        return 0.0;
+        if (v is String) return double.tryParse(v);
+        return null;
       }
 
-      parsedCheckIn = LocationData(
-        latitude: parseDouble(map['checkInLatitude']),
-        longitude: parseDouble(map['checkInLongitude']),
-        accuracy: parseDouble(map['checkInAccuracy']),
-        timestamp: rawCheckIn,
-      );
+      final lat = tryParseDouble(map['checkInLatitude']);
+      final lng = tryParseDouble(map['checkInLongitude']);
+      if (lat != null && lng != null) {
+        final acc = tryParseDouble(map['checkInAccuracy']) ?? 0.0;
+        parsedCheckIn = LocationData(
+          latitude: lat,
+          longitude: lng,
+          accuracy: acc,
+          timestamp: rawCheckIn,
+        );
+      }
     }
 
     return AttendanceRecord(

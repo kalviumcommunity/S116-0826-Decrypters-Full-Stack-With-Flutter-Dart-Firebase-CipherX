@@ -55,16 +55,21 @@ service cloud.firestore {
           && request.resource.data.siteId is string
           && request.resource.data.siteId != ''
           && request.resource.data.status == 'active'
-          && request.resource.data.checkInTime != null;
+          && request.resource.data.checkInTime == request.time;
 
-        // Update: Guard or system updating check-out, strictly preserving immutable check-in audit fields
+        // Update: Guard updating check-out for themselves, strictly preserving immutable check-in audit fields
         allow update: if isAuthenticated()
           && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && request.auth.uid == resource.data.guardId
           && request.resource.data.organizationId == resource.data.organizationId
           && request.resource.data.guardId == resource.data.guardId
           && request.resource.data.shiftId == resource.data.shiftId
           && request.resource.data.siteId == resource.data.siteId
-          && request.resource.data.checkInTime == resource.data.checkInTime;
+          && request.resource.data.checkInTime == resource.data.checkInTime
+          && request.resource.data.verificationMethod == resource.data.verificationMethod
+          && request.resource.data.checkInLatitude == resource.data.checkInLatitude
+          && request.resource.data.checkInLongitude == resource.data.checkInLongitude
+          && request.resource.data.checkInAccuracy == resource.data.checkInAccuracy;
 
         // Delete: strictly forbidden (audit attendance records are immutable and permanent)
         allow delete: if false;

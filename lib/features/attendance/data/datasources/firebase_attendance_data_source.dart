@@ -73,7 +73,7 @@ class FirebaseAttendanceDataSource {
       final docRef =
           _attendanceCollection(record.organizationId).doc(deterministicId);
 
-      return await db.runTransaction<AttendanceRecord>((transaction) async {
+      await db.runTransaction<void>((transaction) async {
         final doc = await transaction.get(docRef);
 
         if (doc.exists && doc.data() != null) {
@@ -93,9 +93,15 @@ class FirebaseAttendanceDataSource {
         mapData['updatedAt'] = FieldValue.serverTimestamp();
 
         transaction.set(docRef, mapData);
-
-        return prepared;
       });
+
+      // Re-read document to return actual server-persisted timestamps and audit data
+      final writtenDoc = await docRef.get();
+      if (writtenDoc.exists && writtenDoc.data() != null) {
+        return AttendanceRecord.fromMap(writtenDoc.data()!, writtenDoc.id);
+      }
+
+      return record.copyWith(attendanceId: deterministicId);
     } finally {
       _inFlightCheckIns.remove(lockKey);
     }

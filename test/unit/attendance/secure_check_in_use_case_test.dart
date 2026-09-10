@@ -715,5 +715,35 @@ void main() {
       expect(result.site.name, equals('Alpha Facility'));
       expect(result.shift.shiftId, equals('shift_001'));
     });
+    test(
+        'Gate 21 rejects check-in when guard has active attendance on another shift',
+        () async {
+      fakeAttendanceRepo.activeAttendance = AttendanceRecord(
+        attendanceId: 'att_other_shift',
+        organizationId: 'org_test',
+        shiftId: 'shift_other',
+        siteId: 'site_001',
+        guardId: 'guard_123',
+        checkInTime: DateTime.now().subtract(const Duration(hours: 1)),
+        status: AttendanceStatus.active,
+      );
+
+      final useCase = buildUseCase();
+
+      final request = CheckInRequest(
+        shiftId: 'shift_001',
+        rawQrData: SiteQrPayload.createForSite('site_001').toJson(),
+      );
+
+      expect(
+        () => useCase.execute(request),
+        throwsA(isA<AlreadyCheckedInFailure>().having(
+          (f) => f.message,
+          'message',
+          contains(
+              'Guard already has an active check-in session for shift shift_other'),
+        )),
+      );
+    });
   });
 }

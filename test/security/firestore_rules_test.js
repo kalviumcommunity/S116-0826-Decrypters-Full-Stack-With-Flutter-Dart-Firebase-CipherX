@@ -29,7 +29,11 @@ assert(rules.includes('request.resource.data.guardId == request.auth.uid'), 'Mus
 assert(rules.includes('request.resource.data.organizationId == organizationId'), 'Must enforce tenant isolation');
 assert(rules.includes('request.resource.data.shiftId is string'), 'Must validate shiftId');
 assert(rules.includes('request.resource.data.siteId is string'), 'Must validate siteId');
+assert(rules.includes('request.resource.data.checkInTime == request.time'), 'checkInTime must equal request.time on creation');
+assert(rules.includes('request.auth.uid == resource.data.guardId'), 'Updater must be the owning guard');
 assert(rules.includes('request.resource.data.checkInTime == resource.data.checkInTime'), 'checkInTime must be immutable on update');
+assert(rules.includes('request.resource.data.verificationMethod == resource.data.verificationMethod'), 'verificationMethod must be immutable on update');
+assert(rules.includes('request.resource.data.checkInLatitude == resource.data.checkInLatitude'), 'checkInLatitude must be immutable on update');
 assert(rules.includes('allow delete: if false;'), 'Attendance deletion must be strictly forbidden');
 
 // 6. Default deny rule

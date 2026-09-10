@@ -15,11 +15,32 @@ import '../entities/check_in_entities.dart';
 import '../failures/check_in_failure.dart';
 import '../repositories/attendance_repository.dart';
 
-/// Secure Check-In Use Case executing the 21-gate verification pipeline.
+/// Secure Check-In Use Case executing the exhaustive 21-gate verification pipeline.
 ///
 /// Ensures zero client-trusted identity or site data. Attendance is created
-/// only after all authentication, role, guard, shift, site, location, QR,
-/// geofence, and duplicate-prevention gates pass.
+/// only after all 21 verification gates pass:
+///
+/// 1.  Authenticated User Gate
+/// 2.  Guard Organization Tenant Gate
+/// 3.  Guard Role Authorization Gate (UserRole.guard)
+/// 4.  Guard Profile Existence Gate
+/// 5.  Guard Organization Match Gate
+/// 6.  Guard Active Status Gate
+/// 7.  Shift Identifier Gate
+/// 8.  Shift Existence Gate
+/// 9.  Shift Organization Match Gate
+/// 10. Shift Guard Assignment Gate
+/// 11. Shift Not Cancelled Gate
+/// 12. Site Existence Gate (resolved from shift)
+/// 13. Site Organization Match Gate
+/// 14. Site Active Status Gate
+/// 15. Site Coordinates and Radius Gate
+/// 16. Device GPS Location Acquisition Gate
+/// 17. Device Coordinates Bounds and Accuracy Gate
+/// 18. QR Code Decryption and Validation Gate
+/// 19. QR Site Match Gate (qrSite == shiftSite)
+/// 20. Geofence Distance & Accuracy Gate (accuracy <= 50m, inside radius)
+/// 21. Existing Active Attendance & Atomic Persistence Gate (deterministic ID `att_${shiftId}`)
 class SecureCheckInUseCase {
   final UserProfile? Function() _getCurrentUserProfile;
   final GuardRepository _guardRepository;
@@ -48,29 +69,36 @@ class SecureCheckInUseCase {
         _geofenceEngine = geofenceEngine,
         _attendanceRepository = attendanceRepository;
 
-  /// Executes the secure check-in pipeline against [request].
+  /// Executes the 21-gate secure check-in pipeline against [request].
   ///
   /// Throws a typed subclass of [CheckInFailure] immediately upon any verification gate failure.
   Future<CheckInResult> execute(CheckInRequest request) async {
     // -------------------------------------------------------------------------
-    // Gate 1: Authenticated User & Profile Check
+    // Gate 1: Authenticated User Gate
     // -------------------------------------------------------------------------
     final profile = _getCurrentUserProfile();
-    if (profile == null ||
-        profile.uid.trim().isEmpty ||
-        profile.organizationId.trim().isEmpty) {
+    if (profile == null || profile.uid.trim().isEmpty) {
       throw const UnauthenticatedFailure();
     }
 
     // -------------------------------------------------------------------------
-    // Gate 2: Role Authorization Gate (GUARD role required)
+    // Gate 2: Guard Organization Tenant Gate
+    // -------------------------------------------------------------------------
+    if (profile.organizationId.trim().isEmpty) {
+      throw const UnauthenticatedFailure(
+        'User profile lacks valid organization identifier.',
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // Gate 3: Guard Role Authorization Gate (GUARD role required)
     // -------------------------------------------------------------------------
     if (profile.role != UserRole.guard) {
       throw const UnauthorizedRoleFailure();
     }
 
     // -------------------------------------------------------------------------
-    // Gate 3: Guard Verification Gate
+    // Gate 4: Guard Profile Existence Gate
     // -------------------------------------------------------------------------
     final guard = await _guardRepository.getGuard(
       organizationId: profile.organizationId,
@@ -79,20 +107,31 @@ class SecureCheckInUseCase {
     if (guard == null) {
       throw const CheckInGuardNotFoundFailure();
     }
+
+    // -------------------------------------------------------------------------
+    // Gate 5: Guard Organization Match Gate
+    // -------------------------------------------------------------------------
     if (guard.organizationId != profile.organizationId) {
       throw const GuardOrgMismatchFailure();
     }
+
+    // -------------------------------------------------------------------------
+    // Gate 6: Guard Active Status Gate
+    // -------------------------------------------------------------------------
     if (guard.status != GuardStatus.active) {
       throw const InactiveGuardFailure();
     }
 
     // -------------------------------------------------------------------------
-    // Gate 4: Shift Verification Gate
+    // Gate 7: Shift Identifier Gate
     // -------------------------------------------------------------------------
     if (request.shiftId.trim().isEmpty) {
       throw const CheckInShiftNotFoundFailure();
     }
 
+    // -------------------------------------------------------------------------
+    // Gate 8: Shift Existence Gate
+    // -------------------------------------------------------------------------
     final shift = await _shiftRepository.getShift(
       organizationId: profile.organizationId,
       shiftId: request.shiftId.trim(),
@@ -100,18 +139,30 @@ class SecureCheckInUseCase {
     if (shift == null) {
       throw const CheckInShiftNotFoundFailure();
     }
+
+    // -------------------------------------------------------------------------
+    // Gate 9: Shift Organization Match Gate
+    // -------------------------------------------------------------------------
     if (shift.organizationId != profile.organizationId) {
       throw const ShiftOrgMismatchFailure();
     }
+
+    // -------------------------------------------------------------------------
+    // Gate 10: Shift Guard Assignment Gate
+    // -------------------------------------------------------------------------
     if (shift.guardId != guard.guardId) {
       throw const ShiftGuardMismatchFailure();
     }
+
+    // -------------------------------------------------------------------------
+    // Gate 11: Shift Not Cancelled Gate
+    // -------------------------------------------------------------------------
     if (shift.status == ShiftStatus.cancelled) {
       throw const ShiftCancelledFailure();
     }
 
     // -------------------------------------------------------------------------
-    // Gate 5: Site Resolution Gate (strictly resolved from shift, never from client)
+    // Gate 12: Site Existence Gate (resolved strictly from shift, never from client)
     // -------------------------------------------------------------------------
     final site = await _siteRepository.getSite(
       organizationId: profile.organizationId,
@@ -120,14 +171,24 @@ class SecureCheckInUseCase {
     if (site == null) {
       throw const CheckInSiteNotFoundFailure();
     }
+
+    // -------------------------------------------------------------------------
+    // Gate 13: Site Organization Match Gate
+    // -------------------------------------------------------------------------
     if (site.organizationId != profile.organizationId) {
       throw const SiteOrgMismatchFailure();
     }
+
+    // -------------------------------------------------------------------------
+    // Gate 14: Site Active Status Gate
+    // -------------------------------------------------------------------------
     if (site.status != SiteStatus.active) {
       throw const InactiveSiteFailure();
     }
 
-    // Validate site coordinates and geofence radius
+    // -------------------------------------------------------------------------
+    // Gate 15: Site Coordinates and Geofence Radius Gate
+    // -------------------------------------------------------------------------
     if (!site.latitude.isFinite ||
         site.latitude < -90.0 ||
         site.latitude > 90.0 ||
@@ -140,7 +201,7 @@ class SecureCheckInUseCase {
     }
 
     // -------------------------------------------------------------------------
-    // Gate 6: Device GPS Location Acquisition Gate
+    // Gate 16: Device GPS Location Acquisition Gate
     // -------------------------------------------------------------------------
     final LocationData location;
     try {
@@ -161,7 +222,9 @@ class SecureCheckInUseCase {
       throw LocationUnavailableFailure(e.toString());
     }
 
-    // Validate location coordinates
+    // -------------------------------------------------------------------------
+    // Gate 17: Device Coordinates Bounds and Accuracy Gate
+    // -------------------------------------------------------------------------
     if (!location.latitude.isFinite ||
         location.latitude < -90.0 ||
         location.latitude > 90.0 ||
@@ -174,7 +237,7 @@ class SecureCheckInUseCase {
     }
 
     // -------------------------------------------------------------------------
-    // Gate 7: QR Validation & Site Matching Gate
+    // Gate 18: QR Code Decryption and Validation Gate
     // -------------------------------------------------------------------------
     final qrResult = await _qrValidator.validateRawQr(
       rawQrData: request.rawQrData,
@@ -186,13 +249,15 @@ class SecureCheckInUseCase {
       throw QrValidationFailedFailure(qrResult.message);
     }
 
-    // Ensure QR site matches shift site (Reject Site B QR for Site A shift)
+    // -------------------------------------------------------------------------
+    // Gate 19: QR Site Match Gate (Reject valid QR from another site)
+    // -------------------------------------------------------------------------
     if (qrResult.siteId != shift.siteId) {
       throw const QrSiteMismatchFailure();
     }
 
     // -------------------------------------------------------------------------
-    // Gate 8: Geofence Verification Gate
+    // Gate 20: Geofence Distance & Accuracy Gate
     // -------------------------------------------------------------------------
     final geofenceResult = _geofenceEngine.evaluateWithLocationAndSite(
       location: location,
@@ -218,20 +283,23 @@ class SecureCheckInUseCase {
     }
 
     // -------------------------------------------------------------------------
-    // Gate 9: Duplicate Attendance Check Gate
+    // Gate 21: Existing Active Attendance & Atomic Persistence Gate
     // -------------------------------------------------------------------------
     final activeAttendance =
         await _attendanceRepository.getActiveAttendanceForGuard(
       organizationId: profile.organizationId,
       guardId: guard.guardId,
     );
-    if (activeAttendance != null && activeAttendance.shiftId == shift.shiftId) {
-      throw const AlreadyCheckedInFailure();
+    if (activeAttendance != null) {
+      if (activeAttendance.shiftId == shift.shiftId) {
+        throw const AlreadyCheckedInFailure();
+      } else {
+        throw AlreadyCheckedInFailure(
+          'Guard already has an active check-in session for shift ${activeAttendance.shiftId}. Must check out first.',
+        );
+      }
     }
 
-    // -------------------------------------------------------------------------
-    // Gate 10: Atomic Attendance Creation Gate
-    // -------------------------------------------------------------------------
     final now = DateTime.now();
     final deterministicAttendanceId = 'att_${shift.shiftId}';
 
@@ -261,9 +329,6 @@ class SecureCheckInUseCase {
       throw AttendancePersistenceFailure(e.toString());
     }
 
-    // -------------------------------------------------------------------------
-    // Gate 11: Typed Success Result
-    // -------------------------------------------------------------------------
     return CheckInResult(
       record: persistedRecord,
       shift: shift,

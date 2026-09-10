@@ -194,5 +194,30 @@ void main() {
       expect(state.isSuccess, isFalse);
       expect(state.result, isNull);
     });
+    test(
+        'clears previous result when subsequent check-in fails without explicit reset',
+        () async {
+      final controller = container.read(checkInControllerProvider.notifier);
+
+      // First run: success
+      final success = await controller.checkIn(
+        shiftId: 'shift_100',
+        rawQrData: '{"siteId":"site_001"}',
+      );
+      expect(success, isTrue);
+      expect(container.read(checkInControllerProvider).result, isNotNull);
+
+      // Second run with failure
+      fakeUseCase.exceptionToThrow =
+          const OutsideGeofenceFailure('Outside geofence');
+      final secondSuccess = await controller.checkIn(
+        shiftId: 'shift_100',
+        rawQrData: '{"siteId":"site_001"}',
+      );
+      expect(secondSuccess, isFalse);
+      expect(container.read(checkInControllerProvider).phase,
+          equals(CheckInVerificationPhase.failure));
+      expect(container.read(checkInControllerProvider).result, isNull);
+    });
   });
 }
