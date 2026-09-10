@@ -36,7 +36,16 @@ assert(rules.includes('request.resource.data.verificationMethod == resource.data
 assert(rules.includes('request.resource.data.checkInLatitude == resource.data.checkInLatitude'), 'checkInLatitude must be immutable on update');
 assert(rules.includes('allow delete: if false;'), 'Attendance deletion must be strictly forbidden');
 
-// 6. Default deny rule
+
+// 6. Must secure /organizations/{organizationId}/incidents/{incidentId} (PR #26)
+assert(rules.includes('match /incidents/{incidentId}'), 'Rules must define /incidents/{incidentId} subcollection');
+assert(rules.includes('request.resource.data.reportedBy == request.auth.uid'), 'Must require reporter self-ownership');
+assert(rules.includes("request.resource.data.severity in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']"), 'Must validate severity enum values');
+assert(rules.includes("request.resource.data.status == 'OPEN'"), 'Status must be OPEN on creation');
+assert(rules.includes('request.resource.data.createdAt == request.time'), 'createdAt must equal request.time on creation');
+assert(rules.includes('request.resource.data.updatedAt == request.time'), 'updatedAt must equal request.time on creation');
+
+// 7. Default deny rule
 assert(rules.includes('match /{document=**}'), 'Default deny rule must exist');
 
 console.log('✅ Firestore Security Rules Structural & Boundary Verification PASSED!');
