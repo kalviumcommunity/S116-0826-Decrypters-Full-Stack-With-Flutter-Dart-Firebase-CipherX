@@ -1,0 +1,25 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Security Incident Evidence Storage boundaries (PR #27)
+    // Canonical path: incidents/{incidentId}/evidence/{fileId}
+    match /incidents/{incidentId}/evidence/{fileId} {
+      // Read: Authenticated users only
+      allow read: if request.auth != null;
+
+      // Write: Authenticated users, maximum 10 MB (10485760 bytes), allowed content types
+      allow write: if request.auth != null
+        && request.resource.size <= 10 * 1024 * 1024
+        && (request.resource.contentType.matches('image/(jpeg|png|webp)')
+            || request.resource.contentType == 'application/pdf');
+
+      // Delete: Strictly prohibited for clients (audit integrity)
+      allow delete: if false;
+    }
+
+    // Default deny rule for all unspecified paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

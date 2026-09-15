@@ -104,6 +104,27 @@ service cloud.firestore {
 
         // Delete: Strictly forbidden (incident audit trail is immutable)
         allow delete: if false;
+
+        // Incident Evidence Subcollection (PR #27)
+        match /evidence/{evidenceId} {
+          // Read: Authenticated members of the organization
+          allow read: if isAuthenticated()
+            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+
+          // Create: Authenticated reporter in the same organization
+          allow create: if isAuthenticated()
+            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+            && request.resource.data.organizationId == organizationId
+            && request.resource.data.incidentId == incidentId
+            && request.resource.data.uploadedBy == request.auth.uid
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.sizeBytes is int
+            && request.resource.data.sizeBytes <= 10485760
+            && request.resource.data.contentType in ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+
+          // Updates and deletions forbidden
+          allow update, delete: if false;
+        }
       }
     }
 

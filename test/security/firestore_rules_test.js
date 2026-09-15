@@ -45,7 +45,14 @@ assert(rules.includes("request.resource.data.status == 'OPEN'"), 'Status must be
 assert(rules.includes('request.resource.data.createdAt == request.time'), 'createdAt must equal request.time on creation');
 assert(rules.includes('request.resource.data.updatedAt == request.time'), 'updatedAt must equal request.time on creation');
 
-// 7. Default deny rule
+// 7. Must secure /organizations/{organizationId}/incidents/{incidentId}/evidence/{evidenceId} (PR #27)
+assert(rules.includes('match /evidence/{evidenceId}'), 'Rules must define incident evidence subcollection');
+assert(rules.includes('request.resource.data.uploadedBy == request.auth.uid'), 'Must enforce uploadedBy == auth.uid');
+assert(rules.includes('request.resource.data.incidentId == incidentId'), 'Must enforce incidentId matching parent');
+assert(rules.includes('request.resource.data.sizeBytes <= 10485760'), 'Must enforce sizeBytes limit in firestore');
+assert(rules.includes('allow update, delete: if false;'), 'Evidence update and delete must be forbidden');
+
+// 8. Default deny rule
 assert(rules.includes('match /{document=**}'), 'Default deny rule must exist');
 
 console.log('✅ Firestore Security Rules Structural & Boundary Verification PASSED!');

@@ -1,3 +1,4 @@
+import '../../features/incidents/presentation/screens/incident_evidence_upload_screen.dart';
 import '../../features/incidents/presentation/screens/incident_list_screen.dart';
 import '../../features/incidents/presentation/screens/incident_report_screen.dart';
 import '../../features/attendance/presentation/screens/guard_check_in_screen.dart';
@@ -68,6 +69,8 @@ abstract class AppRoutes {
   static const String attendanceDetails = '/guard/attendance-history/details';
   static const String incidents = '/guard/incidents';
   static const String reportIncident = '/guard/incidents/report';
+  static const String incidentEvidence =
+      '/guard/incidents/:incidentId/evidence';
   static const String profile = '/guard/profile';
 }
 
@@ -337,6 +340,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.reportIncident,
         builder: (BuildContext context, GoRouterState state) =>
             const IncidentReportScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.incidentEvidence,
+        builder: (BuildContext context, GoRouterState state) {
+          final incidentId = state.pathParameters['incidentId'] ?? '';
+          return IncidentEvidenceUploadScreen(incidentId: incidentId);
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (
