@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/incident.dart';
@@ -149,6 +150,22 @@ class IncidentCard extends StatelessWidget {
                     ),
                   ),
                 ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: () {
+                    context.push(
+                        '/guard/incidents/${incident.incidentId}/evidence');
+                  },
+                  icon: const Icon(Icons.attach_file, size: 18),
+                  label: const Text('Evidence'),
+                ),
               ],
             ),
           ],
