@@ -45,14 +45,23 @@ assert(rules.includes("request.resource.data.status == 'OPEN'"), 'Status must be
 assert(rules.includes('request.resource.data.createdAt == request.time'), 'createdAt must equal request.time on creation');
 assert(rules.includes('request.resource.data.updatedAt == request.time'), 'updatedAt must equal request.time on creation');
 
-// 7. Must secure /organizations/{organizationId}/incidents/{incidentId}/evidence/{evidenceId} (PR #27)
+// 7. Must secure incident updates for PR #28 Incident Management
+assert(rules.includes("data.role in ['admin', 'supervisor']"), 'Must restrict incident update to admin and supervisor');
+assert(rules.includes('request.resource.data.reportedBy == resource.data.reportedBy'), 'Must enforce reportedBy immutability on incident update');
+assert(rules.includes('request.resource.data.siteId == resource.data.siteId'), 'Must enforce siteId immutability on incident update');
+assert(rules.includes('request.resource.data.createdAt == resource.data.createdAt'), 'Must enforce createdAt immutability on incident update');
+assert(rules.includes("request.resource.data.status == 'RESOLVED'"), 'Must enforce RESOLVED status rules');
+assert(rules.includes('request.resource.data.resolvedBy == request.auth.uid'), 'Must enforce resolvedBy == auth.uid');
+assert(rules.includes("request.resource.data.resolution != ''"), 'Must enforce non-empty resolution');
+
+// 8. Must secure /organizations/{organizationId}/incidents/{incidentId}/evidence/{evidenceId} (PR #27)
 assert(rules.includes('match /evidence/{evidenceId}'), 'Rules must define incident evidence subcollection');
 assert(rules.includes('request.resource.data.uploadedBy == request.auth.uid'), 'Must enforce uploadedBy == auth.uid');
 assert(rules.includes('request.resource.data.incidentId == incidentId'), 'Must enforce incidentId matching parent');
 assert(rules.includes('request.resource.data.sizeBytes <= 10485760'), 'Must enforce sizeBytes limit in firestore');
 assert(rules.includes('allow update, delete: if false;'), 'Evidence update and delete must be forbidden');
 
-// 8. Default deny rule
+// 9. Default deny rule
 assert(rules.includes('match /{document=**}'), 'Default deny rule must exist');
 
 console.log('✅ Firestore Security Rules Structural & Boundary Verification PASSED!');

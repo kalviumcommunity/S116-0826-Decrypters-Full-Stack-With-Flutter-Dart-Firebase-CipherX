@@ -99,8 +99,34 @@ service cloud.firestore {
           && (!('resolvedAt' in request.resource.data) || request.resource.data.resolvedAt == null)
           && (!('resolvedBy' in request.resource.data) || request.resource.data.resolvedBy == null);
 
-        // Update: Reserved for Incident Management (PR #28)
-        allow update: if false;
+        // Update: Incident Management (PR #28) - Admin & Supervisor lifecycle operations
+        allow update: if isAuthenticated()
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'supervisor']
+          && request.resource.data.organizationId == resource.data.organizationId
+          && request.resource.data.reportedBy == resource.data.reportedBy
+          && request.resource.data.siteId == resource.data.siteId
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.description == resource.data.description
+          && request.resource.data.severity == resource.data.severity
+          && request.resource.data.createdAt == resource.data.createdAt
+          && (!('latitude' in resource.data) || request.resource.data.latitude == resource.data.latitude)
+          && (!('longitude' in resource.data) || request.resource.data.longitude == resource.data.longitude)
+          && request.resource.data.updatedAt == request.time
+          && (
+            // Transition from OPEN -> INVESTIGATING
+            (resource.data.status == 'OPEN' && request.resource.data.status == 'INVESTIGATING'
+              && (!('resolvedAt' in request.resource.data) || request.resource.data.resolvedAt == null)
+              && (!('resolvedBy' in request.resource.data) || request.resource.data.resolvedBy == null)
+              && (!('resolution' in request.resource.data) || request.resource.data.resolution == null))
+            // Transition from OPEN or INVESTIGATING -> RESOLVED
+            || ((resource.data.status == 'OPEN' || resource.data.status == 'INVESTIGATING')
+              && request.resource.data.status == 'RESOLVED'
+              && request.resource.data.resolvedBy == request.auth.uid
+              && request.resource.data.resolvedAt == request.time
+              && request.resource.data.resolution is string
+              && request.resource.data.resolution != '')
+          );
 
         // Delete: Strictly forbidden (incident audit trail is immutable)
         allow delete: if false;
