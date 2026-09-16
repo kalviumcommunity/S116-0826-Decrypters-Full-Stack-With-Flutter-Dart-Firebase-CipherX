@@ -157,4 +157,33 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       throw UnknownAttendanceFailure(e.toString());
     }
   }
+
+  @override
+  Future<List<AttendanceRecord>> getAttendanceByOrganization(
+    String organizationId, {
+    AttendanceStatus? status,
+  }) async {
+    try {
+      if (organizationId.trim().isEmpty) return [];
+      return await dataSource.getAttendanceByOrganization(
+        organizationId,
+        status: status,
+      );
+    } catch (e) {
+      if (e is AttendanceFailure) rethrow;
+      throw UnknownAttendanceFailure(e.toString());
+    }
+  }
+
+  @override
+  Stream<List<AttendanceRecord>> watchAttendanceByOrganization(
+    String organizationId, {
+    AttendanceStatus? status,
+  }) {
+    if (organizationId.trim().isEmpty) return Stream.value([]);
+    return dataSource.watchAttendanceByOrganization(
+      organizationId,
+      status: status,
+    );
+  }
 }

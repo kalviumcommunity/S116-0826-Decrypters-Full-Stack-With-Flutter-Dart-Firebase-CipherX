@@ -262,6 +262,28 @@ class FakeAttendanceRepository implements AttendanceRepository {
     required String guardId,
   }) =>
       Stream.value(records.values.toList());
+
+  @override
+  Future<List<AttendanceRecord>> getAttendanceByOrganization(
+    String organizationId, {
+    AttendanceStatus? status,
+  }) async =>
+      records.values.where((r) {
+        if (r.organizationId != organizationId) return false;
+        if (status != null && r.status != status) return false;
+        return true;
+      }).toList();
+
+  @override
+  Stream<List<AttendanceRecord>> watchAttendanceByOrganization(
+    String organizationId, {
+    AttendanceStatus? status,
+  }) =>
+      Stream.value(records.values.where((r) {
+        if (r.organizationId != organizationId) return false;
+        if (status != null && r.status != status) return false;
+        return true;
+      }).toList());
 }
 
 // =============================================================================

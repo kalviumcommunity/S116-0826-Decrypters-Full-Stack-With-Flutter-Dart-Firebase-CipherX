@@ -217,4 +217,33 @@ class FirebaseAttendanceDataSource {
       );
     });
   }
+
+  Future<List<AttendanceRecord>> getAttendanceByOrganization(
+    String organizationId, {
+    AttendanceStatus? status,
+  }) async {
+    Query<Map<String, dynamic>> query = _attendanceCollection(organizationId);
+    if (status != null) {
+      query = query.where('status', isEqualTo: status.toMapString());
+    }
+    final snapshot = await query.get();
+    return snapshot.docs
+        .map((doc) => AttendanceRecord.fromMap(doc.data(), doc.id))
+        .toList();
+  }
+
+  Stream<List<AttendanceRecord>> watchAttendanceByOrganization(
+    String organizationId, {
+    AttendanceStatus? status,
+  }) {
+    Query<Map<String, dynamic>> query = _attendanceCollection(organizationId);
+    if (status != null) {
+      query = query.where('status', isEqualTo: status.toMapString());
+    }
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => AttendanceRecord.fromMap(doc.data(), doc.id))
+          .toList();
+    });
+  }
 }
