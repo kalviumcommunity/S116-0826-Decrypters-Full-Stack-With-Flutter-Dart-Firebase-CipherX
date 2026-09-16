@@ -59,6 +59,13 @@ final incidentEvidenceListProvider =
   );
 });
 
+/// Provider to fetch download URL for a storage path.
+final evidenceDownloadUrlProvider =
+    FutureProvider.family<String, String>((ref, storagePath) {
+  final repository = ref.watch(evidenceRepositoryProvider);
+  return repository.getEvidenceDownloadUrl(storagePath);
+});
+
 /// Upload lifecycle status states.
 enum EvidenceUploadStatus {
   idle,
