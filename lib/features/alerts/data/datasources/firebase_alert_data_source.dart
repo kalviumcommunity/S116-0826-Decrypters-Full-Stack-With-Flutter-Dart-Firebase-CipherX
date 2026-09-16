@@ -14,7 +14,8 @@ class FirebaseAlertDataSource {
   FirebaseAlertDataSource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  CollectionReference<Map<String, dynamic>> _alertsCollection(String organizationId) {
+  CollectionReference<Map<String, dynamic>> _alertsCollection(
+      String organizationId) {
     return _firestore
         .collection('organizations')
         .doc(organizationId.trim())
@@ -41,7 +42,8 @@ class FirebaseAlertDataSource {
         return alert;
       });
     } on FirebaseException catch (e) {
-      throw AlertPersistenceFailure('Firestore error creating alert: ${e.message}');
+      throw AlertPersistenceFailure(
+          'Firestore error creating alert: ${e.message}');
     } catch (e) {
       if (e is AlertFailure) rethrow;
       throw AlertPersistenceFailure('Unexpected error creating alert: $e');
@@ -63,7 +65,8 @@ class FirebaseAlertDataSource {
 
       return query.docs.isNotEmpty;
     } on FirebaseException catch (e) {
-      throw AlertPersistenceFailure('Failed to check source existence: ${e.message}');
+      throw AlertPersistenceFailure(
+          'Failed to check source existence: ${e.message}');
     }
   }
 
@@ -140,7 +143,8 @@ class FirebaseAlertDataSource {
         'status': status.toMapString(),
       });
     } on FirebaseException catch (e) {
-      throw AlertPersistenceFailure('Failed to update alert status: ${e.message}');
+      throw AlertPersistenceFailure(
+          'Failed to update alert status: ${e.message}');
     }
   }
 }

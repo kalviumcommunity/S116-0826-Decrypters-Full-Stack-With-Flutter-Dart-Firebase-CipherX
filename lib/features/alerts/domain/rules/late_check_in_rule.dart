@@ -61,9 +61,8 @@ class LateCheckInRule implements AlertRule<LateCheckInInput> {
           r.guardId == shift.guardId,
     );
 
-    final actualCheckInTime = matchingRecords.isNotEmpty
-        ? matchingRecords.first.checkInTime
-        : null;
+    final actualCheckInTime =
+        matchingRecords.isNotEmpty ? matchingRecords.first.checkInTime : null;
 
     final isLate = policy.isLate(
       scheduledStartTime: scheduledStartTime,

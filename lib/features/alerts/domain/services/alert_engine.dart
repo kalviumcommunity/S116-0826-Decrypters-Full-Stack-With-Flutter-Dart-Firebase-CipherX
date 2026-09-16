@@ -33,10 +33,12 @@ class AlertEngine {
     this.clock = const SystemClock(),
     MissedShiftPolicy missedShiftPolicy = const DefaultMissedShiftPolicy(),
     LateCheckInPolicy lateCheckInPolicy = const DefaultLateCheckInPolicy(),
-    SiteCoverageProvider siteCoverageProvider = const StaticSiteCoverageProvider(),
+    SiteCoverageProvider siteCoverageProvider =
+        const StaticSiteCoverageProvider(),
   })  : missedShiftRule = MissedShiftRule(policy: missedShiftPolicy),
         lateCheckInRule = LateCheckInRule(policy: lateCheckInPolicy),
-        understaffedSiteRule = UnderstaffedSiteRule(coverageProvider: siteCoverageProvider),
+        understaffedSiteRule =
+            UnderstaffedSiteRule(coverageProvider: siteCoverageProvider),
         criticalIncidentRule = const CriticalIncidentRule();
 
   /// Evaluates and idempotently registers a missed shift alert if conditions are met.

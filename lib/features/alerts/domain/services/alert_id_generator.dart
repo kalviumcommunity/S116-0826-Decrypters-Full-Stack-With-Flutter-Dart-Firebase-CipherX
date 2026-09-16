@@ -6,7 +6,8 @@ class AlertIdGenerator {
   static String lateCheckIn(String orgId, String shiftId) =>
       'alert_${orgId.trim()}_${shiftId.trim()}_late_check_in';
 
-  static String understaffedSite(String orgId, String siteId, String windowKey) =>
+  static String understaffedSite(
+          String orgId, String siteId, String windowKey) =>
       'alert_${orgId.trim()}_${siteId.trim()}_understaffed_${windowKey.trim()}';
 
   static String criticalIncident(String orgId, String incidentId) =>

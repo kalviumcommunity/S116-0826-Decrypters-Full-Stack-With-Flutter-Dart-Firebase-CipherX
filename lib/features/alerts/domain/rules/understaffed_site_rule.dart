@@ -39,7 +39,8 @@ class UnderstaffedSiteRule implements AlertRule<UnderstaffedSiteInput> {
       return null;
     }
 
-    final dateKey = '${evaluationTime.year}-${evaluationTime.month.toString().padLeft(2, '0')}-${evaluationTime.day.toString().padLeft(2, '0')}_${evaluationTime.hour}';
+    final dateKey =
+        '${evaluationTime.year}-${evaluationTime.month.toString().padLeft(2, '0')}-${evaluationTime.day.toString().padLeft(2, '0')}_${evaluationTime.hour}';
     final alertId = AlertIdGenerator.understaffedSite(
       input.organizationId,
       input.siteId,

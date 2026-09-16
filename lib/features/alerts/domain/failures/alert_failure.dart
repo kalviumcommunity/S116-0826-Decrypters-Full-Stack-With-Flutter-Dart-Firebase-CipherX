@@ -31,17 +31,21 @@ class AlertNotFoundFailure extends AlertFailure {
 }
 
 class AlertDuplicateFailure extends AlertFailure {
-  const AlertDuplicateFailure([super.message = 'Alert already exists for this source event.']);
+  const AlertDuplicateFailure(
+      [super.message = 'Alert already exists for this source event.']);
 }
 
 class UnauthorizedAlertActionFailure extends AlertFailure {
-  const UnauthorizedAlertActionFailure([super.message = 'Unauthorized alert action.']);
+  const UnauthorizedAlertActionFailure(
+      [super.message = 'Unauthorized alert action.']);
 }
 
 class AlertPersistenceFailure extends AlertFailure {
-  const AlertPersistenceFailure([super.message = 'Failed to persist alert in storage.']);
+  const AlertPersistenceFailure(
+      [super.message = 'Failed to persist alert in storage.']);
 }
 
 class NotificationDispatchFailure extends AlertFailure {
-  const NotificationDispatchFailure([super.message = 'Failed to dispatch notification.']);
+  const NotificationDispatchFailure(
+      [super.message = 'Failed to dispatch notification.']);
 }

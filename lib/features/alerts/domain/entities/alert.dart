@@ -65,7 +65,8 @@ class Alert {
   }
 
   factory Alert.fromMap(Map<String, dynamic> map, [String? fallbackId]) {
-    final alertId = (map['alertId'] as String?)?.trim() ?? fallbackId?.trim() ?? '';
+    final alertId =
+        (map['alertId'] as String?)?.trim() ?? fallbackId?.trim() ?? '';
     final organizationId = (map['organizationId'] as String?)?.trim() ?? '';
     final rawType = map['type'] as String?;
     final sourceEntityId = (map['sourceEntityId'] as String?)?.trim() ?? '';
@@ -105,7 +106,8 @@ class Alert {
       organizationId: organizationId,
       type: AlertType.fromMapString(rawType),
       sourceEntityId: sourceEntityId,
-      sourceEntityType: sourceEntityType.isNotEmpty ? sourceEntityType : 'unknown',
+      sourceEntityType:
+          sourceEntityType.isNotEmpty ? sourceEntityType : 'unknown',
       createdAt: createdAt,
       status: AlertStatus.fromMapString(rawStatus),
       metadata: metadata,
