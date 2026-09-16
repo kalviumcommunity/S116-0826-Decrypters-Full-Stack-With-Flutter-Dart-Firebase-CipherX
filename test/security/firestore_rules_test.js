@@ -61,7 +61,14 @@ assert(rules.includes('request.resource.data.incidentId == incidentId'), 'Must e
 assert(rules.includes('request.resource.data.sizeBytes <= 10485760'), 'Must enforce sizeBytes limit in firestore');
 assert(rules.includes('allow update, delete: if false;'), 'Evidence update and delete must be forbidden');
 
-// 9. Default deny rule
+// 9. Must secure /organizations/{organizationId}/alerts/{alertId} (PR #29 Alert Engine)
+assert(rules.includes('match /alerts/{alertId}'), 'Rules must define /alerts/{alertId} subcollection');
+assert(rules.includes("request.resource.data.type in ['MISSED_SHIFT', 'LATE_CHECK_IN', 'UNDERSTAFFED_SITE', 'CRITICAL_INCIDENT']"), 'Must validate alert type enum');
+assert(rules.includes("request.resource.data.sourceEntityType in ['shift', 'site', 'incident']"), 'Must validate sourceEntityType');
+assert(rules.includes('request.resource.data.organizationId == organizationId'), 'Must enforce tenant isolation on alerts');
+assert(rules.includes('request.resource.data.alertId == alertId'), 'Must enforce alertId matching document path');
+
+// 10. Default deny rule
 assert(rules.includes('match /{document=**}'), 'Default deny rule must exist');
 
 console.log('✅ Firestore Security Rules Structural & Boundary Verification PASSED!');

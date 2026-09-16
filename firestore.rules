@@ -152,6 +152,40 @@ service cloud.firestore {
           allow update, delete: if false;
         }
       }
+      // Alerts Subcollection (PR #29 Alert Engine)
+      match /alerts/{alertId} {
+        // Read: authenticated members of the organization
+        allow read: if isAuthenticated() 
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+
+        // Create: Authenticated member within their organization creating an alert
+        allow create: if isAuthenticated() 
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.alertId == alertId
+          && request.resource.data.type in ['MISSED_SHIFT', 'LATE_CHECK_IN', 'UNDERSTAFFED_SITE', 'CRITICAL_INCIDENT']
+          && request.resource.data.sourceEntityId is string
+          && request.resource.data.sourceEntityId != ''
+          && request.resource.data.sourceEntityType in ['shift', 'site', 'incident']
+          && request.resource.data.status in ['active', 'acknowledged', 'resolved']
+          && request.resource.data.createdAt == request.time;
+
+        // Update: Authorized admin or supervisor can update status
+        allow update: if isAuthenticated() 
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'supervisor']
+          && request.resource.data.organizationId == resource.data.organizationId
+          && request.resource.data.alertId == resource.data.alertId
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.sourceEntityId == resource.data.sourceEntityId
+          && request.resource.data.sourceEntityType == resource.data.sourceEntityType
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.status in ['active', 'acknowledged', 'resolved'];
+
+        // Delete: strictly forbidden (alerts are immutable audit trail)
+        allow delete: if false;
+      }
+
     }
 
     // Default deny all other paths
