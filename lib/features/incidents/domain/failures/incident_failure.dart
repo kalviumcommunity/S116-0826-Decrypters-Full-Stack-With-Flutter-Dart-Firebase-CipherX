@@ -102,6 +102,28 @@ class MissingResolutionMetadataFailure extends IncidentValidationFailure {
 }
 
 /// Thrown when an unresolved incident (OPEN/INVESTIGATING) contains resolution metadata.
+/// Thrown when resolution text is empty or whitespace-only.
+class InvalidResolutionTextFailure extends IncidentValidationFailure {
+  const InvalidResolutionTextFailure([
+    super.message = 'Resolution text cannot be empty or whitespace-only.',
+  ]);
+}
+
+/// Thrown when a user attempts an incident action without proper role/tenant authorization.
+class UnauthorizedIncidentActionFailure extends IncidentFailure {
+  const UnauthorizedIncidentActionFailure([
+    super.message = 'Unauthorized to perform this incident management action.',
+  ]);
+}
+
+/// Thrown when concurrent modification of an incident is detected.
+class ConcurrentIncidentModificationFailure extends IncidentFailure {
+  const ConcurrentIncidentModificationFailure([
+    super.message =
+        'The incident state was modified concurrently. Please refresh.',
+  ]);
+}
+
 class ContradictoryResolutionMetadataFailure extends IncidentValidationFailure {
   const ContradictoryResolutionMetadataFailure(super.message);
 }

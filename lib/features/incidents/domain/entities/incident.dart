@@ -24,6 +24,7 @@ class Incident {
   final DateTime updatedAt;
   final DateTime? resolvedAt;
   final String? resolvedBy;
+  final String? resolution;
 
   const Incident({
     required this.incidentId,
@@ -40,6 +41,7 @@ class Incident {
     required this.updatedAt,
     this.resolvedAt,
     this.resolvedBy,
+    this.resolution,
   });
 
   /// Factory for creating and validating a brand-new incident report in the [IncidentStatus.open] state.
@@ -99,6 +101,7 @@ class Incident {
   /// Throws [InvalidStatusTransitionFailure] if transition from current [status] is illegal.
   Incident resolve({
     required String resolvedBy,
+    String? resolution,
     DateTime? resolvedAt,
     DateTime? updatedAt,
   }) {
@@ -117,6 +120,7 @@ class Incident {
     final updated = copyWith(
       status: IncidentStatus.resolved,
       resolvedBy: resolvedBy,
+      resolution: resolution,
       resolvedAt: resolvedTimestamp,
       updatedAt: updatedTimestamp,
     );
@@ -157,6 +161,7 @@ class Incident {
     DateTime? updatedAt,
     DateTime? resolvedAt,
     String? resolvedBy,
+    String? resolution,
   }) {
     return Incident(
       incidentId: incidentId ?? this.incidentId,
@@ -173,6 +178,7 @@ class Incident {
       updatedAt: updatedAt ?? this.updatedAt,
       resolvedAt: resolvedAt ?? this.resolvedAt,
       resolvedBy: resolvedBy ?? this.resolvedBy,
+      resolution: resolution ?? this.resolution,
     );
   }
 
@@ -193,6 +199,7 @@ class Incident {
       'updatedAt': updatedAt.toIso8601String(),
       'resolvedAt': resolvedAt?.toIso8601String(),
       'resolvedBy': resolvedBy,
+      'resolution': resolution,
     };
   }
 
@@ -313,6 +320,7 @@ class Incident {
     }
 
     final resolvedBy = map['resolvedBy'] as String?;
+    final resolution = map['resolution'] as String?;
 
     final incident = Incident(
       incidentId: rawId,
@@ -329,6 +337,7 @@ class Incident {
       updatedAt: updatedAt,
       resolvedAt: resolvedAt,
       resolvedBy: resolvedBy,
+      resolution: resolution,
     );
 
     return IncidentValidator.validate(incident);
@@ -351,7 +360,8 @@ class Incident {
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
         other.resolvedAt == resolvedAt &&
-        other.resolvedBy == resolvedBy;
+        other.resolvedBy == resolvedBy &&
+        other.resolution == resolution;
   }
 
   @override
