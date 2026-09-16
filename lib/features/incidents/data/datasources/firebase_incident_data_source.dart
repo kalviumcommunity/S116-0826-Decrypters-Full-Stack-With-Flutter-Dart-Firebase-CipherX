@@ -1,3 +1,5 @@
+import '../../domain/failures/incident_failure.dart';
+import '../../domain/validators/incident_validator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/incident.dart';
@@ -195,31 +197,82 @@ class FirebaseIncidentDataSource {
     required IncidentStatus status,
     String? resolvedBy,
     DateTime? resolvedAt,
+    String? resolution,
   }) async {
     final docRef = _incidentsCollection(organizationId).doc(incidentId);
-    final updates = <String, dynamic>{
-      'status': status.toMapString(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
-    if (status == IncidentStatus.resolved) {
-      updates['resolvedBy'] = resolvedBy;
-      updates['resolvedAt'] = resolvedAt != null
-          ? Timestamp.fromDate(resolvedAt)
-          : FieldValue.serverTimestamp();
-    } else {
-      updates['resolvedBy'] = null;
-      updates['resolvedAt'] = null;
-    }
 
-    await docRef.update(updates);
-    final snapshot = await docRef.get();
-    if (!snapshot.exists || snapshot.data() == null) {
-      throw FirebaseException(
-        plugin: 'cloud_firestore',
-        code: 'not-found',
-        message: 'Incident document does not exist after status update.',
+    return await _firestore.runTransaction<Incident>((transaction) async {
+      final doc = await transaction.get(docRef);
+      if (!doc.exists || doc.data() == null) {
+        throw const IncidentNotFoundFailure();
+      }
+
+      final existing = Incident.fromMap(doc.data()!, doc.id);
+
+      if (existing.organizationId != organizationId) {
+        throw const InvalidOrganizationIdFailure(
+          'Incident does not belong to specified organization.',
+        );
+      }
+
+      // Concurrency check: enforce state transition validation
+      if (existing.status == IncidentStatus.resolved &&
+          status != IncidentStatus.resolved) {
+        throw const IncidentAlreadyResolvedFailure();
+      }
+
+      IncidentValidator.validateStatusTransition(
+        from: existing.status,
+        to: status,
       );
-    }
-    return Incident.fromMap(snapshot.data()!, incidentId);
+
+      final now = DateTime.now();
+      final updates = <String, dynamic>{
+        'status': status.toMapString(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (status == IncidentStatus.resolved) {
+        if (resolvedBy == null || resolvedBy.trim().isEmpty) {
+          throw const MissingResolutionMetadataFailure(
+            'Resolver ID required when resolving an incident.',
+          );
+        }
+        if (resolution != null) {
+          final resErr = IncidentValidator.validateResolution(resolution);
+          if (resErr != null) {
+            throw InvalidResolutionTextFailure(resErr);
+          }
+        }
+
+        updates['resolvedBy'] = resolvedBy.trim();
+        updates['resolvedAt'] = resolvedAt != null
+            ? Timestamp.fromDate(resolvedAt)
+            : FieldValue.serverTimestamp();
+        updates['resolution'] = resolution?.trim();
+      } else {
+        updates['resolvedBy'] = null;
+        updates['resolvedAt'] = null;
+        updates['resolution'] = null;
+      }
+
+      transaction.update(docRef, updates);
+
+      if (status == IncidentStatus.resolved) {
+        return existing.resolve(
+          resolvedBy: resolvedBy!.trim(),
+          resolution: resolution?.trim(),
+          resolvedAt: resolvedAt ?? now,
+          updatedAt: now,
+        );
+      } else if (status == IncidentStatus.investigating) {
+        return existing.investigate(updatedAt: now);
+      } else {
+        return existing.copyWith(
+          status: status,
+          updatedAt: now,
+        );
+      }
+    });
   }
 }

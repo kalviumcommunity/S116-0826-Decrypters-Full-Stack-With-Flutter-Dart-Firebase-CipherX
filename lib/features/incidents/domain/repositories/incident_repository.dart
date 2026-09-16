@@ -69,5 +69,6 @@ abstract class IncidentRepository {
     required IncidentStatus status,
     String? resolvedBy,
     DateTime? resolvedAt,
+    String? resolution,
   });
 }
