@@ -83,7 +83,7 @@ void main() {
       expect(map['sourceEntityId'], 'inc_123');
       expect(map['sourceEntityType'], 'incident');
       expect(map['status'], 'active');
-      expect(map['metadata'], {'severity': 'CRITICAL'});
+      expect(map['metadata'], const {'severity': 'CRITICAL'});
 
       final fromMap = Alert.fromMap(map);
       expect(fromMap.alertId, alert.alertId);
@@ -95,7 +95,7 @@ void main() {
 
     test('throws InvalidAlertDataFailure on empty fields', () {
       expect(
-        () => Alert.fromMap({
+        () => Alert.fromMap(const {
           'alertId': '',
           'organizationId': 'org_1',
           'type': 'MISSED_SHIFT',
@@ -105,7 +105,7 @@ void main() {
       );
 
       expect(
-        () => Alert.fromMap({
+        () => Alert.fromMap(const {
           'alertId': 'a1',
           'organizationId': '',
           'type': 'MISSED_SHIFT',
