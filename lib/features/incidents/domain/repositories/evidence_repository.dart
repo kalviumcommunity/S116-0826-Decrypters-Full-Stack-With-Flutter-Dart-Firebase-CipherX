@@ -29,6 +29,9 @@ abstract class EvidenceRepository {
   });
 
   /// Deletes an evidence item and its associated storage object.
+  /// Retrieves a secure download URL for an uploaded evidence item's [storagePath].
+  Future<String> getEvidenceDownloadUrl(String storagePath);
+
   Future<void> deleteEvidence({
     required String organizationId,
     required String incidentId,

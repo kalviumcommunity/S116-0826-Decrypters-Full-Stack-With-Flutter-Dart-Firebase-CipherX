@@ -51,6 +51,17 @@ class AdminDashboardScreen extends ConsumerWidget {
                 onTap: () => context.push(AppRoutes.adminSites),
               ),
             ),
+            const SizedBox(height: 12),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.report_problem_outlined, size: 32),
+                title: const Text('Incident Management'),
+                subtitle:
+                    const Text('Review, investigate, and resolve incidents'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(AppRoutes.adminIncidents),
+              ),
+            ),
             const Spacer(),
             ElevatedButton.icon(
               onPressed: () =>

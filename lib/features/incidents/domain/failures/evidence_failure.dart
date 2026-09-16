@@ -88,6 +88,18 @@ class PersistenceFailure extends EvidenceFailure {
   ]) : super(code: 'persistence_failed');
 }
 
+class EvidenceNotFoundFailure extends EvidenceFailure {
+  const EvidenceNotFoundFailure([
+    super.message = 'Evidence item was not found in storage.',
+  ]) : super(code: 'evidence_not_found');
+}
+
+class EvidenceDownloadUrlFailure extends EvidenceFailure {
+  const EvidenceDownloadUrlFailure([
+    super.message = 'Failed to retrieve evidence download URL.',
+  ]) : super(code: 'download_url_failed');
+}
+
 class NetworkFailure extends EvidenceFailure {
   const NetworkFailure([
     super.message = 'Network error during evidence operation.',

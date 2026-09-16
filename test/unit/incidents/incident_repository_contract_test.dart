@@ -151,6 +151,7 @@ class FakeIncidentRepository implements IncidentRepository {
     required IncidentStatus status,
     String? resolvedBy,
     DateTime? resolvedAt,
+    String? resolution,
   }) async {
     final existing = await getIncident(
         organizationId: organizationId, incidentId: incidentId);
@@ -169,6 +170,7 @@ class FakeIncidentRepository implements IncidentRepository {
       final updated = existing.resolve(
         resolvedBy: resolvedBy,
         resolvedAt: resolvedAt,
+        resolution: resolution,
       );
       return updateIncident(updated);
     } else {

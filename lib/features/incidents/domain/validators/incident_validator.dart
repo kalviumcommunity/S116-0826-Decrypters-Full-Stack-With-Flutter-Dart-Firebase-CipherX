@@ -52,6 +52,14 @@ class IncidentValidator {
     return null;
   }
 
+  /// Validates incident resolution notes.
+  static String? validateResolution(String? resolution) {
+    if (resolution == null || resolution.trim().isEmpty) {
+      return 'Resolution text cannot be empty or whitespace-only.';
+    }
+    return null;
+  }
+
   /// Validates geographic coordinate consistency and boundaries.
   ///
   /// Enforces that coordinates are either both absent (null) or both present.
@@ -131,6 +139,7 @@ class IncidentValidator {
     required DateTime? resolvedAt,
     required String? resolvedBy,
     required DateTime createdAt,
+    String? resolution,
   }) {
     if (status == IncidentStatus.resolved) {
       if (resolvedAt == null) {
@@ -150,6 +159,10 @@ class IncidentValidator {
           'resolvedAt ($resolvedAt) cannot be earlier than createdAt ($createdAt).',
         );
       }
+
+      if (resolution != null && resolution.trim().isEmpty) {
+        throw const InvalidResolutionTextFailure();
+      }
     } else {
       if (resolvedAt != null) {
         throw ContradictoryResolutionMetadataFailure(
@@ -160,6 +173,12 @@ class IncidentValidator {
       if (resolvedBy != null) {
         throw ContradictoryResolutionMetadataFailure(
           'Unresolved incident ($status) cannot have a resolvedBy identifier.',
+        );
+      }
+
+      if (resolution != null) {
+        throw ContradictoryResolutionMetadataFailure(
+          'Unresolved incident ($status) cannot have a resolution.',
         );
       }
     }
@@ -187,6 +206,7 @@ class IncidentValidator {
       type: incident.type.trim(),
       description: incident.description.trim(),
       resolvedBy: incident.resolvedBy?.trim(),
+      resolution: incident.resolution?.trim(),
     );
   }
 
@@ -229,6 +249,7 @@ class IncidentValidator {
       resolvedAt: incident.resolvedAt,
       resolvedBy: incident.resolvedBy,
       createdAt: incident.createdAt,
+      resolution: incident.resolution,
     );
 
     return normalize(incident);

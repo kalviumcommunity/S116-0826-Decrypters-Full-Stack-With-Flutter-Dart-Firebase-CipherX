@@ -83,6 +83,7 @@ class FakeIncidentRepository implements IncidentRepository {
     required IncidentStatus status,
     String? resolvedBy,
     DateTime? resolvedAt,
+    String? resolution,
   }) async {
     return incidents.first;
   }

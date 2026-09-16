@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/incident.dart';
 import '../../domain/entities/incident_severity.dart';
 import '../../domain/entities/incident_status.dart';
@@ -166,6 +167,7 @@ class IncidentRepositoryImpl implements IncidentRepository {
     required IncidentStatus status,
     String? resolvedBy,
     DateTime? resolvedAt,
+    String? resolution,
   }) async {
     try {
       if (organizationId.trim().isEmpty) {
@@ -184,6 +186,12 @@ class IncidentRepositoryImpl implements IncidentRepository {
             'Resolver ID required.',
           );
         }
+        if (resolution != null) {
+          final resErr = IncidentValidator.validateResolution(resolution);
+          if (resErr != null) {
+            throw InvalidResolutionTextFailure(resErr);
+          }
+        }
       }
       return await _dataSource.updateIncidentStatus(
         organizationId: organizationId,
@@ -191,9 +199,21 @@ class IncidentRepositoryImpl implements IncidentRepository {
         status: status,
         resolvedBy: resolvedBy,
         resolvedAt: resolvedAt,
+        resolution: resolution,
       );
     } on IncidentFailure {
       rethrow;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw IncidentDatabaseFailure('Permission denied: ${e.message}');
+      }
+      if (e.code == 'not-found') {
+        throw const IncidentNotFoundFailure();
+      }
+      if (e.code == 'unavailable') {
+        throw IncidentDatabaseFailure('Network unavailable: ${e.message}');
+      }
+      throw IncidentDatabaseFailure(e.message ?? e.code);
     } catch (e) {
       throw UnknownIncidentFailure(e.toString());
     }

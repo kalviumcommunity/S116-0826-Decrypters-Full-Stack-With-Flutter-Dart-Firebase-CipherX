@@ -176,6 +176,11 @@ class EvidenceRepositoryImpl implements EvidenceRepository {
   }
 
   @override
+  Future<String> getEvidenceDownloadUrl(String storagePath) async {
+    return _storageDataSource.getDownloadUrl(storagePath);
+  }
+
+  @override
   Future<void> deleteEvidence({
     required String organizationId,
     required String incidentId,

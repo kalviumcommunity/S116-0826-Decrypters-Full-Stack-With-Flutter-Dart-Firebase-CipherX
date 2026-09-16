@@ -68,7 +68,8 @@ class MockIncidentRepository implements IncidentRepository {
       required String incidentId,
       required IncidentStatus status,
       String? resolvedBy,
-      DateTime? resolvedAt}) async {
+      DateTime? resolvedAt,
+      String? resolution}) async {
     return incidents.first;
   }
 }

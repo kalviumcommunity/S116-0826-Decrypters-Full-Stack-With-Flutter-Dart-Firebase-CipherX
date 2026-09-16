@@ -1,6 +1,9 @@
 import '../../features/incidents/presentation/screens/incident_evidence_upload_screen.dart';
 import '../../features/incidents/presentation/screens/incident_list_screen.dart';
 import '../../features/incidents/presentation/screens/incident_report_screen.dart';
+import '../../features/incidents/presentation/screens/admin_incident_list_screen.dart';
+import '../../features/incidents/presentation/screens/admin_incident_detail_screen.dart';
+import '../../features/incidents/domain/entities/incident.dart';
 import '../../features/attendance/presentation/screens/guard_check_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,6 +61,8 @@ abstract class AppRoutes {
   static const String adminSiteCreate = '/admin/sites/create';
   static const String adminSiteEdit = '/admin/sites/edit';
   static const String adminShiftCreate = '/admin/shifts/create';
+  static const String adminIncidents = '/admin/incidents';
+  static const String adminIncidentDetails = '/admin/incidents/:incidentId';
 
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
@@ -299,6 +304,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.adminShiftCreate,
         builder: (BuildContext context, GoRouterState state) =>
             const ShiftCreateScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminIncidents,
+        builder: (BuildContext context, GoRouterState state) =>
+            const AdminIncidentListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminIncidentDetails,
+        builder: (BuildContext context, GoRouterState state) {
+          final incidentId = state.pathParameters['incidentId'] ?? '';
+          final extra = state.extra;
+          return AdminIncidentDetailScreen(
+            incidentId: incidentId,
+            initialIncident: extra is Incident ? extra : null,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.supervisorDashboard,

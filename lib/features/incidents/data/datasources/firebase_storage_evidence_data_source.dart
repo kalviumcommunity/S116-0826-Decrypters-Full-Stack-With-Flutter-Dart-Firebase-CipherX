@@ -76,6 +76,31 @@ class FirebaseStorageEvidenceDataSource {
     }
   }
 
+  /// Retrieves download URL for an uploaded storage file.
+  Future<String> getDownloadUrl(String storagePath) async {
+    try {
+      final ref = _storage.ref().child(storagePath);
+      return await ref.getDownloadURL();
+    } on FirebaseException catch (e) {
+      if (e.code == 'object-not-found') {
+        throw const EvidenceNotFoundFailure();
+      }
+      if (e.code == 'unauthenticated') {
+        throw const UnauthenticatedFailure();
+      }
+      if (e.code == 'unauthorized' || e.code == 'permission-denied') {
+        throw const UnauthorizedFailure(
+          'Storage permission denied for evidence download URL.',
+        );
+      }
+      throw EvidenceDownloadUrlFailure(e.message ?? e.code);
+    } catch (e) {
+      if (e is EvidenceFailure) rethrow;
+      throw EvidenceDownloadUrlFailure(
+          'Unexpected error getting download URL: $e');
+    }
+  }
+
   /// Deletes an uploaded storage object (used for cleanup on partial failure).
   Future<void> deleteFile(String storagePath) async {
     try {
