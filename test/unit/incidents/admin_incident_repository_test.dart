@@ -66,7 +66,7 @@ void main() {
         () async {
       await repository.createIncident(makeSampleIncident());
 
-      final resTime = DateTime.utc(2026, 9, 16, 12, 0);
+      final resTime = DateTime.now().add(const Duration(hours: 1));
       final resolved = await repository.updateIncidentStatus(
         organizationId: orgId,
         incidentId: 'inc_concurrency_01',

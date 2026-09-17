@@ -51,6 +51,14 @@ class FirebaseShiftDataSource {
         .toList();
   }
 
+  Stream<List<Shift>> watchShiftsByOrganization(String organizationId) {
+    return _shiftsCollection(organizationId).snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => Shift.fromMap(doc.data(), doc.id))
+          .toList();
+    });
+  }
+
   Future<List<Shift>> getShiftsByGuard(
     String organizationId,
     String guardId,

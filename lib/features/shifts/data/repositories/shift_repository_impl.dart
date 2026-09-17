@@ -30,6 +30,11 @@ class ShiftRepositoryImpl implements ShiftRepository {
   }
 
   @override
+  Stream<List<Shift>> watchShiftsByOrganization(String organizationId) {
+    return _dataSource.watchShiftsByOrganization(organizationId);
+  }
+
+  @override
   Future<List<Shift>> getShiftsByGuard(
     String organizationId,
     String guardId,

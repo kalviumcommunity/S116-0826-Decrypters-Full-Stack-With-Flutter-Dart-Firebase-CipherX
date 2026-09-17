@@ -10,6 +10,8 @@ abstract class ShiftRepository {
 
   Future<List<Shift>> getShiftsByOrganization(String organizationId);
 
+  Stream<List<Shift>> watchShiftsByOrganization(String organizationId);
+
   Future<List<Shift>> getShiftsByGuard(
     String organizationId,
     String guardId,

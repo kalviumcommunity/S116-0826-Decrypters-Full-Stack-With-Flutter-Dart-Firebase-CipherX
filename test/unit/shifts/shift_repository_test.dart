@@ -37,6 +37,15 @@ class InMemoryShiftRepository implements ShiftRepository {
   }
 
   @override
+  Stream<List<Shift>> watchShiftsByOrganization(
+    String organizationId,
+  ) {
+    return Stream.value(
+      _shifts.where((s) => s.organizationId == organizationId).toList(),
+    );
+  }
+
+  @override
   Future<List<Shift>> getShiftsByGuard(
     String organizationId,
     String guardId,

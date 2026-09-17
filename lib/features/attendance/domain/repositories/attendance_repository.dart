@@ -39,4 +39,14 @@ abstract class AttendanceRepository {
     required String attendanceId,
     required LocationData location,
   });
+
+  Future<List<AttendanceRecord>> getAttendanceByOrganization(
+    String organizationId, {
+    AttendanceStatus? status,
+  });
+
+  Stream<List<AttendanceRecord>> watchAttendanceByOrganization(
+    String organizationId, {
+    AttendanceStatus? status,
+  });
 }
