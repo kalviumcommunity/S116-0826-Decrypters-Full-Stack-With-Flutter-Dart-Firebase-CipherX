@@ -54,6 +54,14 @@ class FakeShiftRepository implements ShiftRepository {
   }
 
   @override
+  Stream<List<Shift>> watchShiftsByOrganization(String organizationId) {
+    if (shouldFail) throw failure ?? const UnknownShiftFailure();
+    return Stream.value(
+      shifts.where((s) => s.organizationId == organizationId).toList(),
+    );
+  }
+
+  @override
   Future<List<Shift>> getShiftsByGuard(
     String organizationId,
     String guardId,

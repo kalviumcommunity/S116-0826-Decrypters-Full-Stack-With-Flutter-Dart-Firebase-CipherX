@@ -98,6 +98,10 @@ class FakeShiftRepository implements ShiftRepository {
       [];
 
   @override
+  Stream<List<Shift>> watchShiftsByOrganization(String organizationId) =>
+      Stream.value([]);
+
+  @override
   Future<List<Shift>> getShiftsBySite(
           String organizationId, String siteId) async =>
       [];
