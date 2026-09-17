@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
+import '../../features/activity/presentation/screens/alerts_activity_feed_screen.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/access_denied_screen.dart';
 import '../../features/auth/presentation/screens/email_verification_screen.dart';
@@ -63,6 +64,7 @@ abstract class AppRoutes {
   static const String adminShiftCreate = '/admin/shifts/create';
   static const String adminIncidents = '/admin/incidents';
   static const String adminIncidentDetails = '/admin/incidents/:incidentId';
+  static const String adminActivityFeed = '/admin/activity-feed';
 
   static const String supervisorDashboard = '/supervisor/dashboard';
   static const String guardHome = '/guard/home';
@@ -320,6 +322,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             initialIncident: extra is Incident ? extra : null,
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.adminActivityFeed,
+        builder: (BuildContext context, GoRouterState state) =>
+            const AlertsActivityFeedScreen(),
       ),
       GoRoute(
         path: AppRoutes.supervisorDashboard,
