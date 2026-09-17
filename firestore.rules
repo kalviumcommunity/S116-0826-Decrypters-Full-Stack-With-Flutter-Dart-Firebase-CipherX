@@ -186,6 +186,19 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // Audit Logs Subcollection (PR #32 Activity Feed)
+      match /auditLogs/{logId} {
+        // Read: authenticated members of the organization with admin or supervisor role
+        allow read: if isAuthenticated() 
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'supervisor'];
+
+        // Write: strictly forbidden from client (audit logs are created server-side or via backend)
+        allow create, update, delete: if false;
+      }
+
+
+
     }
 
     // Default deny all other paths

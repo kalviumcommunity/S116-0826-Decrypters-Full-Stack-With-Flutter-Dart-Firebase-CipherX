@@ -45,13 +45,21 @@ class LateCheckInRule implements AlertRule<LateCheckInInput> {
       return null;
     }
 
-    final scheduledStartTime = DateTime(
-      shift.date.year,
-      shift.date.month,
-      shift.date.day,
-      shift.startTime.hour,
-      shift.startTime.minute,
-    );
+    final scheduledStartTime = (shift.date.isUtc || evaluationTime.isUtc)
+        ? DateTime.utc(
+            shift.date.year,
+            shift.date.month,
+            shift.date.day,
+            shift.startTime.hour,
+            shift.startTime.minute,
+          )
+        : DateTime(
+            shift.date.year,
+            shift.date.month,
+            shift.date.day,
+            shift.startTime.hour,
+            shift.startTime.minute,
+          );
 
     // Look for existing attendance records for this shift & guard
     final matchingRecords = input.attendanceRecords.where(

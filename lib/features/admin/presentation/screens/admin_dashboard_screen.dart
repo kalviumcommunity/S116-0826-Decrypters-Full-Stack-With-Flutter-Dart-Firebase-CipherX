@@ -38,6 +38,12 @@ class AdminDashboardScreen extends ConsumerWidget {
         title: const Text('Command Center'),
         actions: [
           IconButton(
+            key: const Key('open_activity_feed'),
+            icon: const Icon(Icons.notifications_active_outlined),
+            tooltip: 'Alerts & Activity Feed',
+            onPressed: () => context.push(AppRoutes.adminActivityFeed),
+          ),
+          IconButton(
             key: const Key('refresh_command_center'),
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh Metrics',
