@@ -2,25 +2,62 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to check authentication
+    // ==========================================================
+    // HELPER FUNCTIONS: Authentication, Roles & Tenant Isolation
+    // ==========================================================
+    
+    // Check if the user is authenticated via Firebase Auth
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper function to check self ownership
+    // Check if the authenticated user matches the specified userId
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // User Profile security boundaries
+    // Fetch the authenticated user's profile document
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // Check if authenticated user belongs to the target organization
+    function isMemberOf(orgId) {
+      return isAuthenticated() 
+        && getUserDoc().data.organizationId == orgId;
+    }
+
+    // Check if user is an admin or supervisor of the target organization
+    function isAdminOrSupervisor(orgId) {
+      return isMemberOf(orgId) 
+        && (getUserDoc().data.role in ['admin', 'supervisor']);
+    }
+
+    // Check if user is a guard of the target organization
+    function isGuard(orgId) {
+      return isMemberOf(orgId) 
+        && getUserDoc().data.role == 'guard';
+    }
+
+    // ==========================================================
+    // TOP-LEVEL COLLECTIONS
+    // ==========================================================
+
+    // User Profiles (/users/{userId})
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      
+      // Read: Self ownership, OR admin/supervisor of the same organization
+      allow read: if isOwner(userId) 
+        || (isAuthenticated() 
+            && resource.data.organizationId == getUserDoc().data.organizationId 
+            && getUserDoc().data.role in ['admin', 'supervisor']);
+
+      // Create: User can create their own profile during registration/onboarding
       allow create: if isOwner(userId) 
         && request.resource.data.uid == userId
         && request.resource.data.organizationId != null
         && request.resource.data.organizationId != '';
 
+      // Update: User can update their own profile, but security fields are immutable
       allow update: if isOwner(userId)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.organizationId == resource.data.organizationId
@@ -28,26 +65,110 @@ service cloud.firestore {
         && (!('createdAt' in resource.data) || request.resource.data.createdAt == resource.data.createdAt)
         && (!('role' in resource.data) || request.resource.data.role == resource.data.role);
 
+      // Delete: Strictly forbidden (user accounts preserved for audit integrity)
       allow delete: if false;
     }
 
-    // Organization document rules (Read-only for members; client writes forbidden)
+    // ==========================================================
+    // TENANT ISOLATION BOUNDARY (/organizations/{organizationId})
+    // ==========================================================
+
     match /organizations/{organizationId} {
-      allow read: if isAuthenticated() 
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+      // Organization Document: Read-only for verified tenant members
+      allow read: if isMemberOf(organizationId);
       
+      // Client writes directly to organization root are forbidden
       allow write: if false;
 
-      // Attendance records subcollection security boundaries
-      match /attendance/{attendanceId} {
-        // Read: authenticated members of the organization
+      // --------------------------------------------------------
+      // Guard Directory Subcollection (PR #30 Command Center)
+      // --------------------------------------------------------
+      match /guards/{guardId} {
+        // Read: Admin/supervisor of org, OR the individual guard reading own record
         allow read: if isAuthenticated() 
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+          && (isAdminOrSupervisor(organizationId) || (isMemberOf(organizationId) && guardId == request.auth.uid));
+
+        // Create: Admin or supervisor of the organization only
+        allow create: if isAdminOrSupervisor(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.guardId == guardId
+          && request.resource.data.name is string
+          && request.resource.data.name != ''
+          && request.resource.data.createdAt == request.time;
+
+        // Update: Admin or supervisor of the organization only
+        allow update: if isAdminOrSupervisor(organizationId)
+          && request.resource.data.organizationId == resource.data.organizationId
+          && request.resource.data.guardId == resource.data.guardId
+          && (!('createdAt' in resource.data) || request.resource.data.createdAt == resource.data.createdAt);
+
+        // Delete: Strictly forbidden (soft delete via status is used)
+        allow delete: if false;
+      }
+
+      // --------------------------------------------------------
+      // Site Subcollection (PR #31 Site Coverage)
+      // --------------------------------------------------------
+      match /sites/{siteId} {
+        // Read: Authenticated members of the organization (needed for geofencing/check-in)
+        allow read: if isMemberOf(organizationId);
+
+        // Create: Admin or supervisor of the organization only
+        allow create: if isAdminOrSupervisor(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.siteId == siteId
+          && request.resource.data.name is string
+          && request.resource.data.name != '';
+
+        // Update: Admin or supervisor of the organization only
+        allow update: if isAdminOrSupervisor(organizationId)
+          && request.resource.data.organizationId == resource.data.organizationId
+          && request.resource.data.siteId == resource.data.siteId
+          && (!('createdAt' in resource.data) || request.resource.data.createdAt == resource.data.createdAt);
+
+        // Delete: Strictly forbidden
+        allow delete: if false;
+      }
+
+      // --------------------------------------------------------
+      // Shift Subcollection
+      // --------------------------------------------------------
+      match /shifts/{shiftId} {
+        // Read: Admin/supervisor of org, OR assigned guard
+        allow read: if isAuthenticated() 
+          && (isAdminOrSupervisor(organizationId) || (isMemberOf(organizationId) && resource.data.guardId == request.auth.uid));
+
+        // Create: Admin or supervisor of the organization only
+        allow create: if isAdminOrSupervisor(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.shiftId == shiftId
+          && request.resource.data.guardId is string
+          && request.resource.data.guardId != ''
+          && request.resource.data.siteId is string
+          && request.resource.data.siteId != '';
+
+        // Update: Admin or supervisor of the organization only
+        allow update: if isAdminOrSupervisor(organizationId)
+          && request.resource.data.organizationId == resource.data.organizationId
+          && request.resource.data.shiftId == resource.data.shiftId
+          && (!('createdAt' in resource.data) || request.resource.data.createdAt == resource.data.createdAt);
+
+        // Delete: Strictly forbidden
+        allow delete: if false;
+      }
+
+      // --------------------------------------------------------
+      // Attendance Records Subcollection (PR #21, PR #24)
+      // --------------------------------------------------------
+      match /attendance/{attendanceId} {
+        // Read: Admin or supervisor of the organization, OR the owning guard
+        allow read: if isAuthenticated() 
+          && (isAdminOrSupervisor(organizationId) || (isMemberOf(organizationId) && resource.data.guardId == request.auth.uid));
 
         // Create: Authenticated guard checking in for themselves within their own organization
         allow create: if isAuthenticated()
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'guard'
+          && isMemberOf(organizationId)
+          && getUserDoc().data.role == 'guard'
           && request.resource.data.organizationId == organizationId
           && request.resource.data.guardId == request.auth.uid
           && request.resource.data.shiftId is string
@@ -59,7 +180,7 @@ service cloud.firestore {
 
         // Update: Guard updating check-out for themselves, strictly preserving immutable check-in audit fields
         allow update: if isAuthenticated()
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          && isMemberOf(organizationId)
           && request.auth.uid == resource.data.guardId
           && request.resource.data.organizationId == resource.data.organizationId
           && request.resource.data.guardId == resource.data.guardId
@@ -71,19 +192,19 @@ service cloud.firestore {
           && request.resource.data.checkInLongitude == resource.data.checkInLongitude
           && request.resource.data.checkInAccuracy == resource.data.checkInAccuracy;
 
-        // Delete: strictly forbidden (audit attendance records are immutable and permanent)
+        // Delete: Strictly forbidden (audit attendance records are immutable and permanent)
         allow delete: if false;
       }
 
-      // Incident reporting subcollection security boundaries (PR #26)
+      // --------------------------------------------------------
+      // Incident Reporting Subcollection (PR #26, PR #27, PR #28)
+      // --------------------------------------------------------
       match /incidents/{incidentId} {
-        // Read: authenticated members of the organization
-        allow read: if isAuthenticated() 
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+        // Read: Authenticated members of the organization
+        allow read: if isMemberOf(organizationId);
 
         // Create: Authenticated member reporting an incident for themselves within their own organization
-        allow create: if isAuthenticated()
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+        allow create: if isMemberOf(organizationId)
           && request.resource.data.organizationId == organizationId
           && request.resource.data.reportedBy == request.auth.uid
           && request.resource.data.siteId is string
@@ -100,9 +221,7 @@ service cloud.firestore {
           && (!('resolvedBy' in request.resource.data) || request.resource.data.resolvedBy == null);
 
         // Update: Incident Management (PR #28) - Admin & Supervisor lifecycle operations
-        allow update: if isAuthenticated()
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'supervisor']
+        allow update: if isAdminOrSupervisor(organizationId)
           && request.resource.data.organizationId == resource.data.organizationId
           && request.resource.data.reportedBy == resource.data.reportedBy
           && request.resource.data.siteId == resource.data.siteId
@@ -134,12 +253,10 @@ service cloud.firestore {
         // Incident Evidence Subcollection (PR #27)
         match /evidence/{evidenceId} {
           // Read: Authenticated members of the organization
-          allow read: if isAuthenticated()
-            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+          allow read: if isMemberOf(organizationId);
 
           // Create: Authenticated reporter in the same organization
-          allow create: if isAuthenticated()
-            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+          allow create: if isMemberOf(organizationId)
             && request.resource.data.organizationId == organizationId
             && request.resource.data.incidentId == incidentId
             && request.resource.data.uploadedBy == request.auth.uid
@@ -152,15 +269,16 @@ service cloud.firestore {
           allow update, delete: if false;
         }
       }
+
+      // --------------------------------------------------------
       // Alerts Subcollection (PR #29 Alert Engine)
+      // --------------------------------------------------------
       match /alerts/{alertId} {
-        // Read: authenticated members of the organization
-        allow read: if isAuthenticated() 
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId;
+        // Read: Authenticated members of the organization
+        allow read: if isMemberOf(organizationId);
 
         // Create: Authenticated member within their organization creating an alert
-        allow create: if isAuthenticated() 
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
+        allow create: if isMemberOf(organizationId)
           && request.resource.data.organizationId == organizationId
           && request.resource.data.alertId == alertId
           && request.resource.data.type in ['MISSED_SHIFT', 'LATE_CHECK_IN', 'UNDERSTAFFED_SITE', 'CRITICAL_INCIDENT']
@@ -171,9 +289,7 @@ service cloud.firestore {
           && request.resource.data.createdAt == request.time;
 
         // Update: Authorized admin or supervisor can update status
-        allow update: if isAuthenticated() 
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'supervisor']
+        allow update: if isAdminOrSupervisor(organizationId)
           && request.resource.data.organizationId == resource.data.organizationId
           && request.resource.data.alertId == resource.data.alertId
           && request.resource.data.type == resource.data.type
@@ -182,26 +298,25 @@ service cloud.firestore {
           && request.resource.data.createdAt == resource.data.createdAt
           && request.resource.data.status in ['active', 'acknowledged', 'resolved'];
 
-        // Delete: strictly forbidden (alerts are immutable audit trail)
+        // Delete: Strictly forbidden (alerts are immutable audit trail)
         allow delete: if false;
       }
 
+      // --------------------------------------------------------
       // Audit Logs Subcollection (PR #32 Activity Feed)
+      // --------------------------------------------------------
       match /auditLogs/{logId} {
-        // Read: authenticated members of the organization with admin or supervisor role
-        allow read: if isAuthenticated() 
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == organizationId
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'supervisor'];
+        // Read: Authenticated members of the organization with admin or supervisor role
+        allow read: if isAdminOrSupervisor(organizationId);
 
-        // Write: strictly forbidden from client (audit logs are created server-side or via backend)
+        // Write: Strictly forbidden from client (audit logs are created server-side or via backend)
         allow create, update, delete: if false;
       }
-
-
-
     }
 
-    // Default deny all other paths
+    // ==========================================================
+    // DEFAULT DENY FALLBACK
+    // ==========================================================
     match /{document=**} {
       allow read, write: if false;
     }
