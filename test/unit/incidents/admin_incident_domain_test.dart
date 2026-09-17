@@ -74,7 +74,7 @@ void main() {
 
       test('OPEN can transition to RESOLVED with valid resolution', () {
         final open = makeIncident(status: IncidentStatus.open);
-        final resolvedTime = DateTime.utc(2026, 9, 16, 11, 0);
+        final resolvedTime = now.add(const Duration(minutes: 30));
         final resolved = open.resolve(
           resolvedBy: 'admin_1',
           resolution: 'Investigated and false alarm verified.',
@@ -91,7 +91,7 @@ void main() {
           () {
         final investigating =
             makeIncident(status: IncidentStatus.investigating);
-        final resolvedTime = DateTime.utc(2026, 9, 16, 11, 30);
+        final resolvedTime = now.add(const Duration(hours: 1));
         final resolved = investigating.resolve(
           resolvedBy: 'supervisor_2',
           resolution: 'Intruder escorted off premises.',
