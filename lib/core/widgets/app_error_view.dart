@@ -1,18 +1,39 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_constants.dart';
+import '../errors/failure_mapper.dart';
 
 class AppErrorView extends StatelessWidget {
   final String title;
   final String message;
+  final IconData icon;
   final VoidCallback? onRetry;
 
   const AppErrorView({
     super.key,
     this.title = 'Something Went Wrong',
     required this.message,
+    this.icon = Icons.error_outline,
     this.onRetry,
   });
+
+  /// Factory constructor that automatically transforms any exception or failure
+  /// object into a user-friendly error message via [FailureMapper].
+  factory AppErrorView.fromError({
+    Key? key,
+    required dynamic error,
+    String title = 'Error',
+    IconData icon = Icons.error_outline,
+    VoidCallback? onRetry,
+  }) {
+    return AppErrorView(
+      key: key,
+      title: title,
+      message: FailureMapper.mapToMessage(error),
+      icon: icon,
+      onRetry: onRetry,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +45,7 @@ class AppErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
+            Icon(icon, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
               title,
