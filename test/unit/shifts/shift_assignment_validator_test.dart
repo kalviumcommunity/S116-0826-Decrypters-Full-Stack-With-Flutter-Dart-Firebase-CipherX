@@ -274,5 +274,129 @@ void main() {
         returnsNormally,
       );
     });
+
+    group('Production Multi-Tenant & Boundary Hardening Tests', () {
+      test('strictly rejects guard from differing organization with CrossOrganizationAssignmentFailure', () {
+        const foreignGuard = Guard(
+          guardId: 'g-foreign',
+          organizationId: 'org-competitor',
+          name: 'Foreign Guard',
+          employeeId: 'EMP-9999',
+          phone: '+1 555-9999',
+          status: GuardStatus.active,
+        );
+
+        expect(
+          () => ShiftAssignmentValidator.validateAssignment(
+            shift: validShift,
+            guard: foreignGuard,
+            site: testSiteA,
+            existingShifts: [],
+          ),
+          throwsA(isA<CrossOrganizationAssignmentFailure>()),
+        );
+      });
+
+      test('strictly rejects site from differing organization with CrossOrganizationAssignmentFailure', () {
+        const foreignSite = Site(
+          siteId: 'site-foreign',
+          organizationId: 'org-competitor',
+          name: 'Foreign Site Tower',
+          address: '999 Foreign Way',
+          latitude: 17.50,
+          longitude: 78.50,
+          geofenceRadius: 100.0,
+          status: SiteStatus.active,
+        );
+
+        expect(
+          () => ShiftAssignmentValidator.validateAssignment(
+            shift: validShift,
+            guard: testGuard,
+            site: foreignSite,
+            existingShifts: [],
+          ),
+          throwsA(isA<CrossOrganizationAssignmentFailure>()),
+        );
+      });
+
+      test('rejects assignment when guard status is suspended or inactive', () {
+        const inactiveGuard = Guard(
+          guardId: 'g-101',
+          organizationId: 'org-test',
+          name: 'Suspended Guard',
+          employeeId: 'EMP-1001',
+          phone: '+1 555-0199',
+          status: GuardStatus.inactive,
+        );
+
+        expect(
+          () => ShiftAssignmentValidator.validateAssignment(
+            shift: validShift,
+            guard: inactiveGuard,
+            site: testSiteA,
+            existingShifts: [],
+          ),
+          throwsA(isA<GuardInactiveFailure>()),
+        );
+      });
+
+      test('rejects assignment when site status is inactive', () {
+        const inactiveSite = Site(
+          siteId: 'site-001',
+          organizationId: 'org-test',
+          name: 'Closed Facility',
+          address: '123 Cyber Way',
+          latitude: 17.44,
+          longitude: 78.38,
+          geofenceRadius: 50.0,
+          status: SiteStatus.inactive,
+        );
+
+        expect(
+          () => ShiftAssignmentValidator.validateAssignment(
+            shift: validShift,
+            guard: testGuard,
+            site: inactiveSite,
+            existingShifts: [],
+          ),
+          throwsA(isA<SiteInactiveFailure>()),
+        );
+      });
+
+      test('allows new shift if existing shift for same guard was already completed earlier in the day', () {
+        final completedMorningShift = Shift(
+          shiftId: 'shift-morning',
+          organizationId: 'org-test',
+          siteId: 'site-001',
+          guardId: 'g-101',
+          date: DateTime(2026, 8, 27),
+          startTime: const ShiftTime(hour: 6, minute: 0),
+          endTime: const ShiftTime(hour: 14, minute: 0),
+          status: ShiftStatus.completed,
+        );
+
+        final eveningShift = Shift(
+          shiftId: 'shift-evening',
+          organizationId: 'org-test',
+          siteId: 'site-001',
+          guardId: 'g-101',
+          date: DateTime(2026, 8, 27),
+          startTime: const ShiftTime(hour: 15, minute: 0),
+          endTime: const ShiftTime(hour: 23, minute: 0),
+          status: ShiftStatus.scheduled,
+        );
+
+        expect(
+          () => ShiftAssignmentValidator.validateAssignment(
+            shift: eveningShift,
+            guard: testGuard,
+            site: testSiteA,
+            existingShifts: [completedMorningShift],
+          ),
+          returnsNormally,
+        );
+      });
+    });
   });
 }
