@@ -271,4 +271,104 @@ void main() {
       expect(result.radiusMeters, equals(50.0));
     });
   });
+
+  group('GeofenceEngine — Advanced Edge Cases & Boundary Conditions', () {
+    test('exact boundary: distance equals radius evaluates as inside', () {
+      // Create coordinates where distance is exactly ~siteRadius
+      // Moving north by siteRadius / earthRadius in radians:
+      final deltaLatRad = (siteRadius / GeofenceEngine.earthRadiusMeters);
+      final boundaryLat = siteLat + (deltaLatRad * 180.0 / 3.141592653589793);
+
+      final distance = engine.calculateDistanceMeters(
+        startLatitude: siteLat,
+        startLongitude: siteLng,
+        endLatitude: boundaryLat,
+        endLongitude: siteLng,
+      );
+
+      // Evaluate using the calculated distance as exact radius
+      final result = engine.evaluate(
+        guardLatitude: boundaryLat,
+        guardLongitude: siteLng,
+        guardAccuracy: 5.0,
+        siteLatitude: siteLat,
+        siteLongitude: siteLng,
+        siteRadius: distance,
+      );
+
+      expect(result.status, equals(GeofenceStatus.inside));
+      expect(result.isWithinGeofence, isTrue);
+      expect(result.distanceMeters, closeTo(distance, 0.001));
+    });
+
+    test('extreme antipodal coordinates across poles calculate correctly', () {
+      final poleToPoleDistance = engine.calculateDistanceMeters(
+        startLatitude: 90.0,
+        startLongitude: 0.0,
+        endLatitude: -90.0,
+        endLongitude: 0.0,
+      );
+
+      // Half the circumference of Earth: pi * 6,371,000 ~ 20,015,087 meters
+      expect(poleToPoleDistance, closeTo(20015087.0, 1000.0));
+    });
+
+    test('identical point across 180 and -180 longitude evaluates to 0 distance', () {
+      final distance = engine.calculateDistanceMeters(
+        startLatitude: 0.0,
+        startLongitude: 180.0,
+        endLatitude: 0.0,
+        endLongitude: -180.0,
+      );
+
+      expect(distance, closeTo(0.0, 0.001));
+    });
+
+    test('accuracy threshold margin: exact threshold is accepted, fraction above is poorAccuracy', () {
+      // Exactly at default threshold (50.0) -> accepted
+      final validAccResult = engine.evaluate(
+        guardLatitude: siteLat,
+        guardLongitude: siteLng,
+        guardAccuracy: 50.0,
+        siteLatitude: siteLat,
+        siteLongitude: siteLng,
+        siteRadius: siteRadius,
+      );
+      expect(validAccResult.status, equals(GeofenceStatus.inside));
+
+      // Just above default threshold (50.01) -> rejected as poorAccuracy
+      final poorAccResult = engine.evaluate(
+        guardLatitude: siteLat,
+        guardLongitude: siteLng,
+        guardAccuracy: 50.01,
+        siteLatitude: siteLat,
+        siteLongitude: siteLng,
+        siteRadius: siteRadius,
+      );
+      expect(poorAccResult.status, equals(GeofenceStatus.poorAccuracy));
+      expect(poorAccResult.isWithinGeofence, isFalse);
+    });
+
+    test('handles double.nan and double.infinity gracefully without crashing', () {
+      final nanResult = engine.evaluate(
+        guardLatitude: double.nan,
+        guardLongitude: siteLng,
+        guardAccuracy: 5.0,
+        siteLatitude: siteLat,
+        siteLongitude: siteLng,
+        siteRadius: siteRadius,
+      );
+      expect(nanResult.status, equals(GeofenceStatus.invalidInput));
+
+      final infResult = engine.evaluate(
+        guardLatitude: siteLat,
+        guardLongitude: double.infinity,
+        guardAccuracy: 5.0,
+        siteLatitude: siteLat,
+        siteLongitude: siteLng,
+        siteRadius: siteRadius,
+      );
+      expect(infResult.status, equals(GeofenceStatus.invalidInput));
+    });
+  });
 }
