@@ -74,7 +74,8 @@ class DemoData {
     siteId: siteCyberGateway.siteId,
     type: 'Unauthorized Entry Attempt',
     severity: IncidentSeverity.high,
-    description: 'Individual attempted perimeter breach at North Gate without access badge.',
+    description:
+        'Individual attempted perimeter breach at North Gate without access badge.',
     status: IncidentStatus.open,
     createdAt: DateTime.now().subtract(const Duration(minutes: 45)),
     updatedAt: DateTime.now().subtract(const Duration(minutes: 45)),

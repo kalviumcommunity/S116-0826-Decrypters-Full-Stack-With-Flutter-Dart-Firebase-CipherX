@@ -502,7 +502,6 @@ void main() {
   });
 }
 
-
 Incident sampleWithDesc(String desc) {
   final now = DateTime.utc(2026, 9, 10, 10, 0);
   return Incident(

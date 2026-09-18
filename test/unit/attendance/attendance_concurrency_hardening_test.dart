@@ -12,7 +12,9 @@ void main() {
       timestamp: t1,
     );
 
-    test('1. Multiple rapid check-in calls with same parameters preserve single session identity', () {
+    test(
+        '1. Multiple rapid check-in calls with same parameters preserve single session identity',
+        () {
       final recordA = AttendanceRecord(
         attendanceId: 'att_shift_101',
         organizationId: 'org_main',
@@ -67,9 +69,11 @@ void main() {
 
       // Second checkout attempted 10 seconds later
       final t3 = t2.add(const Duration(seconds: 10));
-      final secondCheckout = firstCheckout.checkOut(location: loc2, timestamp: t3);
+      final secondCheckout =
+          firstCheckout.checkOut(location: loc2, timestamp: t3);
 
-      expect(secondCheckout.checkOutTime, equals(t2)); // Retained first timestamp!
+      expect(
+          secondCheckout.checkOutTime, equals(t2)); // Retained first timestamp!
       expect(secondCheckout.status, equals(AttendanceStatus.completed));
     });
 

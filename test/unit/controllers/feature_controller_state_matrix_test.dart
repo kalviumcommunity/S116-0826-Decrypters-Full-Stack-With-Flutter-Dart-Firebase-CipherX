@@ -16,7 +16,9 @@ void main() {
       expect(state.value, equals(items));
     });
 
-    test('2. AsyncValue transitions: loading -> error -> retry (loading) -> data', () {
+    test(
+        '2. AsyncValue transitions: loading -> error -> retry (loading) -> data',
+        () {
       AsyncValue<int> state = const AsyncValue.loading();
       expect(state.isLoading, isTrue);
 
@@ -50,7 +52,8 @@ void main() {
       expect(errorState.hasValue, isFalse);
     });
 
-    test('4. StateNotifier lifecycle handles mutation and failure immutability', () {
+    test('4. StateNotifier lifecycle handles mutation and failure immutability',
+        () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -65,7 +68,7 @@ void main() {
       expect(container.read(stateProvider).value, equals('Operational'));
 
       container.read(stateProvider.notifier).state =
-          AsyncValue.error('Network failure', StackTrace.empty);
+          const AsyncValue.error('Network failure', StackTrace.empty);
       expect(container.read(stateProvider).hasError, isTrue);
     });
   });

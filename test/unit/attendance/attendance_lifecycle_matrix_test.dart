@@ -23,7 +23,9 @@ void main() {
       timestamp: t2,
     );
 
-    test('1. Valid Initial Check-In initializes Active status with immutable audit coordinates', () {
+    test(
+        '1. Valid Initial Check-In initializes Active status with immutable audit coordinates',
+        () {
       final record = AttendanceRecord(
         attendanceId: 'att-100',
         organizationId: 'org-cipher',
@@ -43,7 +45,9 @@ void main() {
       expect(record.checkInLocation?.latitude, equals(17.44));
     });
 
-    test('2. Duplicate check-out retains original timestamp and preserves idempotency', () {
+    test(
+        '2. Duplicate check-out retains original timestamp and preserves idempotency',
+        () {
       final active = AttendanceRecord(
         attendanceId: 'att-100',
         organizationId: 'org-cipher',
@@ -84,7 +88,9 @@ void main() {
       expect(secondCheckout.status, equals(AttendanceStatus.completed));
     });
 
-    test('3. Security Failures Type Matrix guarantees non-null actionable error messages', () {
+    test(
+        '3. Security Failures Type Matrix guarantees non-null actionable error messages',
+        () {
       const failures = <CheckInFailure>[
         UnauthenticatedFailure(),
         UnauthorizedRoleFailure(),
@@ -118,7 +124,9 @@ void main() {
       }
     });
 
-    test('4. AttendanceFailure base domain hierarchy handles checkout failures appropriately', () {
+    test(
+        '4. AttendanceFailure base domain hierarchy handles checkout failures appropriately',
+        () {
       const dupFailure = DuplicateCheckOutFailure();
       const noActiveFailure = NoActiveAttendanceFailure();
       const notFoundFailure = AttendanceNotFoundFailure();
@@ -130,7 +138,9 @@ void main() {
       expect(noActiveFailure.message, contains('No active attendance'));
     });
 
-    test('5. Serialization roundtrip maintains exact millisecond precision for auditing', () {
+    test(
+        '5. Serialization roundtrip maintains exact millisecond precision for auditing',
+        () {
       final original = AttendanceRecord(
         attendanceId: 'att-roundtrip',
         organizationId: 'org-audit',
@@ -150,8 +160,10 @@ void main() {
 
       expect(reconstructed.attendanceId, equals(original.attendanceId));
       expect(reconstructed.organizationId, equals(original.organizationId));
-      expect(reconstructed.checkInTime.millisecondsSinceEpoch, equals(original.checkInTime.millisecondsSinceEpoch));
-      expect(reconstructed.checkOutTime?.millisecondsSinceEpoch, equals(original.checkOutTime?.millisecondsSinceEpoch));
+      expect(reconstructed.checkInTime.millisecondsSinceEpoch,
+          equals(original.checkInTime.millisecondsSinceEpoch));
+      expect(reconstructed.checkOutTime?.millisecondsSinceEpoch,
+          equals(original.checkOutTime?.millisecondsSinceEpoch));
       expect(reconstructed.verificationMethod, equals('qr_gps_biometric'));
     });
   });

@@ -276,7 +276,9 @@ void main() {
     });
 
     group('Production Multi-Tenant & Boundary Hardening Tests', () {
-      test('strictly rejects guard from differing organization with CrossOrganizationAssignmentFailure', () {
+      test(
+          'strictly rejects guard from differing organization with CrossOrganizationAssignmentFailure',
+          () {
         const foreignGuard = Guard(
           guardId: 'g-foreign',
           organizationId: 'org-competitor',
@@ -297,7 +299,9 @@ void main() {
         );
       });
 
-      test('strictly rejects site from differing organization with CrossOrganizationAssignmentFailure', () {
+      test(
+          'strictly rejects site from differing organization with CrossOrganizationAssignmentFailure',
+          () {
         const foreignSite = Site(
           siteId: 'site-foreign',
           organizationId: 'org-competitor',
@@ -364,7 +368,9 @@ void main() {
         );
       });
 
-      test('allows new shift if existing shift for same guard was already completed earlier in the day', () {
+      test(
+          'allows new shift if existing shift for same guard was already completed earlier in the day',
+          () {
         final completedMorningShift = Shift(
           shiftId: 'shift-morning',
           organizationId: 'org-test',

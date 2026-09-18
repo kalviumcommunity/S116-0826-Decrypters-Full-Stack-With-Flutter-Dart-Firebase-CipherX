@@ -56,7 +56,7 @@ void main() {
     test('1. Admin role authorization permissions', () {
       expect(adminUser.role, equals(UserRole.admin));
       expect(adminUser.status, equals(UserStatus.active));
-      
+
       // Admin capabilities
       bool canManageGuards(UserProfile user) => user.role == UserRole.admin;
       bool canManageSites(UserProfile user) => user.role == UserRole.admin;
@@ -82,7 +82,8 @@ void main() {
       expect(canAccessCommandCenter(supervisorUser), isTrue);
     });
 
-    test('3. Guard role strictly denies administrative and supervisory routes', () {
+    test('3. Guard role strictly denies administrative and supervisory routes',
+        () {
       expect(guardUser.role, equals(UserRole.guard));
 
       bool canAccessCommandCenter(UserProfile user) =>
@@ -96,7 +97,9 @@ void main() {
       expect(canPerformFieldCheckIn(guardUser), isTrue);
     });
 
-    test('4. Inactive or Suspended users are denied all active operational duties', () {
+    test(
+        '4. Inactive or Suspended users are denied all active operational duties',
+        () {
       bool canPerformOperationalDuties(UserProfile user) =>
           user.status == UserStatus.active;
 
@@ -104,7 +107,8 @@ void main() {
       expect(canPerformOperationalDuties(guardUser), isTrue);
     });
 
-    test('5. Multi-tenant boundary checks reject cross-organization actions', () {
+    test('5. Multi-tenant boundary checks reject cross-organization actions',
+        () {
       bool canAccessOrgResource(UserProfile user, String targetOrgId) {
         return user.organizationId == targetOrgId;
       }

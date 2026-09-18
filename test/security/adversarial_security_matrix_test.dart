@@ -49,8 +49,10 @@ void main() {
     );
 
     test('ATTACK VECTOR 1: Guard -> Another Guard Data Access (DENIED)', () {
-      bool canAccessGuardPrivateData(UserProfile requester, String targetGuardUid) {
-        if (requester.role == UserRole.admin || requester.role == UserRole.supervisor) {
+      bool canAccessGuardPrivateData(
+          UserProfile requester, String targetGuardUid) {
+        if (requester.role == UserRole.admin ||
+            requester.role == UserRole.supervisor) {
           return true;
         }
         return requester.uid == targetGuardUid;
@@ -64,28 +66,36 @@ void main() {
       expect(canAccessGuardPrivateData(adminAlice, guardBob.uid), isTrue);
     });
 
-    test('ATTACK VECTOR 2: Guard -> Admin Command Center & Role Escalation (DENIED)', () {
-      bool canModifyUserRole(UserProfile requester, UserProfile target, UserRole newRole) {
+    test(
+        'ATTACK VECTOR 2: Guard -> Admin Command Center & Role Escalation (DENIED)',
+        () {
+      bool canModifyUserRole(
+          UserProfile requester, UserProfile target, UserRole newRole) {
         return requester.role == UserRole.admin &&
             requester.organizationId == target.organizationId;
       }
 
       bool canAccessAdminCommandCenter(UserProfile requester) {
-        return requester.role == UserRole.admin || requester.role == UserRole.supervisor;
+        return requester.role == UserRole.admin ||
+            requester.role == UserRole.supervisor;
       }
 
       // Guard tries to access command center
       expect(canAccessAdminCommandCenter(guardAlice), isFalse);
 
       // Guard tries to escalate self to admin
-      expect(canModifyUserRole(guardAlice, guardAlice, UserRole.admin), isFalse);
+      expect(
+          canModifyUserRole(guardAlice, guardAlice, UserRole.admin), isFalse);
 
       // Admin can access and assign roles
       expect(canAccessAdminCommandCenter(adminAlice), isTrue);
-      expect(canModifyUserRole(adminAlice, guardAlice, UserRole.supervisor), isTrue);
+      expect(canModifyUserRole(adminAlice, guardAlice, UserRole.supervisor),
+          isTrue);
     });
 
-    test('ATTACK VECTOR 3: Guard -> Tamper / Modify Past Attendance Records (DENIED)', () {
+    test(
+        'ATTACK VECTOR 3: Guard -> Tamper / Modify Past Attendance Records (DENIED)',
+        () {
       final initialCheckIn = DateTime.utc(2026, 9, 1, 9, 0);
       final initialLocation = LocationData(
         latitude: 18.5204,
@@ -111,7 +121,9 @@ void main() {
       expect(record.guardId, equals(guardAlice.uid));
     });
 
-    test('ATTACK VECTOR 4: Guard -> Modify or Delete Immutable Audit Logs (DENIED)', () {
+    test(
+        'ATTACK VECTOR 4: Guard -> Modify or Delete Immutable Audit Logs (DENIED)',
+        () {
       bool canDeleteAuditLog(UserProfile requester) {
         // Audit logs are strictly immutable and append-only across all roles
         return false;
@@ -127,12 +139,14 @@ void main() {
       expect(canViewAuditLog(adminAlice), isTrue);
     });
 
-    test('ATTACK VECTOR 5: Multi-Tenant Org A -> Org B Data Access (DENIED)', () {
+    test('ATTACK VECTOR 5: Multi-Tenant Org A -> Org B Data Access (DENIED)',
+        () {
       bool canAccessResource({
         required UserProfile requester,
         required String resourceOrganizationId,
       }) {
-        if (requester.organizationId.isEmpty || resourceOrganizationId.isEmpty) {
+        if (requester.organizationId.isEmpty ||
+            resourceOrganizationId.isEmpty) {
           return false;
         }
         return requester.organizationId == resourceOrganizationId;

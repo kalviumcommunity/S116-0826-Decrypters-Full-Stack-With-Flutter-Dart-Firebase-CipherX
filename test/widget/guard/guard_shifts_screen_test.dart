@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('GuardShiftsScreen Widget Tests', () {
-    testWidgets('1. Displays loading indicator when provider is in loading state',
+    testWidgets(
+        '1. Displays loading indicator when provider is in loading state',
         (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -75,7 +76,8 @@ void main() {
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
 
-    testWidgets('4. Displays Today\'s Shift when active or scheduled shift exists',
+    testWidgets(
+        '4. Displays Today\'s Shift when active or scheduled shift exists',
         (tester) async {
       final now = DateTime.now();
       final todayShift = Shift(

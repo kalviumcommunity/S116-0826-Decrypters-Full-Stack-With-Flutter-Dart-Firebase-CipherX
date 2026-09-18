@@ -276,8 +276,8 @@ void main() {
     test('exact boundary: distance equals radius evaluates as inside', () {
       // Create coordinates where distance is exactly ~siteRadius
       // Moving north by siteRadius / earthRadius in radians:
-      final deltaLatRad = (siteRadius / GeofenceEngine.earthRadiusMeters);
-      final boundaryLat = siteLat + (deltaLatRad * 180.0 / 3.141592653589793);
+      const deltaLatRad = (siteRadius / GeofenceEngine.earthRadiusMeters);
+      const boundaryLat = siteLat + (deltaLatRad * 180.0 / 3.141592653589793);
 
       final distance = engine.calculateDistanceMeters(
         startLatitude: siteLat,
@@ -313,7 +313,9 @@ void main() {
       expect(poleToPoleDistance, closeTo(20015087.0, 1000.0));
     });
 
-    test('identical point across 180 and -180 longitude evaluates to 0 distance', () {
+    test(
+        'identical point across 180 and -180 longitude evaluates to 0 distance',
+        () {
       final distance = engine.calculateDistanceMeters(
         startLatitude: 0.0,
         startLongitude: 180.0,
@@ -324,7 +326,9 @@ void main() {
       expect(distance, closeTo(0.0, 0.001));
     });
 
-    test('accuracy threshold margin: exact threshold is accepted, fraction above is poorAccuracy', () {
+    test(
+        'accuracy threshold margin: exact threshold is accepted, fraction above is poorAccuracy',
+        () {
       // Exactly at default threshold (50.0) -> accepted
       final validAccResult = engine.evaluate(
         guardLatitude: siteLat,
@@ -349,7 +353,8 @@ void main() {
       expect(poorAccResult.isWithinGeofence, isFalse);
     });
 
-    test('handles double.nan and double.infinity gracefully without crashing', () {
+    test('handles double.nan and double.infinity gracefully without crashing',
+        () {
       final nanResult = engine.evaluate(
         guardLatitude: double.nan,
         guardLongitude: siteLng,
