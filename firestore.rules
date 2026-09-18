@@ -1,3 +1,8 @@
+// ============================================================================
+// CIPHER-X PRODUCTION FIRESTORE SECURITY RULES (v1.0.0 RELEASE)
+// Team Decrypters — Zero Client Trust Architecture
+// Strict Multi-Tenant Scoping, Role-Based Access, Immutable Audit Trails
+// ============================================================================
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {

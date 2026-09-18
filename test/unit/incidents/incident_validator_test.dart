@@ -409,6 +409,96 @@ void main() {
         );
       });
     });
+
+    group('Production Invariant & Edge Case Hardening', () {
+      test('rejects partial coordinates (latitude without longitude)', () {
+        expect(
+          () => IncidentValidator.validateCoordinates(
+            latitude: 17.44,
+            longitude: null,
+          ),
+          throwsA(isA<PartialCoordinatesFailure>()),
+        );
+      });
+
+      test('rejects partial coordinates (longitude without latitude)', () {
+        expect(
+          () => IncidentValidator.validateCoordinates(
+            latitude: null,
+            longitude: 78.38,
+          ),
+          throwsA(isA<PartialCoordinatesFailure>()),
+        );
+      });
+
+      test('rejects non-finite coordinates (NaN and Infinity)', () {
+        expect(
+          () => IncidentValidator.validateCoordinates(
+            latitude: double.nan,
+            longitude: 78.38,
+          ),
+          throwsA(isA<InvalidCoordinatesFailure>()),
+        );
+
+        expect(
+          () => IncidentValidator.validateCoordinates(
+            latitude: 17.44,
+            longitude: double.infinity,
+          ),
+          throwsA(isA<InvalidCoordinatesFailure>()),
+        );
+      });
+
+      test('rejects contradictory resolution fields on open incident', () {
+        final now = DateTime.utc(2026, 9, 18, 10, 0);
+        expect(
+          () => IncidentValidator.validateResolutionState(
+            status: IncidentStatus.open,
+            resolvedAt: now,
+            resolvedBy: 'admin_user',
+            createdAt: now,
+          ),
+          throwsA(isA<ContradictoryResolutionMetadataFailure>()),
+        );
+      });
+
+      test('rejects resolved incident missing resolvedBy or resolvedAt', () {
+        final now = DateTime.utc(2026, 9, 18, 10, 0);
+        expect(
+          () => IncidentValidator.validateResolutionState(
+            status: IncidentStatus.resolved,
+            resolvedAt: null,
+            resolvedBy: 'admin_user',
+            createdAt: now,
+          ),
+          throwsA(isA<MissingResolutionMetadataFailure>()),
+        );
+
+        expect(
+          () => IncidentValidator.validateResolutionState(
+            status: IncidentStatus.resolved,
+            resolvedAt: now,
+            resolvedBy: '   ',
+            createdAt: now,
+          ),
+          throwsA(isA<MissingResolutionMetadataFailure>()),
+        );
+      });
+
+      test('rejects resolvedAt that is earlier than createdAt', () {
+        final created = DateTime.utc(2026, 9, 18, 10, 0);
+        final resolvedEarlier = DateTime.utc(2026, 9, 18, 9, 0);
+        expect(
+          () => IncidentValidator.validateResolutionState(
+            status: IncidentStatus.resolved,
+            resolvedAt: resolvedEarlier,
+            resolvedBy: 'admin_user',
+            createdAt: created,
+          ),
+          throwsA(isA<InvalidIncidentTimestampFailure>()),
+        );
+      });
+    });
   });
 }
 
