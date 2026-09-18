@@ -1,3 +1,7 @@
+// ============================================================================
+// CIPHER-X PRODUCTION FIREBASE STORAGE SECURITY RULES (v1.0.0 RELEASE)
+// Multi-Tenant Incident Evidence Isolation & Role-Based Access Control
+// ============================================================================
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
