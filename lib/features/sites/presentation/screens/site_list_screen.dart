@@ -184,121 +184,128 @@ class _SiteListScreenState extends ConsumerState<SiteListScreen> {
                   );
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  itemCount: filteredSites.length,
-                  itemBuilder: (context, index) {
-                    final site = filteredSites[index];
-                    final isActive = site.status == SiteStatus.active;
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(sitesListProvider(_includeInactive));
+                  },
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    itemCount: filteredSites.length,
+                    itemBuilder: (context, index) {
+                      final site = filteredSites[index];
+                      final isActive = site.status == SiteStatus.active;
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12.0),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(16.0),
-                        title: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                site.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isActive
-                                    ? Colors.green.withValues(alpha: 0.15)
-                                    : Colors.grey.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isActive ? Colors.green : Colors.grey,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isActive
-                                        ? Icons.check_circle
-                                        : Icons.cancel_outlined,
-                                    size: 14,
-                                    color: isActive
-                                        ? Colors.green[800]
-                                        : Colors.grey[700],
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12.0),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16.0),
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  site.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    isActive ? 'Active' : 'Inactive',
-                                    style: TextStyle(
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                  vertical: 4.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? Colors.green.withValues(alpha: 0.1)
+                                      : Colors.grey.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  border: Border.all(
+                                    color: isActive
+                                        ? Colors.green
+                                        : Colors.grey,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isActive
+                                          ? Icons.check_circle
+                                          : Icons.cancel,
+                                      size: 14,
                                       color: isActive
-                                          ? Colors.green[800]
-                                          : Colors.grey[700],
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
+                                          ? Colors.green
+                                          : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      isActive ? 'Active' : 'Inactive',
+                                      style: TextStyle(
+                                        color: isActive
+                                            ? Colors.green[800]
+                                            : Colors.grey[700],
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.place_outlined,
+                                      size: 16, color: Colors.grey),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      site.address,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.place_outlined,
-                                    size: 16, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    site.address,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.my_location,
+                                      size: 16, color: Colors.grey),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${site.latitude.toStringAsFixed(4)}, ${site.longitude.toStringAsFixed(4)}',
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(Icons.my_location,
-                                    size: 16, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${site.latitude.toStringAsFixed(4)}, ${site.longitude.toStringAsFixed(4)}',
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
-                                ),
-                                const SizedBox(width: 16),
-                                const Icon(Icons.radar,
-                                    size: 16, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${site.geofenceRadius.toStringAsFixed(0)} meters',
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  const SizedBox(width: 16),
+                                  const Icon(Icons.radar,
+                                      size: 16, color: Colors.grey),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${site.geofenceRadius.toStringAsFixed(0)} meters',
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push(
+                            AppRoutes.adminSiteDetails,
+                            extra: site,
+                          ),
                         ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => context.push(
-                          AppRoutes.adminSiteDetails,
-                          extra: site,
-                        ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),

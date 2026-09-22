@@ -4,6 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../app/router/app_router.dart';
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_text_styles.dart';
+import '../../../../core/utils/greeting_utils.dart';
+import '../../../../core/widgets/app_dialogs.dart';
+import '../../../../core/widgets/network_status_banner.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../identity/presentation/providers/identity_providers.dart';
 import '../providers/admin_dashboard_providers.dart';
@@ -20,32 +25,88 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final profileAsync = ref.watch(currentUserProfileProvider);
+    final authUser = ref.watch(authStateProvider).asData?.value;
     final statsAsync = ref.watch(dashboardStatisticsStreamProvider);
 
     final profile = profileAsync.asData?.value;
-    final adminName = profile?.displayName.isNotEmpty == true
-        ? profile!.displayName
-        : 'Administrator';
+    final greeting = GreetingUtils.getTimeGreeting();
+    final firstName = GreetingUtils.getFirstName(
+      profile: profile,
+      authUser: authUser,
+      defaultFallback: 'Administrator',
+    );
     final orgId = profile?.organizationId ?? '';
 
     final todayFormatted = DateFormat('EEEE, MMMM d, y').format(DateTime.now());
 
     return Scaffold(
       key: const Key('admin_command_center_screen'),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('Command Center'),
+        titleSpacing: 8,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/images/cipher_x_logo.png',
+                width: 22,
+                height: 22,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Flexible(
+              child: Text(
+                'Command Center',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             key: const Key('open_activity_feed'),
-            icon: const Icon(Icons.notifications_active_outlined),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: const Icon(
+                Icons.notifications_active_outlined,
+                size: 17,
+                color: AppColors.primary,
+              ),
+            ),
             tooltip: 'Alerts & Activity Feed',
             onPressed: () => context.push(AppRoutes.adminActivityFeed),
           ),
           IconButton(
             key: const Key('refresh_command_center'),
-            icon: const Icon(Icons.refresh),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: const Icon(
+                Icons.refresh_rounded,
+                size: 17,
+                color: AppColors.textPrimaryLight,
+              ),
+            ),
             tooltip: 'Refresh Metrics',
             onPressed: () {
               ref.invalidate(dashboardStatisticsStreamProvider);
@@ -53,75 +114,173 @@ class AdminDashboardScreen extends ConsumerWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () =>
-                ref.read(authControllerProvider.notifier).signOut(),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: const Icon(
+                Icons.settings_outlined,
+                size: 17,
+                color: AppColors.textPrimaryLight,
+              ),
+            ),
+            tooltip: 'Settings & Info',
+            onPressed: () => context.push(AppRoutes.settings),
           ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderLight),
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                size: 17,
+                color: AppColors.textSecondaryLight,
+              ),
+            ),
+            tooltip: 'Logout',
+            onPressed: () async {
+              final confirmed = await AppDialogs.confirmLogout(context);
+              if (confirmed) {
+                ref.read(authControllerProvider.notifier).signOut();
+              }
+            },
+          ),
+          const SizedBox(width: 4),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(dashboardStatisticsStreamProvider);
-          ref.invalidate(siteCoverageStreamProvider);
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+      body: Column(
+        children: [
+          const NetworkStatusBanner(),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(dashboardStatisticsStreamProvider);
+                ref.invalidate(siteCoverageStreamProvider);
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
               // Welcome Header
               Container(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(18.0),
                 decoration: BoxDecoration(
-                  color:
-                      theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color:
-                        theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                  ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.borderLight),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: AppColors.shadowColor,
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: theme.colorScheme.primary,
-                      child: Text(
-                        adminName.isNotEmpty ? adminName[0].toUpperCase() : 'A',
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.cardWineGradient,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.25),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          firstName.isNotEmpty
+                              ? firstName[0].toUpperCase()
+                              : 'A',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 20,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Welcome back, $adminName',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            '$greeting, $firstName',
+                            style: AppTextStyles.titleMedium(
+                              color: AppColors.textPrimaryLight,
+                            ).copyWith(fontWeight: FontWeight.w700),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            todayFormatted,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary
+                                      .withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  'Administrator',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  todayFormatted,
+                                  style: AppTextStyles.bodyMedium(
+                                    color: AppColors.textSecondaryLight,
+                                  ).copyWith(fontSize: 11),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                           if (orgId.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              'Organization: $orgId',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w500,
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceMuted,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Organization: $orgId',
+                                style: AppTextStyles.caption(
+                                  color: AppColors.primary,
+                                ).copyWith(fontWeight: FontWeight.w700),
                               ),
                             ),
                           ],
@@ -131,6 +290,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 18),
+
               const SizedBox(height: 20),
 
               // Operations Overview / KPI Metrics
@@ -139,20 +300,20 @@ class AdminDashboardScreen extends ConsumerWidget {
                 children: [
                   Text(
                     'Operations Overview',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTextStyles.titleLarge(
+                      color: AppColors.textPrimaryLight,
+                    ).copyWith(fontWeight: FontWeight.w800),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 'Live metrics across guards, shifts, and active facilities',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: AppTextStyles.bodyMedium(
+                  color: AppColors.textSecondaryLight,
+                ).copyWith(fontSize: 12),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               statsAsync.when(
                 loading: () => const Padding(
@@ -162,19 +323,20 @@ class AdminDashboardScreen extends ConsumerWidget {
                 error: (error, _) => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border:
-                        Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                    color: AppColors.errorBadgeBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red),
+                      const Icon(Icons.error_outline, color: AppColors.error),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Failed to load operational metrics: $error',
-                          style: const TextStyle(color: Colors.red),
+                          style: const TextStyle(color: AppColors.error),
                         ),
                       ),
                     ],
@@ -193,48 +355,30 @@ class AdminDashboardScreen extends ConsumerWidget {
               // Navigation Shortcuts
               Row(
                 children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.shield_outlined, size: 18),
-                      label: const Text('Guards'),
-                      onPressed: () => context.push(AppRoutes.adminGuards),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
+                  _buildShortcutButton(
+                    context,
+                    label: 'Guards',
+                    icon: Icons.shield_outlined,
+                    onPressed: () => context.push(AppRoutes.adminGuards),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.location_city_outlined, size: 18),
-                      label: const Text('Sites'),
-                      onPressed: () => context.push(AppRoutes.adminSites),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
+                  const SizedBox(width: 10),
+                  _buildShortcutButton(
+                    context,
+                    label: 'Sites',
+                    icon: Icons.location_city_outlined,
+                    onPressed: () => context.push(AppRoutes.adminSites),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.report_problem_outlined, size: 18),
-                      label: const Text('Incidents'),
-                      onPressed: () => context.push(AppRoutes.adminIncidents),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
+                  const SizedBox(width: 10),
+                  _buildShortcutButton(
+                    context,
+                    label: 'Incidents',
+                    icon: Icons.report_problem_outlined,
+                    onPressed: () => context.push(AppRoutes.adminIncidents),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               // Site Staffing Coverage Section
               SiteCoverageSection(
@@ -243,6 +387,67 @@ class AdminDashboardScreen extends ConsumerWidget {
 
               const SizedBox(height: 32),
             ],
+          ),
+        ),
+      ),
+    ),
+  ],
+),
+);
+  }
+
+  Widget _buildShortcutButton(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.borderLight),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.shadowColor,
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentRose,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: AppTextStyles.caption(
+                    color: AppColors.textPrimaryLight,
+                  ).copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

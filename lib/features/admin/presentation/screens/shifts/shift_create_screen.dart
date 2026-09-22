@@ -636,6 +636,8 @@ class _ShiftCreateScreenState extends ConsumerState<ShiftCreateScreen> {
   }
 
   Future<void> _submitForm() async {
+    if (ref.read(shiftCreationControllerProvider).isLoading) return;
+
     setState(() {
       _guardError = _validateGuard(_selectedGuard);
       _siteError = _validateSite(_selectedSite);

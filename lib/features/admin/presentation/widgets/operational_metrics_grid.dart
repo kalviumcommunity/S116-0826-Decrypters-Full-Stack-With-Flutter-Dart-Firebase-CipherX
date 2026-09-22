@@ -34,7 +34,7 @@ class OperationalMetricsGrid extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.15,
+          childAspectRatio: constraints.maxWidth < 360 ? 0.88 : 1.15,
           children: [
             MetricCard(
               key: const Key('metric_total_guards'),
