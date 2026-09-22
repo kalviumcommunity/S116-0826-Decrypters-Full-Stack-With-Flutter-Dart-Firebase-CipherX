@@ -38,6 +38,7 @@ import '../../features/sites/presentation/screens/site_list_screen.dart';
 import '../../features/qr/presentation/screens/site_qr_scanner_screen.dart';
 import '../../features/attendance/domain/entities/attendance_record.dart';
 import '../../features/attendance/presentation/screens/attendance_details_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/attendance/presentation/screens/attendance_history_screen.dart';
 import '../navigation_shell.dart';
 import 'router_notifier.dart';
@@ -79,6 +80,7 @@ abstract class AppRoutes {
   static const String incidentEvidence =
       '/guard/incidents/:incidentId/evidence';
   static const String profile = '/guard/profile';
+  static const String settings = '/settings';
 }
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -165,8 +167,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return roleHome;
       }
 
-      if (!state.uri.path.startsWith(allowedBasePath) &&
-          state.uri.path != AppRoutes.accessDenied) {
+      bool isAllowedPath = state.uri.path.startsWith(allowedBasePath);
+      if (role == UserRole.supervisor) {
+        if (state.uri.path.startsWith('/admin/incidents') ||
+            state.uri.path == AppRoutes.adminActivityFeed ||
+            state.uri.path == AppRoutes.adminSites ||
+            state.uri.path == AppRoutes.adminSiteDetails ||
+            state.uri.path == AppRoutes.adminGuards ||
+            state.uri.path == AppRoutes.adminGuardDetails) {
+          isAllowedPath = true;
+        }
+      }
+      if (state.uri.path == AppRoutes.settings) {
+        isAllowedPath = true;
+      }
+
+      if (!isAllowedPath && state.uri.path != AppRoutes.accessDenied) {
         return roleHome;
       }
 
@@ -375,6 +391,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final incidentId = state.pathParameters['incidentId'] ?? '';
           return IncidentEvidenceUploadScreen(incidentId: incidentId);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (BuildContext context, GoRouterState state) =>
+            const SettingsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (

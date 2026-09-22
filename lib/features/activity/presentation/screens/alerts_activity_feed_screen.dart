@@ -8,6 +8,14 @@ import '../providers/activity_feed_providers.dart';
 import '../widgets/activity_item_card.dart';
 import '../widgets/alert_item_card.dart';
 
+enum AlertSeverityFilter {
+  all,
+  critical,
+  high,
+  medium,
+  low,
+}
+
 class AlertsActivityFeedScreen extends ConsumerStatefulWidget {
   const AlertsActivityFeedScreen({super.key});
 
@@ -20,6 +28,7 @@ class _AlertsActivityFeedScreenState
     extends ConsumerState<AlertsActivityFeedScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  AlertSeverityFilter _selectedAlertFilter = AlertSeverityFilter.all;
 
   @override
   void initState() {
@@ -73,42 +82,185 @@ class _AlertsActivityFeedScreenState
     );
   }
 
-  // 1. Recent Alerts Section
+  // 1. Recent Alerts Section with Severity Filtering
   Widget _buildAlertsTab(ThemeData theme) {
     final alertsAsync = ref.watch(recentAlertsFeedProvider);
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        ref.invalidate(recentAlertsFeedProvider);
-        await ref.read(recentAlertsFeedProvider.future);
-      },
-      child: alertsAsync.when(
-        data: (alerts) {
-          if (alerts.isEmpty) {
-            return _buildEmptySection(
-              icon: Icons.notifications_off_outlined,
-              title: 'No Recent Operational Alerts',
-              subtitle:
-                  'Overdue shift notices and critical alerts will appear here.',
-            );
-          }
+    return Column(
+      children: [
+        // Filter bar
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+          color: Colors.white,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildAlertFilterChip(
+                  label: 'All',
+                  filter: AlertSeverityFilter.all,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 8),
+                _buildAlertFilterChip(
+                  label: 'Critical',
+                  filter: AlertSeverityFilter.critical,
+                  icon: Icons.warning_rounded,
+                  color: Colors.red.shade700,
+                ),
+                const SizedBox(width: 8),
+                _buildAlertFilterChip(
+                  label: 'High',
+                  filter: AlertSeverityFilter.high,
+                  icon: Icons.priority_high_rounded,
+                  color: Colors.orange.shade800,
+                ),
+                const SizedBox(width: 8),
+                _buildAlertFilterChip(
+                  label: 'Medium',
+                  filter: AlertSeverityFilter.medium,
+                  icon: Icons.notification_important_rounded,
+                  color: Colors.amber.shade900,
+                ),
+                const SizedBox(width: 8),
+                _buildAlertFilterChip(
+                  label: 'Low',
+                  filter: AlertSeverityFilter.low,
+                  icon: Icons.info_outline_rounded,
+                  color: Colors.blue.shade700,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Divider(height: 1, color: AppColors.borderLight),
 
-          return ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16.0),
-            itemCount: alerts.length,
-            itemBuilder: (context, index) {
-              final alert = alerts[index];
-              return AlertItemCard(alert: alert);
+        // List
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(recentAlertsFeedProvider);
+              await ref.read(recentAlertsFeedProvider.future);
             },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _buildErrorSection(
-          error: error.toString(),
-          onRetry: () => ref.invalidate(recentAlertsFeedProvider),
+            child: alertsAsync.when(
+              data: (alerts) {
+                if (alerts.isEmpty) {
+                  return _buildEmptySection(
+                    icon: Icons.notifications_off_outlined,
+                    title: 'No Recent Operational Alerts',
+                    subtitle:
+                        'Overdue shift notices and critical alerts will appear here.',
+                  );
+                }
+
+                final filteredAlerts = alerts.where((alert) {
+                  switch (_selectedAlertFilter) {
+                    case AlertSeverityFilter.all:
+                      return true;
+                    case AlertSeverityFilter.critical:
+                      return alert.type == AlertType.criticalIncident;
+                    case AlertSeverityFilter.high:
+                      return alert.type == AlertType.understaffedSite;
+                    case AlertSeverityFilter.medium:
+                      return alert.type == AlertType.missedShift;
+                    case AlertSeverityFilter.low:
+                      return alert.type == AlertType.lateCheckIn;
+                  }
+                }).toList();
+
+                if (filteredAlerts.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.filter_list_off_rounded,
+                              size: 48, color: Colors.grey),
+                          const SizedBox(height: 12),
+                          Text(
+                            'No ${_selectedAlertFilter.name.toUpperCase()} alerts found',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedAlertFilter = AlertSeverityFilter.all;
+                              });
+                            },
+                            child: const Text('Show All Alerts'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: filteredAlerts.length,
+                  itemBuilder: (context, index) {
+                    final alert = filteredAlerts[index];
+                    return AlertItemCard(alert: alert);
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => _buildErrorSection(
+                error: error.toString(),
+                onRetry: () => ref.invalidate(recentAlertsFeedProvider),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAlertFilterChip({
+    required String label,
+    required AlertSeverityFilter filter,
+    required Color color,
+    IconData? icon,
+  }) {
+    final isSelected = _selectedAlertFilter == filter;
+
+    return ChoiceChip(
+      label: Text(label),
+      avatar: icon != null
+          ? Icon(
+              icon,
+              size: 15,
+              color: isSelected ? Colors.white : color,
+            )
+          : null,
+      selected: isSelected,
+      selectedColor: color,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isSelected ? color : AppColors.borderLight,
         ),
       ),
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : AppColors.textPrimaryLight,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        fontSize: 12,
+      ),
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _selectedAlertFilter = filter;
+          });
+        }
+      },
     );
   }
 

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/theme/app_colors.dart';
 import '../../../identity/presentation/providers/identity_providers.dart';
+import '../../../location/domain/failures/location_failure.dart';
+import '../../../location/presentation/providers/location_providers.dart';
 import '../../domain/entities/site.dart';
 import '../../domain/validators/site_validator.dart';
 import '../providers/site_providers.dart';
@@ -27,7 +30,8 @@ class _SiteFormScreenState extends ConsumerState<SiteFormScreen> {
   late TextEditingController _latitudeController;
   late TextEditingController _longitudeController;
   late TextEditingController _geofenceRadiusController;
-  late SiteStatus _status;
+  SiteStatus _status = SiteStatus.active;
+  bool _isAcquiringLocation = false;
 
   @override
   void initState() {
@@ -58,6 +62,7 @@ class _SiteFormScreenState extends ConsumerState<SiteFormScreen> {
   }
 
   Future<void> _submitForm() async {
+    if (ref.read(siteControllerProvider).isLoading) return;
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -126,6 +131,78 @@ class _SiteFormScreenState extends ConsumerState<SiteFormScreen> {
     }
   }
 
+  Future<void> _useCurrentLocation() async {
+    if (_isAcquiringLocation) return;
+    setState(() {
+      _isAcquiringLocation = true;
+    });
+
+    try {
+      final locationService = ref.read(locationServiceProvider);
+      final location = await locationService.getCurrentLocation();
+      _latitudeController.text = location.latitude.toStringAsFixed(6);
+      _longitudeController.text = location.longitude.toStringAsFixed(6);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Location captured: ${location.latitude.toStringAsFixed(6)}, ${location.longitude.toStringAsFixed(6)} (±${location.accuracy.toStringAsFixed(1)}m)',
+            ),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } on LocationPermissionDeniedFailure {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Location permission denied. Please grant location access in device settings.',
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } on LocationServiceDisabledFailure {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Location services are disabled. Please enable GPS on your device.',
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } on LocationTimeoutFailure {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Location acquisition timed out. Please verify GPS signal and retry.',
+            ),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to get location: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAcquiringLocation = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditMode = widget.existingSite != null;
@@ -166,6 +243,32 @@ class _SiteFormScreenState extends ConsumerState<SiteFormScreen> {
                 validator: (val) => SiteValidator.validateAddress(val ?? ''),
               ),
               const SizedBox(height: 16),
+              // Use Current Location CTA
+              OutlinedButton.icon(
+                onPressed: _isAcquiringLocation ? null : _useCurrentLocation,
+                icon: _isAcquiringLocation
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.my_location_rounded, size: 18),
+                label: Text(
+                  _isAcquiringLocation
+                      ? 'Acquiring GPS Fix...'
+                      : 'Use Current Location',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: const BorderSide(color: AppColors.primary),
+                  foregroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(

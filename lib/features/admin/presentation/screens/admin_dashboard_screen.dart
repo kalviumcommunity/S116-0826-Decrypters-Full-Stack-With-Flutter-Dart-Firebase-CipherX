@@ -23,12 +23,16 @@ class AdminDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(currentUserProfileProvider);
+    final authUser = ref.watch(authStateProvider).asData?.value;
     final statsAsync = ref.watch(dashboardStatisticsStreamProvider);
 
     final profile = profileAsync.asData?.value;
-    final adminName = profile?.displayName.isNotEmpty == true
-        ? profile!.displayName
-        : 'Administrator';
+    final greeting = GreetingUtils.getTimeGreeting();
+    final firstName = GreetingUtils.getFirstName(
+      profile: profile,
+      authUser: authUser,
+      defaultFallback: 'Administrator',
+    );
     final orgId = profile?.organizationId ?? '';
 
     final todayFormatted = DateFormat('EEEE, MMMM d, y').format(DateTime.now());
@@ -108,9 +112,14 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ),
             tooltip: 'Logout',
-            onPressed: () =>
-                ref.read(authControllerProvider.notifier).signOut(),
+            onPressed: () async {
+              final confirmed = await AppDialogs.confirmLogout(context);
+              if (confirmed) {
+                ref.read(authControllerProvider.notifier).signOut();
+              }
+            },
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: RefreshIndicator(
@@ -308,6 +317,67 @@ class AdminDashboardScreen extends ConsumerWidget {
 
               const SizedBox(height: 32),
             ],
+          ),
+        ),
+      ),
+    ),
+  ],
+),
+);
+  }
+
+  Widget _buildShortcutButton(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.borderLight),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.shadowColor,
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentRose,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: AppTextStyles.caption(
+                    color: AppColors.textPrimaryLight,
+                  ).copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

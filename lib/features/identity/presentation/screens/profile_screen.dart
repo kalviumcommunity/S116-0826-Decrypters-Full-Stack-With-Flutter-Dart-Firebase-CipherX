@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/widgets/app_dialogs.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/failures/identity_failure.dart';
@@ -76,10 +80,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         elevation: 0,
         actions: [
           IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings & Info',
+            onPressed: () => context.push(AppRoutes.settings),
+          ),
+          IconButton(
             key: const Key('profile_logout_button'),
             icon: const Icon(Icons.logout),
-            onPressed: () =>
-                ref.read(authControllerProvider.notifier).signOut(),
+            onPressed: () async {
+              final confirmed = await AppDialogs.confirmLogout(context);
+              if (confirmed) {
+                ref.read(authControllerProvider.notifier).signOut();
+              }
+            },
           ),
         ],
       ),

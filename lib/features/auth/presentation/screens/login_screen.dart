@@ -30,6 +30,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
+    if (ref.read(authControllerProvider).isLoading) return;
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
 

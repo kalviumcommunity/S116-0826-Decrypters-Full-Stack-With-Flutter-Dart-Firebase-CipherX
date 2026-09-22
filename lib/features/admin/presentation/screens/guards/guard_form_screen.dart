@@ -60,6 +60,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
   }
 
   void _submit() async {
+    if (ref.read(guardControllerProvider).isLoading) return;
     if (!_formKey.currentState!.validate()) return;
 
     final profileAsync = ref.read(currentUserProfileProvider);
@@ -174,7 +175,7 @@ class _GuardFormScreenState extends ConsumerState<GuardFormScreen> {
               AppTextField(
                 controller: _phoneController,
                 label: 'Phone Number',
-                hint: 'e.g., +1234567890',
+                hint: 'e.g., 9876543210',
                 keyboardType: TextInputType.phone,
                 prefixIcon: const Icon(Icons.phone_outlined),
                 validator: (value) => GuardValidator.validatePhone(value ?? ''),

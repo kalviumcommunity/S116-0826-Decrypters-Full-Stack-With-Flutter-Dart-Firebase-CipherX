@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
-import '../../../qr/presentation/widgets/site_qr_widget.dart';
+import '../../../../core/widgets/app_dialogs.dart';
+import '../../../qr/presentation/widgets/site_qr_management_dialog.dart';
 import '../../domain/entities/site.dart';
 import '../providers/site_providers.dart';
 
@@ -17,28 +18,13 @@ class SiteDetailsScreen extends ConsumerWidget {
 
   Future<void> _showDeactivateDialog(
       BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Deactivate Site?'),
-        content: const Text(
+    final confirmed = await AppDialogs.confirmDeactivation(
+      context,
+      entityType: 'Site',
+      entityName: site.name,
+      title: 'Deactivate Site?',
+      message:
           'This site will no longer be treated as active. Operational records will be preserved.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Deactivate'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true && context.mounted) {
@@ -228,28 +214,10 @@ class SiteDetailsScreen extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (ctx) => Dialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SiteQrWidget(site: site),
-                          const SizedBox(height: 12),
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('Close'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  builder: (ctx) => SiteQrManagementDialog(site: site),
                 ),
-                icon: const Icon(Icons.qr_code_2),
-                label: const Text('View Site QR Code'),
+                icon: const Icon(Icons.qr_code_2_rounded),
+                label: const Text('Manage Site QR Code'),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),

@@ -8,23 +8,81 @@ import '../../domain/entities/incident_severity.dart';
 import '../../domain/entities/incident_status.dart';
 import '../providers/admin_incident_providers.dart';
 
-/// Admin operational dashboard screen for managing security incidents.
-class AdminIncidentListScreen extends ConsumerWidget {
+/// Admin & Supervisor operational screen for monitoring, filtering, and resolving security incidents.
+class AdminIncidentListScreen extends ConsumerStatefulWidget {
   const AdminIncidentListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminIncidentListScreen> createState() =>
+      _AdminIncidentListScreenState();
+}
+
+class _AdminIncidentListScreenState
+    extends ConsumerState<AdminIncidentListScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentFilter = ref.watch(adminIncidentFilterProvider);
     final incidentsAsync = ref.watch(adminIncidentsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Incident Management'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Incidents',
+            onPressed: () => ref.invalidate(adminIncidentsStreamProvider),
+          ),
+        ],
       ),
       body: Column(
         children: [
+          // Search Input
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search incidents by title, description, or site...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.trim().toLowerCase();
+                });
+              },
+            ),
+          ),
           // Filter Tabs
-          _buildFilterTabs(context, ref, currentFilter),
+          _buildFilterTabs(context, currentFilter),
           const Divider(height: 1),
           // Incidents List / States
           Expanded(
@@ -61,7 +119,18 @@ class AdminIncidentListScreen extends ConsumerWidget {
                 ),
               ),
               data: (incidents) {
-                if (incidents.isEmpty) {
+                final filteredIncidents = incidents.where((incident) {
+                  if (_searchQuery.isEmpty) return true;
+                  final typeMatch =
+                      incident.type.toLowerCase().contains(_searchQuery);
+                  final descMatch =
+                      incident.description.toLowerCase().contains(_searchQuery);
+                  final siteMatch =
+                      incident.siteId.toLowerCase().contains(_searchQuery);
+                  return typeMatch || descMatch || siteMatch;
+                }).toList();
+
+                if (incidents.isEmpty || filteredIncidents.isEmpty) {
                   return Center(
                     key: const Key('admin_incidents_empty'),
                     child: Padding(
@@ -74,7 +143,9 @@ class AdminIncidentListScreen extends ConsumerWidget {
                           const SizedBox(height: 16),
                           Text(
                             currentFilter == null
-                                ? 'No incidents reported'
+                                ? (_searchQuery.isNotEmpty
+                                    ? 'No matching incidents'
+                                    : 'No incidents reported')
                                 : 'No ${currentFilter.name.toUpperCase()} incidents',
                             style: Theme.of(context)
                                 .textTheme
@@ -86,7 +157,9 @@ class AdminIncidentListScreen extends ConsumerWidget {
                           const SizedBox(height: 8),
                           Text(
                             currentFilter == null
-                                ? 'All security operational reports will appear here.'
+                                ? (_searchQuery.isNotEmpty
+                                    ? 'Try adjusting your search terms.'
+                                    : 'All security operational reports will appear here.')
                                 : 'Try changing or clearing the status filter above.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -105,10 +178,10 @@ class AdminIncidentListScreen extends ConsumerWidget {
                   child: ListView.separated(
                     key: const Key('admin_incidents_list'),
                     padding: const EdgeInsets.all(12),
-                    itemCount: incidents.length,
+                    itemCount: filteredIncidents.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
-                      final incident = incidents[index];
+                      final incident = filteredIncidents[index];
                       return _AdminIncidentCard(
                         incident: incident,
                         onTap: () {
@@ -134,7 +207,6 @@ class AdminIncidentListScreen extends ConsumerWidget {
 
   Widget _buildFilterTabs(
     BuildContext context,
-    WidgetRef ref,
     IncidentStatus? currentFilter,
   ) {
     return SingleChildScrollView(
@@ -210,119 +282,88 @@ class _AdminIncidentCard extends StatelessWidget {
     required this.onTap,
   });
 
-  Color _severityColor(IncidentSeverity severity) {
-    switch (severity) {
-      case IncidentSeverity.low:
-        return Colors.green.shade600;
-      case IncidentSeverity.medium:
-        return Colors.orange.shade700;
-      case IncidentSeverity.high:
-        return Colors.deepOrange.shade600;
-      case IncidentSeverity.critical:
-        return Colors.red.shade700;
-    }
-  }
-
-  Color _statusColor(IncidentStatus status) {
-    switch (status) {
-      case IncidentStatus.open:
-        return Colors.blue.shade700;
-      case IncidentStatus.investigating:
-        return Colors.amber.shade800;
-      case IncidentStatus.resolved:
-        return Colors.green.shade700;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final severityColor = _getSeverityColor(incident.severity);
+
     return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: incident.severity == IncidentSeverity.critical
+              ? Colors.red.shade300
+              : Colors.grey.shade200,
+          width: incident.severity == IncidentSeverity.critical ? 1.5 : 1,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(14.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Top Row: Status badge and Severity indicator
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      incident.type,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color:
-                          _statusColor(incident.status).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: _statusColor(incident.status),
-                      ),
-                    ),
-                    child: Text(
-                      incident.status.name.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: _statusColor(incident.status),
-                      ),
-                    ),
-                  ),
+                  _buildStatusChip(context, incident.status),
+                  _buildSeverityBadge(incident.severity, severityColor),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 12),
+              // Title / Type
+              Text(
+                incident.type,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              // Description
               Text(
                 incident.description,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade700,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13, color: Colors.black87),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              // Metadata Row
               Row(
                 children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: _severityColor(incident.severity)
-                          .withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      incident.severity.name.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: _severityColor(incident.severity),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.location_on_outlined,
-                      size: 14, color: Colors.grey),
+                  Icon(Icons.location_on_outlined,
+                      size: 14, color: Colors.grey.shade600),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       incident.siteId,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.black54),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
+                  const Spacer(),
+                  Icon(Icons.access_time,
+                      size: 14, color: Colors.grey.shade600),
+                  const SizedBox(width: 4),
                   Text(
-                    '${incident.createdAt.hour.toString().padLeft(2, '0')}:${incident.createdAt.minute.toString().padLeft(2, '0')}',
-                    style: const TextStyle(fontSize: 11, color: Colors.black45),
+                    _formatDate(incident.createdAt),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ],
               ),
@@ -331,5 +372,82 @@ class _AdminIncidentCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildStatusChip(BuildContext context, IncidentStatus status) {
+    Color bg;
+    Color fg;
+    switch (status) {
+      case IncidentStatus.open:
+        bg = Colors.red.shade50;
+        fg = Colors.red.shade700;
+        break;
+      case IncidentStatus.investigating:
+        bg = Colors.amber.shade50;
+        fg = Colors.amber.shade800;
+        break;
+      case IncidentStatus.resolved:
+        bg = Colors.green.shade50;
+        fg = Colors.green.shade700;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        status.name.toUpperCase(),
+        style: TextStyle(
+          color: fg,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeverityBadge(IncidentSeverity severity, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          severity == IncidentSeverity.critical
+              ? Icons.warning_rounded
+              : Icons.circle,
+          size: 12,
+          color: color,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          severity.name.toUpperCase(),
+          style: TextStyle(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getSeverityColor(IncidentSeverity severity) {
+    switch (severity) {
+      case IncidentSeverity.low:
+        return Colors.green;
+      case IncidentSeverity.medium:
+        return Colors.blue;
+      case IncidentSeverity.high:
+        return Colors.orange;
+      case IncidentSeverity.critical:
+        return Colors.red;
+    }
+  }
+
+  String _formatDate(DateTime dt) {
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }

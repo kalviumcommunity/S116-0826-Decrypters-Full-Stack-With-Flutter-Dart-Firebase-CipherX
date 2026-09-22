@@ -3,9 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../app/router/app_router.dart';
+import '../../../../../app/theme/app_colors.dart';
 import '../../../../../core/widgets/entity_list_item.dart';
+import '../../../../../core/widgets/status_badge.dart';
 import '../../../../guards/domain/entities/guard.dart';
 import '../../../../guards/presentation/providers/guard_providers.dart';
+
+enum GuardFilter { all, active, inactive }
 
 class GuardListScreen extends ConsumerStatefulWidget {
   const GuardListScreen({super.key});
@@ -15,7 +19,15 @@ class GuardListScreen extends ConsumerStatefulWidget {
 }
 
 class _GuardListScreenState extends ConsumerState<GuardListScreen> {
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  GuardFilter _filter = GuardFilter.all;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,81 +36,161 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manage Guards'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Guards',
+            onPressed: () => ref.invalidate(guardsStreamProvider),
+          ),
+        ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60.0),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search by name or employee ID...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide.none,
+          preferredSize: const Size.fromHeight(116.0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search guards by name or ID...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.trim().toLowerCase();
+                    });
+                  },
                 ),
-                filled: true,
-                fillColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
-              },
-            ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    _buildFilterChip('All Guards', GuardFilter.all),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Active', GuardFilter.active),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Inactive', GuardFilter.inactive),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
         ),
       ),
-      body: guardsAsync.when(
-        data: (guards) {
-          final filteredGuards = guards.where((guard) {
-            final nameMatch = guard.name.toLowerCase().contains(_searchQuery);
-            final idMatch = guard.employeeId.toLowerCase().contains(
-                  _searchQuery,
-                );
-            return nameMatch || idMatch;
-          }).toList();
-
-          if (guards.isEmpty) {
-            return const Center(
-              child: Text('No guards yet — add your first guard'),
-            );
-          }
-
-          if (filteredGuards.isEmpty) {
-            return const Center(child: Text('No guards match your search.'));
-          }
-
-          return ListView.builder(
-            itemCount: filteredGuards.length,
-            itemBuilder: (context, index) {
-              final guard = filteredGuards[index];
-              return EntityListItem(
-                title: guard.name,
-                subtitle: 'ID: ${guard.employeeId}',
-                avatarUrl: guard.photoUrl,
-                badge: _buildStatusBadge(context, guard.status),
-                onTap: () {
-                  context.push(AppRoutes.adminGuardDetails, extra: guard);
-                },
-              );
-            },
-          );
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(guardsStreamProvider);
+          await ref.read(guardsStreamProvider.future);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Error loading guards: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.refresh(guardsStreamProvider),
-                child: const Text('Retry'),
+        child: guardsAsync.when(
+          data: (guards) {
+            final filteredGuards = guards.where((guard) {
+              // Status filter
+              if (_filter == GuardFilter.active &&
+                  guard.status != GuardStatus.active) {
+                return false;
+              }
+              if (_filter == GuardFilter.inactive &&
+                  guard.status != GuardStatus.inactive) {
+                return false;
+              }
+
+              // Search query
+              if (_searchQuery.isNotEmpty) {
+                final nameMatch =
+                    guard.name.toLowerCase().contains(_searchQuery);
+                final idMatch =
+                    guard.employeeId.toLowerCase().contains(_searchQuery);
+                return nameMatch || idMatch;
+              }
+              return true;
+            }).toList();
+
+            if (guards.isEmpty) {
+              return _buildEmptyView(
+                icon: Icons.person_off_outlined,
+                title: 'No guards yet — add your first guard',
+                message: 'Add security officers to deploy them to duty sites.',
+                showAddButton: true,
+              );
+            }
+
+            if (filteredGuards.isEmpty) {
+              return _buildEmptyView(
+                icon: Icons.search_off_rounded,
+                title: 'No guards found',
+                message: 'No guards match your search query or selected filter.',
+                showAddButton: false,
+              );
+            }
+
+            return ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              itemCount: filteredGuards.length,
+              itemBuilder: (context, index) {
+                final guard = filteredGuards[index];
+                return EntityListItem(
+                  title: guard.name,
+                  subtitle: 'ID: ${guard.employeeId}',
+                  avatarUrl: guard.photoUrl,
+                  badge: guard.status == GuardStatus.active
+                      ? StatusBadge.active()
+                      : StatusBadge.inactive(),
+                  onTap: () {
+                    context.push(AppRoutes.adminGuardDetails, extra: guard);
+                  },
+                );
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline,
+                      size: 48, color: AppColors.error),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading guards: $error',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppColors.error),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => ref.refresh(guardsStreamProvider),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -106,31 +198,81 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
         onPressed: () {
           context.push(AppRoutes.adminGuardCreate);
         },
-        child: const Icon(Icons.add),
+        tooltip: 'Add Guard',
+        child: const Icon(Icons.person_add_rounded),
       ),
     );
   }
 
-  Widget _buildStatusBadge(BuildContext context, GuardStatus status) {
-    final isActive = status == GuardStatus.active;
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isActive
-            ? colorScheme.primaryContainer
-            : colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
+  Widget _buildFilterChip(String label, GuardFilter filter) {
+    final isSelected = _filter == filter;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) {
+        setState(() {
+          _filter = filter;
+        });
+      },
+      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.primary : AppColors.textSecondaryLight,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        fontSize: 12,
       ),
-      child: Text(
-        isActive ? 'Active' : 'Inactive',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isActive
-                  ? colorScheme.onPrimaryContainer
-                  : colorScheme.onErrorContainer,
-              fontWeight: FontWeight.bold,
+    );
+  }
+
+  Widget _buildEmptyView({
+    required IconData icon,
+    required String title,
+    required String message,
+    required bool showAddButton,
+  }) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 56, color: AppColors.textSecondaryLight),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondaryLight,
+                    ),
+                  ),
+                  if (showAddButton) ...[
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () => context.push(AppRoutes.adminGuardCreate),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Guard'),
+                    ),
+                  ],
+                ],
+              ),
             ),
-      ),
+          ),
+        ),
+      ],
     );
   }
 }

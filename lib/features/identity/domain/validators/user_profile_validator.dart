@@ -1,3 +1,4 @@
+import '../../../../core/utils/phone_validator.dart';
 import '../entities/user_profile.dart';
 import '../failures/identity_failure.dart';
 
@@ -38,10 +39,7 @@ class UserProfileValidator {
     if (value == null || value.trim().isEmpty) {
       return 'Phone number is required.';
     }
-    if (value.trim().length < 7) {
-      return 'Please enter a valid phone number.';
-    }
-    return null;
+    return PhoneValidator.validate(value, isRequired: true);
   }
 
   static String? validateOrganizationCode(String? value) {
