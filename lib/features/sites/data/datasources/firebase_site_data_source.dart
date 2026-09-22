@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/demo/demo_data.dart';
 import '../../domain/entities/site.dart';
 
 class FirebaseSiteDataSource {
@@ -15,6 +16,10 @@ class FirebaseSiteDataSource {
           .collection('sites');
 
   Future<Site> createSite(Site site) async {
+    if (DemoData.isDemoOrg(site.organizationId)) {
+      return DemoData.addSite(site);
+    }
+
     final collection = _sitesCollection(site.organizationId);
     final docRef = site.siteId.trim().isNotEmpty
         ? collection.doc(site.siteId.trim())
@@ -41,6 +46,10 @@ class FirebaseSiteDataSource {
     required String organizationId,
     required String siteId,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.getSite(siteId);
+    }
+
     final doc = await _sitesCollection(organizationId).doc(siteId).get();
     if (!doc.exists || doc.data() == null) {
       return null;
@@ -52,6 +61,10 @@ class FirebaseSiteDataSource {
     String organizationId, {
     bool includeInactive = false,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.getSites(includeInactive: includeInactive);
+    }
+
     final collection = _sitesCollection(organizationId);
     final Query<Map<String, dynamic>> query = includeInactive
         ? collection
@@ -66,6 +79,10 @@ class FirebaseSiteDataSource {
     String organizationId, {
     bool includeInactive = false,
   }) {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.watchSites(includeInactive: includeInactive);
+    }
+
     final collection = _sitesCollection(organizationId);
     final Query<Map<String, dynamic>> query = includeInactive
         ? collection
@@ -78,6 +95,10 @@ class FirebaseSiteDataSource {
   }
 
   Future<Site> updateSite(Site site) async {
+    if (DemoData.isDemoOrg(site.organizationId)) {
+      return DemoData.updateSite(site);
+    }
+
     final docRef = _sitesCollection(site.organizationId).doc(site.siteId);
     final now = DateTime.now();
     final updates = <String, dynamic>{
@@ -119,6 +140,13 @@ class FirebaseSiteDataSource {
     required String siteId,
     required SiteStatus status,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      final site = DemoData.getSite(siteId);
+      if (site != null) {
+        return DemoData.updateSite(site.copyWith(status: status));
+      }
+    }
+
     final docRef = _sitesCollection(organizationId).doc(siteId);
     final now = DateTime.now();
 
@@ -153,6 +181,11 @@ class FirebaseSiteDataSource {
     required String organizationId,
     required String siteId,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      DemoData.deleteSite(siteId);
+      return;
+    }
+
     await updateSiteStatus(
       organizationId: organizationId,
       siteId: siteId,
