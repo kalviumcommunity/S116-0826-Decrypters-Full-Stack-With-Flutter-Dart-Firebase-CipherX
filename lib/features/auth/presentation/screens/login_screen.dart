@@ -42,7 +42,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleDemoLogin(String email) async {
-    if (ref.read(authControllerProvider).isLoading) return;
     FocusScope.of(context).unfocus();
     _emailController.text = email;
     _passwordController.text = 'Password123!';

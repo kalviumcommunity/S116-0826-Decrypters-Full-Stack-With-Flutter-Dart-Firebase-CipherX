@@ -50,7 +50,7 @@ class MetricCard extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(18),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(14.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -59,28 +59,28 @@ class MetricCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(icon, color: color, size: 18),
+                        child: Icon(icon, color: color, size: 20),
                       ),
                       if (onTap != null)
                         const Icon(
                           Icons.arrow_forward_ios_rounded,
-                          size: 11,
+                          size: 12,
                           color: AppColors.textSecondaryLight,
                         ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
                   Text(
                     value,
                     style: AppTextStyles.metricValue(
                       color: AppColors.textPrimaryLight,
                     ).copyWith(
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

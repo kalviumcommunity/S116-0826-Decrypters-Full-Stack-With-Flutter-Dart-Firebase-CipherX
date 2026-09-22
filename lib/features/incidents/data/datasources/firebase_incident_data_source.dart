@@ -1,3 +1,4 @@
+import '../../../../core/demo/demo_data.dart';
 import '../../domain/failures/incident_failure.dart';
 import '../../domain/validators/incident_validator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,6 +23,9 @@ class FirebaseIncidentDataSource {
   }
 
   Future<Incident> createIncident(Incident incident) async {
+    if (DemoData.isDemoOrg(incident.organizationId)) {
+      return DemoData.addIncident(incident);
+    }
     final collection = _incidentsCollection(incident.organizationId);
     final docRef = incident.incidentId.trim().isNotEmpty
         ? collection.doc(incident.incidentId.trim())
@@ -63,6 +67,19 @@ class FirebaseIncidentDataSource {
     IncidentSeverity? severity,
     int? limit,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      var list = DemoData.getIncidents();
+      if (status != null) {
+        list = list.where((i) => i.status == status).toList();
+      }
+      if (severity != null) {
+        list = list.where((i) => i.severity == severity).toList();
+      }
+      if (limit != null && list.length > limit) {
+        list = list.sublist(0, limit);
+      }
+      return list;
+    }
     Query<Map<String, dynamic>> query = _incidentsCollection(organizationId);
 
     if (status != null) {
@@ -87,6 +104,18 @@ class FirebaseIncidentDataSource {
     IncidentStatus? status,
     IncidentSeverity? severity,
   }) {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.watchIncidents().map((list) {
+        var res = list;
+        if (status != null) {
+          res = res.where((i) => i.status == status).toList();
+        }
+        if (severity != null) {
+          res = res.where((i) => i.severity == severity).toList();
+        }
+        return res;
+      });
+    }
     Query<Map<String, dynamic>> query = _incidentsCollection(organizationId);
 
     if (status != null) {

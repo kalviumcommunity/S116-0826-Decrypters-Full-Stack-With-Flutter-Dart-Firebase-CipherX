@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../core/demo/demo_data.dart';
 import '../../domain/entities/user_profile.dart';
 
 class FirebaseUserProfileDataSource {
@@ -20,11 +21,18 @@ class FirebaseUserProfileDataSource {
   }
 
   Future<UserProfile?> getUserProfile(String uid) async {
-    final doc = await _usersCollection.doc(uid).get();
-    if (!doc.exists || doc.data() == null) {
-      return null;
+    if (DemoData.isDemoUid(uid)) {
+      return DemoData.getDemoProfile(uid);
     }
-    return UserProfile.fromMap(doc.data()!);
+    try {
+      final doc = await _usersCollection.doc(uid).get();
+      if (!doc.exists || doc.data() == null) {
+        return DemoData.getDemoProfile(uid);
+      }
+      return UserProfile.fromMap(doc.data()!);
+    } catch (_) {
+      return DemoData.getDemoProfile(uid);
+    }
   }
 
   Future<UserProfile> updateUserProfile({

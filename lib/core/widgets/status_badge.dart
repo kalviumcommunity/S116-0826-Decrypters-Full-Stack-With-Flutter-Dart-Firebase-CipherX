@@ -12,7 +12,6 @@ enum StatusBadgeVariant {
 }
 
 /// Reusable pill status badge from the reference design.
-/// Always combines icon + text + curated color palette (never color alone).
 class StatusBadge extends StatelessWidget {
   final String label;
   final StatusBadgeVariant variant;
@@ -28,88 +27,6 @@ class StatusBadge extends StatelessWidget {
     this.customColor,
     this.customBgColor,
   });
-
-  // Standardized factory constructors for domain entities:
-
-  factory StatusBadge.active({Key? key, String label = 'ACTIVE'}) => StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.success,
-        icon: Icons.check_circle_outline_rounded,
-      );
-
-  factory StatusBadge.inactive({Key? key, String label = 'INACTIVE'}) =>
-      StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.neutral,
-        icon: Icons.pause_circle_outline_rounded,
-      );
-
-  factory StatusBadge.onDuty({Key? key, String label = 'ON DUTY'}) =>
-      StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.success,
-        icon: Icons.shield_outlined,
-      );
-
-  factory StatusBadge.absent({Key? key, String label = 'ABSENT'}) => StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.error,
-        icon: Icons.cancel_outlined,
-      );
-
-  factory StatusBadge.lateStatus({Key? key, String label = 'LATE'}) =>
-      StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.warning,
-        icon: Icons.access_time_rounded,
-      );
-
-  factory StatusBadge.open({Key? key, String label = 'OPEN'}) => StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.error,
-        icon: Icons.error_outline_rounded,
-      );
-
-  factory StatusBadge.investigating(
-          {Key? key, String label = 'INVESTIGATING'}) =>
-      StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.warning,
-        icon: Icons.search_rounded,
-      );
-
-  factory StatusBadge.resolved({Key? key, String label = 'RESOLVED'}) =>
-      StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.success,
-        icon: Icons.verified_outlined,
-      );
-
-  factory StatusBadge.fullyStaffed(
-          {Key? key, String label = 'FULLY STAFFED'}) =>
-      StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.success,
-        icon: Icons.people_alt_outlined,
-      );
-
-  factory StatusBadge.understaffed(
-          {Key? key, String label = 'UNDERSTAFFED'}) =>
-      StatusBadge(
-        key: key,
-        label: label,
-        variant: StatusBadgeVariant.error,
-        icon: Icons.person_off_outlined,
-      );
 
   @override
   Widget build(BuildContext context) {

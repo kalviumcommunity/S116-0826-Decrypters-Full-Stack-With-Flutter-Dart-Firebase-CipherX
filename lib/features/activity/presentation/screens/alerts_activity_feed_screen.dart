@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../alerts/domain/entities/alert_type.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../attendance/presentation/widgets/attendance_card.dart';
 import '../../../incidents/presentation/widgets/incident_card.dart';

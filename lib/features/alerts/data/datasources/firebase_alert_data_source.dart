@@ -1,3 +1,4 @@
+import '../../../../core/demo/demo_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/alert.dart';
 import '../../domain/entities/alert_status.dart';
@@ -26,6 +27,9 @@ class FirebaseAlertDataSource {
   ///
   /// Returns the created [Alert] if absent, or `null` if the alert already exists.
   Future<Alert?> createIfAbsent(Alert alert) async {
+    if (DemoData.isDemoOrg(alert.organizationId)) {
+      return DemoData.addAlert(alert);
+    }
     try {
       final docRef = _alertsCollection(alert.organizationId).doc(alert.alertId);
 
@@ -90,6 +94,9 @@ class FirebaseAlertDataSource {
     AlertType? type,
     AlertStatus? status,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.getAlerts();
+    }
     try {
       Query<Map<String, dynamic>> query = _alertsCollection(organizationId);
 
@@ -115,6 +122,9 @@ class FirebaseAlertDataSource {
     AlertType? type,
     AlertStatus? status,
   }) {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.watchAlerts();
+    }
     Query<Map<String, dynamic>> query = _alertsCollection(organizationId);
 
     if (type != null) {

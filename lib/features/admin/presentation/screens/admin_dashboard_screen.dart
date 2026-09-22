@@ -6,9 +6,6 @@ import 'package:intl/intl.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
-import '../../../../core/utils/greeting_utils.dart';
-import '../../../../core/widgets/app_dialogs.dart';
-import '../../../../core/widgets/network_status_banner.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../identity/presentation/providers/identity_providers.dart';
 import '../providers/admin_dashboard_providers.dart';
@@ -44,7 +41,6 @@ class AdminDashboardScreen extends ConsumerWidget {
       key: const Key('admin_command_center_screen'),
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        titleSpacing: 8,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -52,29 +48,20 @@ class AdminDashboardScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
               child: Image.asset(
                 'assets/images/cipher_x_logo.png',
-                width: 22,
-                height: 22,
+                width: 24,
+                height: 24,
                 fit: BoxFit.contain,
               ),
             ),
-            const SizedBox(width: 6),
-            const Flexible(
-              child: Text(
-                'Command Center',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
+            const SizedBox(width: 8),
+            const Text('Command Center'),
           ],
         ),
         actions: [
           IconButton(
             key: const Key('open_activity_feed'),
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             icon: Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
@@ -82,7 +69,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
               child: const Icon(
                 Icons.notifications_active_outlined,
-                size: 17,
+                size: 18,
                 color: AppColors.primary,
               ),
             ),
@@ -91,11 +78,8 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
           IconButton(
             key: const Key('refresh_command_center'),
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             icon: Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
@@ -103,7 +87,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
               child: const Icon(
                 Icons.refresh_rounded,
-                size: 17,
+                size: 18,
                 color: AppColors.textPrimaryLight,
               ),
             ),
@@ -114,31 +98,8 @@ class AdminDashboardScreen extends ConsumerWidget {
             },
           ),
           IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             icon: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.borderLight),
-              ),
-              child: const Icon(
-                Icons.settings_outlined,
-                size: 17,
-                color: AppColors.textPrimaryLight,
-              ),
-            ),
-            tooltip: 'Settings & Info',
-            onPressed: () => context.push(AppRoutes.settings),
-          ),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            icon: Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
@@ -146,7 +107,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
               child: const Icon(
                 Icons.logout_rounded,
-                size: 17,
+                size: 18,
                 color: AppColors.textSecondaryLight,
               ),
             ),
@@ -161,21 +122,17 @@ class AdminDashboardScreen extends ConsumerWidget {
           const SizedBox(width: 4),
         ],
       ),
-      body: Column(
-        children: [
-          const NetworkStatusBanner(),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(dashboardStatisticsStreamProvider);
-                ref.invalidate(siteCoverageStreamProvider);
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(dashboardStatisticsStreamProvider);
+          ref.invalidate(siteCoverageStreamProvider);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               // Welcome Header
               Container(
                 padding: const EdgeInsets.all(18.0),
@@ -209,8 +166,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                       ),
                       child: Center(
                         child: Text(
-                          firstName.isNotEmpty
-                              ? firstName[0].toUpperCase()
+                          adminName.isNotEmpty
+                              ? adminName[0].toUpperCase()
                               : 'A',
                           style: const TextStyle(
                             color: Colors.white,
@@ -226,44 +183,17 @@ class AdminDashboardScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '$greeting, $firstName',
+                            'Welcome back, $adminName',
                             style: AppTextStyles.titleMedium(
                               color: AppColors.textPrimaryLight,
                             ).copyWith(fontWeight: FontWeight.w700),
                           ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary
-                                      .withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Text(
-                                  'Administrator',
-                                  style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  todayFormatted,
-                                  style: AppTextStyles.bodyMedium(
-                                    color: AppColors.textSecondaryLight,
-                                  ).copyWith(fontSize: 11),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 2),
+                          Text(
+                            todayFormatted,
+                            style: AppTextStyles.bodyMedium(
+                              color: AppColors.textSecondaryLight,
+                            ).copyWith(fontSize: 12),
                           ),
                           if (orgId.isNotEmpty) ...[
                             const SizedBox(height: 6),
@@ -394,6 +324,64 @@ class AdminDashboardScreen extends ConsumerWidget {
   ],
 ),
 );
+  }
+
+  Widget _buildShortcutButton(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.borderLight),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.shadowColor,
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentRose,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: AppTextStyles.caption(
+                    color: AppColors.textPrimaryLight,
+                  ).copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildShortcutButton(
