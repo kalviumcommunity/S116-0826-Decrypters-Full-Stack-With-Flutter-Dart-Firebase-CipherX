@@ -1,3 +1,4 @@
+import '../../../../core/demo/demo_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../location/domain/entities/location_data.dart';
@@ -26,6 +27,9 @@ class FirebaseAttendanceDataSource {
   Future<AttendanceRecord> createAttendanceRecord(
     AttendanceRecord record,
   ) async {
+    if (DemoData.isDemoOrg(record.organizationId)) {
+      return DemoData.addAttendance(record);
+    }
     final collection = _attendanceCollection(record.organizationId);
     final docRef = record.attendanceId.trim().isNotEmpty
         ? collection.doc(record.attendanceId.trim())
@@ -59,6 +63,9 @@ class FirebaseAttendanceDataSource {
   Future<AttendanceRecord> checkInGuard({
     required AttendanceRecord record,
   }) async {
+    if (DemoData.isDemoOrg(record.organizationId)) {
+      return DemoData.addAttendance(record);
+    }
     final deterministicId = record.attendanceId.trim().isNotEmpty
         ? record.attendanceId.trim()
         : 'att_${record.shiftId}';
@@ -222,6 +229,11 @@ class FirebaseAttendanceDataSource {
     String organizationId, {
     AttendanceStatus? status,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      final list = DemoData.getAttendances();
+      if (status != null) return list.where((a) => a.status == status).toList();
+      return list;
+    }
     Query<Map<String, dynamic>> query = _attendanceCollection(organizationId);
     if (status != null) {
       query = query.where('status', isEqualTo: status.toMapString());
@@ -236,6 +248,12 @@ class FirebaseAttendanceDataSource {
     String organizationId, {
     AttendanceStatus? status,
   }) {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.watchAttendances().map((list) {
+        if (status != null) return list.where((a) => a.status == status).toList();
+        return list;
+      });
+    }
     Query<Map<String, dynamic>> query = _attendanceCollection(organizationId);
     if (status != null) {
       query = query.where('status', isEqualTo: status.toMapString());
