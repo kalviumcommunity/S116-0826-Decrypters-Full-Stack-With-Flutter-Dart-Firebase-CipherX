@@ -45,8 +45,15 @@ class AppErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(icon, size: 64, color: theme.colorScheme.error),
-            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Icon(icon, size: 48, color: theme.colorScheme.error),
+            ),
+            const SizedBox(height: 20),
             Text(
               title,
               textAlign: TextAlign.center,
