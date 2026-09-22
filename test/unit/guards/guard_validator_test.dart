@@ -67,7 +67,7 @@ void main() {
         throwsA(isA<GuardValidationFailure>().having(
           (e) => e.message,
           'message',
-          contains('Enter a valid phone number'),
+          contains('Phone number must contain exactly 10 digits'),
         )),
       );
     });

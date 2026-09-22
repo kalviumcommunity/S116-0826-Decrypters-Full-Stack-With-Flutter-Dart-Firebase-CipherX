@@ -1,13 +1,10 @@
+import '../../../../core/utils/phone_validator.dart';
 import '../entities/guard.dart';
 import '../failures/guard_failure.dart';
 
 class GuardValidator {
   static final RegExp _emailRegExp = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-  );
-
-  static final RegExp _phoneRegExp = RegExp(
-    r'^\+?[0-9\s\-()]{7,20}$',
   );
 
   static String? validateOrganizationId(String organizationId) {
@@ -36,14 +33,7 @@ class GuardValidator {
   }
 
   static String? validatePhone(String phone) {
-    final trimmed = phone.trim();
-    if (trimmed.isEmpty) {
-      return 'Phone number cannot be empty.';
-    }
-    if (!_phoneRegExp.hasMatch(trimmed)) {
-      return 'Enter a valid phone number.';
-    }
-    return null;
+    return PhoneValidator.validate(phone, isRequired: true);
   }
 
   static String? validateEmail(String? email) {
