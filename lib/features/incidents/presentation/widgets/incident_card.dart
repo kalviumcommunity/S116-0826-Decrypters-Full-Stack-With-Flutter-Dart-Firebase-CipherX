@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_text_styles.dart';
 import '../../domain/entities/incident.dart';
 import '../../domain/entities/incident_severity.dart';
 import '../../domain/entities/incident_status.dart';
@@ -46,15 +48,24 @@ class IncidentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final severityColor = _getSeverityColor(incident.severity);
     final statusColor = _getStatusColor(incident.status);
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: severityColor.withAlpha(80), width: 1),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.borderLight,
+          width: 1,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadowColor,
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -69,16 +80,19 @@ class IncidentCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: severityColor.withAlpha(30),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: severityColor),
+                    color: severityColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: severityColor.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     incident.severity.name.toUpperCase(),
                     style: TextStyle(
                       color: severityColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),
@@ -89,24 +103,27 @@ class IncidentCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withAlpha(30),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: statusColor),
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: statusColor.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     incident.status.name.toUpperCase(),
                     style: TextStyle(
                       color: statusColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),
                 const Spacer(),
                 Text(
                   _formatTimestamp(incident.createdAt),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade600,
+                  style: AppTextStyles.caption(
+                    color: AppColors.textSecondaryLight,
                   ),
                 ),
               ],
@@ -114,46 +131,64 @@ class IncidentCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               incident.type,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: AppTextStyles.titleMedium(
+                color: AppColors.textPrimaryLight,
+              ).copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Text(
               incident.description,
-              style: theme.textTheme.bodyMedium,
+              style: AppTextStyles.bodyMedium(
+                color: AppColors.textSecondaryLight,
+              ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.location_on_outlined,
-                    size: 16, color: Colors.grey.shade600),
-                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(
+                    Icons.location_on_outlined,
+                    size: 14,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 6),
                 Text(
                   'Site: ${incident.siteId}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade700,
-                  ),
+                  style: AppTextStyles.caption(
+                    color: AppColors.textPrimaryLight,
+                  ).copyWith(fontWeight: FontWeight.w600),
                 ),
                 if (incident.latitude != null &&
                     incident.longitude != null) ...[
                   const SizedBox(width: 12),
-                  Icon(Icons.my_location,
-                      size: 16, color: Colors.grey.shade600),
+                  const Icon(
+                    Icons.my_location_rounded,
+                    size: 14,
+                    color: AppColors.textSecondaryLight,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${incident.latitude!.toStringAsFixed(4)}, ${incident.longitude!.toStringAsFixed(4)}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade700,
+                    style: AppTextStyles.caption(
+                      color: AppColors.textSecondaryLight,
                     ),
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
+            const SizedBox(height: 10),
+            const Divider(color: AppColors.borderLight, height: 1),
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -163,8 +198,14 @@ class IncidentCard extends StatelessWidget {
                     context.push(
                         '/guard/incidents/${incident.incidentId}/evidence');
                   },
-                  icon: const Icon(Icons.attach_file, size: 18),
+                  icon: const Icon(Icons.attach_file_rounded, size: 16),
                   label: const Text('Evidence'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    textStyle: AppTextStyles.caption().copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ],
             ),

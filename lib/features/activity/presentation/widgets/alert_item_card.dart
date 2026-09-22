@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_text_styles.dart';
 import '../../../alerts/domain/entities/alert.dart';
 import '../../../alerts/domain/entities/alert_status.dart';
 import '../../../alerts/domain/entities/alert_type.dart';
@@ -15,7 +17,6 @@ class AlertItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM d, yyyy - hh:mm a');
     final timeStr = dateFormat.format(alert.createdAt);
     final severityColor = _getSeverityColor(alert.type);
@@ -25,33 +26,51 @@ class AlertItemCard extends StatelessWidget {
         (alert.metadata['details'] as String?) ??
         'Triggered by ${alert.sourceEntityType} (${alert.sourceEntityId})';
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        side: BorderSide(
-          color: severityColor.withValues(alpha: 0.4),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18.0),
+        border: Border.all(
+          color: AppColors.borderLight,
+          width: 1,
         ),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadowColor,
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  _getAlertIcon(alert.type),
-                  color: severityColor,
-                  size: 20,
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: severityColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    _getAlertIcon(alert.type),
+                    color: severityColor,
+                    size: 18,
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     _getAlertTypeName(alert.type),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: AppTextStyles.titleMedium(
+                      color: AppColors.textPrimaryLight,
+                    ).copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -60,12 +79,12 @@ class AlertItemCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: severityColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
+                    color: severityColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: severityColor.withValues(alpha: 0.5),
+                      color: severityColor.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
@@ -73,39 +92,42 @@ class AlertItemCard extends StatelessWidget {
                     style: TextStyle(
                       color: severityColor,
                       fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
             Text(
               message,
-              style: theme.textTheme.bodyMedium,
+              style: AppTextStyles.bodyMedium(
+                color: AppColors.textSecondaryLight,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               children: [
                 if (siteId != null && siteId.isNotEmpty) ...[
-                  const Icon(Icons.business, size: 14, color: Colors.grey),
+                  const Icon(Icons.business_rounded, size: 14, color: AppColors.textSecondaryLight),
                   const SizedBox(width: 4),
                   Text(
                     'Site: $siteId',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade700,
-                    ),
+                    style: AppTextStyles.caption(
+                      color: AppColors.textPrimaryLight,
+                    ).copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(width: 12),
                 ],
-                const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                const Icon(Icons.access_time_rounded, size: 14, color: AppColors.textSecondaryLight),
                 const SizedBox(width: 4),
                 Text(
                   timeStr,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade700,
+                  style: AppTextStyles.caption(
+                    color: AppColors.textSecondaryLight,
                   ),
                 ),
                 const Spacer(),
@@ -113,10 +135,10 @@ class AlertItemCard extends StatelessWidget {
                   _getStatusDisplayName(alert.status),
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: alert.status == AlertStatus.active
-                        ? Colors.red.shade700
-                        : Colors.green,
+                        ? AppColors.error
+                        : AppColors.success,
                   ),
                 ),
               ],

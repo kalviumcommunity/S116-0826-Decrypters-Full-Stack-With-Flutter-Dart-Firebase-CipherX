@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_text_styles.dart';
 import '../../domain/entities/site_coverage_filter.dart';
 
 /// Filter bar providing selectable chips to filter site coverage items.
@@ -57,25 +59,35 @@ class SiteCoverageFilterBar extends StatelessWidget {
     Color? color,
   }) {
     final isSelected = currentFilter == filter;
-    final theme = Theme.of(context);
 
     return ChoiceChip(
       key: key,
       label: Text(label),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected
+              ? (color ?? AppColors.primary)
+              : AppColors.borderLight,
+        ),
+      ),
       avatar: icon != null
           ? Icon(
               icon,
-              size: 16,
+              size: 15,
               color: isSelected
-                  ? (color != null ? Colors.white : theme.colorScheme.onPrimary)
-                  : color ?? theme.colorScheme.onSurfaceVariant,
+                  ? Colors.white
+                  : (color ?? AppColors.textSecondaryLight),
             )
           : null,
       selected: isSelected,
-      selectedColor: color ?? theme.colorScheme.primary,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : theme.colorScheme.onSurfaceVariant,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      selectedColor: color ?? AppColors.primary,
+      backgroundColor: Colors.white,
+      labelStyle: AppTextStyles.caption(
+        color: isSelected ? Colors.white : AppColors.textPrimaryLight,
+      ).copyWith(
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        fontSize: 12,
       ),
       onSelected: (selected) {
         if (selected) {

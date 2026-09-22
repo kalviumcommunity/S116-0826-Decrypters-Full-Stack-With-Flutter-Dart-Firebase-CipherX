@@ -33,7 +33,7 @@ void main() {
         );
 
         // Initially, splash screen elements should be visible
-        expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+        expect(find.byType(Image), findsOneWidget);
 
         // Let the navigation delay complete
         await tester.pumpAndSettle();

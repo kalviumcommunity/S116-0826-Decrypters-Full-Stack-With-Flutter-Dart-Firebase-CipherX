@@ -5,7 +5,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../firebase_options.dart';
-import '../config/app_config.dart';
 import '../errors/app_exception.dart';
 
 class FirebaseService {
@@ -35,9 +34,10 @@ class FirebaseService {
         );
       }
 
-      final AppConfig config = AppConfig.fromEnvironment();
+      const bool connectEmulatorsExplicit =
+          bool.fromEnvironment('USE_FIREBASE_EMULATORS', defaultValue: false);
       final bool shouldEmulate =
-          connectEmulators || config.environment == AppEnvironment.development;
+          connectEmulators || connectEmulatorsExplicit;
 
       if (shouldEmulate) {
         await configureEmulators(host: customHost);

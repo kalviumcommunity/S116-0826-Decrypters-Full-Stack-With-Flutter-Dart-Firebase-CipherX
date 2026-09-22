@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/theme/app_colors.dart';
 import '../../../attendance/presentation/widgets/attendance_card.dart';
 import '../../../incidents/presentation/widgets/incident_card.dart';
 import '../providers/activity_feed_providers.dart';
@@ -37,17 +38,24 @@ class _AlertsActivityFeedScreenState
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Alerts & Activity Feed'),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
+          indicatorColor: AppColors.primary,
+          indicatorWeight: 3,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondaryLight,
+          labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
           tabs: const [
-            Tab(icon: Icon(Icons.notifications_active), text: 'Alerts'),
-            Tab(icon: Icon(Icons.warning_amber), text: 'Incidents'),
-            Tab(icon: Icon(Icons.how_to_reg), text: 'Attendance'),
-            Tab(icon: Icon(Icons.history), text: 'Activity Audit'),
+            Tab(icon: Icon(Icons.notifications_active_rounded), text: 'Alerts'),
+            Tab(icon: Icon(Icons.warning_amber_rounded), text: 'Incidents'),
+            Tab(icon: Icon(Icons.how_to_reg_rounded), text: 'Attendance'),
+            Tab(icon: Icon(Icons.history_rounded), text: 'Activity Audit'),
           ],
         ),
       ),

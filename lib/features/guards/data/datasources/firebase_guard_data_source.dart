@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/demo/demo_data.dart';
 import '../../domain/entities/guard.dart';
 
 class FirebaseGuardDataSource {
@@ -15,6 +16,10 @@ class FirebaseGuardDataSource {
           .collection('guards');
 
   Future<Guard> createGuard(Guard guard) async {
+    if (DemoData.isDemoOrg(guard.organizationId)) {
+      return DemoData.addGuard(guard);
+    }
+
     final collection = _guardsCollection(guard.organizationId);
     final docRef = guard.guardId.trim().isNotEmpty
         ? collection.doc(guard.guardId.trim())
@@ -37,6 +42,10 @@ class FirebaseGuardDataSource {
     required String organizationId,
     required String guardId,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.getGuard(guardId);
+    }
+
     final doc = await _guardsCollection(organizationId).doc(guardId).get();
     if (!doc.exists || doc.data() == null) {
       return null;
@@ -48,6 +57,10 @@ class FirebaseGuardDataSource {
     String organizationId, {
     bool includeInactive = false,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.getGuards(includeInactive: includeInactive);
+    }
+
     final collection = _guardsCollection(organizationId);
     final Query<Map<String, dynamic>> query = includeInactive
         ? collection
@@ -64,6 +77,10 @@ class FirebaseGuardDataSource {
     String organizationId, {
     bool includeInactive = false,
   }) {
+    if (DemoData.isDemoOrg(organizationId)) {
+      return DemoData.watchGuards(includeInactive: includeInactive);
+    }
+
     final collection = _guardsCollection(organizationId);
     final Query<Map<String, dynamic>> query = includeInactive
         ? collection
@@ -78,6 +95,10 @@ class FirebaseGuardDataSource {
   }
 
   Future<Guard> updateGuard(Guard guard) async {
+    if (DemoData.isDemoOrg(guard.organizationId)) {
+      return DemoData.updateGuard(guard);
+    }
+
     final docRef = _guardsCollection(guard.organizationId).doc(guard.guardId);
     final updates = <String, dynamic>{
       'name': guard.name,
@@ -102,6 +123,13 @@ class FirebaseGuardDataSource {
     required String guardId,
     required GuardStatus status,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      final guard = DemoData.getGuard(guardId);
+      if (guard != null) {
+        return DemoData.updateGuard(guard.copyWith(status: status));
+      }
+    }
+
     final docRef = _guardsCollection(organizationId).doc(guardId);
     await docRef.update({
       'status': status.toMapString(),
@@ -122,6 +150,11 @@ class FirebaseGuardDataSource {
     required String organizationId,
     required String guardId,
   }) async {
+    if (DemoData.isDemoOrg(organizationId)) {
+      DemoData.deleteGuard(guardId);
+      return;
+    }
+
     await updateGuardStatus(
       organizationId: organizationId,
       guardId: guardId,
