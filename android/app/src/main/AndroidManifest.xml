@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
     <application
-        android:label="cipher_x"
+        android:label="Cipher-X"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
