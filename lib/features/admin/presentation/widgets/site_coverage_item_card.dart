@@ -90,7 +90,8 @@ class SiteCoverageItemCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      _buildStatusBadge(isFullyStaffed, statusColor, badgeBgColor),
+                      _buildStatusBadge(
+                          isFullyStaffed, statusColor, badgeBgColor),
                     ],
                   ),
                   const SizedBox(height: 14),
@@ -105,7 +106,8 @@ class SiteCoverageItemCard extends StatelessWidget {
                       ),
                       Text(
                         '${(progressRatio * 100).toInt()}%',
-                        style: AppTextStyles.caption(color: statusColor).copyWith(
+                        style:
+                            AppTextStyles.caption(color: statusColor).copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 12,
                         ),

@@ -324,7 +324,8 @@ class DemoData {
     );
   }
 
-  static Stream<List<Guard>> watchGuards({bool includeInactive = false}) async* {
+  static Stream<List<Guard>> watchGuards(
+      {bool includeInactive = false}) async* {
     yield getGuards(includeInactive: includeInactive);
     yield* _guardsController.stream.map((list) {
       if (includeInactive) return list;

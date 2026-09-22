@@ -250,7 +250,9 @@ class FirebaseAttendanceDataSource {
   }) {
     if (DemoData.isDemoOrg(organizationId)) {
       return DemoData.watchAttendances().map((list) {
-        if (status != null) return list.where((a) => a.status == status).toList();
+        if (status != null) {
+          return list.where((a) => a.status == status).toList();
+        }
         return list;
       });
     }

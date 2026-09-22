@@ -49,8 +49,10 @@ class _AlertsActivityFeedScreenState
           indicatorWeight: 3,
           labelColor: AppColors.primary,
           unselectedLabelColor: AppColors.textSecondaryLight,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+          labelStyle:
+              const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          unselectedLabelStyle:
+              const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
           tabs: const [
             Tab(icon: Icon(Icons.notifications_active_rounded), text: 'Alerts'),
             Tab(icon: Icon(Icons.warning_amber_rounded), text: 'Incidents'),

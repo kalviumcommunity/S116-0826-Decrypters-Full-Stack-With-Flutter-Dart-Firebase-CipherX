@@ -112,7 +112,8 @@ class AlertItemCard extends StatelessWidget {
             Row(
               children: [
                 if (siteId != null && siteId.isNotEmpty) ...[
-                  const Icon(Icons.business_rounded, size: 14, color: AppColors.textSecondaryLight),
+                  const Icon(Icons.business_rounded,
+                      size: 14, color: AppColors.textSecondaryLight),
                   const SizedBox(width: 4),
                   Text(
                     'Site: $siteId',
@@ -122,7 +123,8 @@ class AlertItemCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                 ],
-                const Icon(Icons.access_time_rounded, size: 14, color: AppColors.textSecondaryLight),
+                const Icon(Icons.access_time_rounded,
+                    size: 14, color: AppColors.textSecondaryLight),
                 const SizedBox(width: 4),
                 Text(
                   timeStr,

@@ -156,7 +156,8 @@ class GuardHomeScreen extends ConsumerWidget {
                 guardShiftsAsync.when(
                   data: (shiftData) {
                     final todayShift = shiftData.todayShift;
-                    final activeAttendance = activeAttendanceAsync.asData?.value;
+                    final activeAttendance =
+                        activeAttendanceAsync.asData?.value;
                     final isOnDuty = activeAttendance != null;
 
                     return Row(
@@ -176,7 +177,8 @@ class GuardHomeScreen extends ConsumerWidget {
                                     Text(
                                       'Live Shift',
                                       style: AppTextStyles.caption(
-                                        color: Colors.white.withValues(alpha: 0.8),
+                                        color:
+                                            Colors.white.withValues(alpha: 0.8),
                                       ).copyWith(fontWeight: FontWeight.w600),
                                     ),
                                     Container(
@@ -187,7 +189,8 @@ class GuardHomeScreen extends ConsumerWidget {
                                       decoration: BoxDecoration(
                                         color: isOnDuty
                                             ? AppColors.success
-                                            : Colors.white.withValues(alpha: 0.2),
+                                            : Colors.white
+                                                .withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
@@ -254,7 +257,9 @@ class GuardHomeScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  isOnDuty ? 'Geofence Active' : 'Optimal Standby',
+                                  isOnDuty
+                                      ? 'Geofence Active'
+                                      : 'Optimal Standby',
                                   style: TextStyle(
                                     color: isOnDuty
                                         ? AppColors.success

@@ -70,7 +70,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -179,8 +180,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               label: const Text('Admin'),
                               backgroundColor: Colors.white,
-                              side: const BorderSide(color: AppColors.borderLight),
-                              labelStyle: AppTextStyles.caption(color: AppColors.textPrimaryLight)
+                              side: const BorderSide(
+                                  color: AppColors.borderLight),
+                              labelStyle: AppTextStyles.caption(
+                                      color: AppColors.textPrimaryLight)
                                   .copyWith(fontWeight: FontWeight.w600),
                               onPressed: isLoading
                                   ? null
@@ -195,8 +198,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               label: const Text('Guard'),
                               backgroundColor: Colors.white,
-                              side: const BorderSide(color: AppColors.borderLight),
-                              labelStyle: AppTextStyles.caption(color: AppColors.textPrimaryLight)
+                              side: const BorderSide(
+                                  color: AppColors.borderLight),
+                              labelStyle: AppTextStyles.caption(
+                                      color: AppColors.textPrimaryLight)
                                   .copyWith(fontWeight: FontWeight.w600),
                               onPressed: isLoading
                                   ? null
@@ -211,8 +216,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               label: const Text('Supervisor'),
                               backgroundColor: Colors.white,
-                              side: const BorderSide(color: AppColors.borderLight),
-                              labelStyle: AppTextStyles.caption(color: AppColors.textPrimaryLight)
+                              side: const BorderSide(
+                                  color: AppColors.borderLight),
+                              labelStyle: AppTextStyles.caption(
+                                      color: AppColors.textPrimaryLight)
                                   .copyWith(fontWeight: FontWeight.w600),
                               onPressed: isLoading
                                   ? null
@@ -239,7 +246,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                          const Icon(Icons.error_outline,
+                              color: AppColors.error, size: 20),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -271,15 +279,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.borderLight),
+                        borderSide:
+                            const BorderSide(color: AppColors.borderLight),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.borderLight),
+                        borderSide:
+                            const BorderSide(color: AppColors.borderLight),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                        borderSide: const BorderSide(
+                            color: AppColors.primary, width: 1.5),
                       ),
                     ),
                     validator: AuthValidators.validateEmail,
@@ -311,15 +322,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.borderLight),
+                        borderSide:
+                            const BorderSide(color: AppColors.borderLight),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.borderLight),
+                        borderSide:
+                            const BorderSide(color: AppColors.borderLight),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                        borderSide: const BorderSide(
+                            color: AppColors.primary, width: 1.5),
                       ),
                     ),
                     validator: AuthValidators.validatePassword,
@@ -382,12 +396,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           width: 20,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2.2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
                                           ),
                                         )
                                       : Text(
                                           'SIGN IN',
-                                          style: AppTextStyles.button(color: Colors.white).copyWith(
+                                          style: AppTextStyles.button(
+                                                  color: Colors.white)
+                                              .copyWith(
                                             fontWeight: FontWeight.w700,
                                             letterSpacing: 1.0,
                                           ),

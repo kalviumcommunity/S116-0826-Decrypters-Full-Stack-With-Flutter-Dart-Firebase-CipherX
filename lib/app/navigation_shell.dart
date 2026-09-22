@@ -106,9 +106,8 @@ class NavigationShell extends StatelessWidget {
             Icon(
               isSelected ? activeIcon : icon,
               size: 20,
-              color: isSelected
-                  ? AppColors.primary
-                  : AppColors.textSecondaryLight,
+              color:
+                  isSelected ? AppColors.primary : AppColors.textSecondaryLight,
             ),
             if (isSelected) ...[
               const SizedBox(width: 6),

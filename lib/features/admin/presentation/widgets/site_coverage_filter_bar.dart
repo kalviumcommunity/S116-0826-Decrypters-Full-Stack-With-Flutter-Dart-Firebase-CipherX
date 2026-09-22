@@ -66,9 +66,8 @@ class SiteCoverageFilterBar extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected
-              ? (color ?? AppColors.primary)
-              : AppColors.borderLight,
+          color:
+              isSelected ? (color ?? AppColors.primary) : AppColors.borderLight,
         ),
       ),
       avatar: icon != null

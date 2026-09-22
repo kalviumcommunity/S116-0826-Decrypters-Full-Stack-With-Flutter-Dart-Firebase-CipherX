@@ -157,7 +157,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                       ),
                       child: Center(
                         child: Text(
-                          adminName.isNotEmpty ? adminName[0].toUpperCase() : 'A',
+                          adminName.isNotEmpty
+                              ? adminName[0].toUpperCase()
+                              : 'A',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,

@@ -36,8 +36,7 @@ class FirebaseService {
 
       const bool connectEmulatorsExplicit =
           bool.fromEnvironment('USE_FIREBASE_EMULATORS', defaultValue: false);
-      final bool shouldEmulate =
-          connectEmulators || connectEmulatorsExplicit;
+      final bool shouldEmulate = connectEmulators || connectEmulatorsExplicit;
 
       if (shouldEmulate) {
         await configureEmulators(host: customHost);

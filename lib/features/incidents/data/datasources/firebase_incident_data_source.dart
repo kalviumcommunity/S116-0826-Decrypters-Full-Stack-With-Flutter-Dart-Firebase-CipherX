@@ -69,9 +69,15 @@ class FirebaseIncidentDataSource {
   }) async {
     if (DemoData.isDemoOrg(organizationId)) {
       var list = DemoData.getIncidents();
-      if (status != null) list = list.where((i) => i.status == status).toList();
-      if (severity != null) list = list.where((i) => i.severity == severity).toList();
-      if (limit != null && list.length > limit) list = list.sublist(0, limit);
+      if (status != null) {
+        list = list.where((i) => i.status == status).toList();
+      }
+      if (severity != null) {
+        list = list.where((i) => i.severity == severity).toList();
+      }
+      if (limit != null && list.length > limit) {
+        list = list.sublist(0, limit);
+      }
       return list;
     }
     Query<Map<String, dynamic>> query = _incidentsCollection(organizationId);
@@ -101,8 +107,12 @@ class FirebaseIncidentDataSource {
     if (DemoData.isDemoOrg(organizationId)) {
       return DemoData.watchIncidents().map((list) {
         var res = list;
-        if (status != null) res = res.where((i) => i.status == status).toList();
-        if (severity != null) res = res.where((i) => i.severity == severity).toList();
+        if (status != null) {
+          res = res.where((i) => i.status == status).toList();
+        }
+        if (severity != null) {
+          res = res.where((i) => i.severity == severity).toList();
+        }
         return res;
       });
     }

@@ -38,10 +38,8 @@ class FirebaseAuthDataSource {
       onListen: () {
         controller.add(currentUser);
 
-        fbSub = _firebaseAuth
-            .authStateChanges()
-            .map(_mapFirebaseUser)
-            .listen((user) {
+        fbSub = _firebaseAuth.authStateChanges().map(_mapFirebaseUser).listen(
+            (user) {
           if (_demoAuthUser == null) {
             controller.add(user);
           }
@@ -130,9 +128,8 @@ class FirebaseAuthDataSource {
     final user = AuthUser(
       uid: uid,
       email: cleanEmail,
-      displayName: cleanEmail.contains('@')
-          ? cleanEmail.split('@')[0]
-          : cleanEmail,
+      displayName:
+          cleanEmail.contains('@') ? cleanEmail.split('@')[0] : cleanEmail,
       emailVerified: true,
     );
     _demoAuthUser = user;
