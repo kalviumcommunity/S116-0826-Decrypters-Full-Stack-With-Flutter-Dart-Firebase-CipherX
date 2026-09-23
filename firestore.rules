@@ -72,7 +72,14 @@ service cloud.firestore {
 
       // Delete: Strictly forbidden (user accounts preserved for audit integrity)
       allow delete: if false;
+
+      // Device Tokens Subcollection (/users/{userId}/devices/{deviceId})
+      match /devices/{deviceId} {
+        // Read & Write: Authenticated device owner only
+        allow read, write: if isOwner(userId);
+      }
     }
+
 
     // ==========================================================
     // TENANT ISOLATION BOUNDARY (/organizations/{organizationId})

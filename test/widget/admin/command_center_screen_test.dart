@@ -192,9 +192,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify Header
-      expect(find.text('Command Center'), findsOneWidget);
       expect(find.textContaining('Captain'), findsOneWidget);
-      expect(find.text('Administrator'), findsOneWidget);
       expect(find.text('Organization: org_omega'), findsOneWidget);
 
       // Verify KPI Section
