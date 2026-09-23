@@ -42,7 +42,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.cipher_x"
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21
         targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
