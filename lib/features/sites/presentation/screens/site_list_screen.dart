@@ -191,7 +191,9 @@ class _SiteListScreenState extends ConsumerState<SiteListScreen> {
                   child: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
                     itemCount: filteredSites.length,
                     itemBuilder: (context, index) {
                       final site = filteredSites[index];

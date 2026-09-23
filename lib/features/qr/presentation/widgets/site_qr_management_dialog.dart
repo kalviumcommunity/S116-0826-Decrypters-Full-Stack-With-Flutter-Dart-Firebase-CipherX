@@ -340,9 +340,9 @@ class _SiteQrManagementDialogState
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.sync_rounded, size: 18),
-                label: Text(_isRegenerating
-                    ? 'Regenerating...'
-                    : 'Regenerate QR Token'),
+                label: Text(
+                  _isRegenerating ? 'Regenerating...' : 'Regenerate QR Token',
+                ),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.error.withValues(alpha: 0.1),
                   foregroundColor: AppColors.error,
