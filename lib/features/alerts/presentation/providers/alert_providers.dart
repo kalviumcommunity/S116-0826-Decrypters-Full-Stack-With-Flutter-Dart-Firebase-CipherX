@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/firebase_alert_data_source.dart';
 import '../../data/repositories/alert_repository_impl.dart';
+import '../../data/services/fcm_notification_adapter.dart';
 import '../../domain/entities/alert.dart';
 import '../../domain/policies/late_check_in_policy.dart';
 import '../../domain/policies/missed_shift_policy.dart';
@@ -24,7 +25,7 @@ final clockProvider = Provider<Clock>((ref) {
 });
 
 final notificationAdapterProvider = Provider<NotificationAdapter>((ref) {
-  return LoggingNotificationAdapter();
+  return FcmNotificationAdapter();
 });
 
 final missedShiftPolicyProvider = Provider<MissedShiftPolicy>((ref) {

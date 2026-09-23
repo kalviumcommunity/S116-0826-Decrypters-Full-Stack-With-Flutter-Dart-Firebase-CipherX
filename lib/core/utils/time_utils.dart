@@ -57,7 +57,8 @@ class TimeUtils {
   }
 
   /// Formats [dateTime] to human-friendly relative string.
-  static String formatRelative(DateTime? dateTime) => formatHumanFriendly(dateTime);
+  static String formatRelative(DateTime? dateTime) =>
+      formatHumanFriendly(dateTime);
 
   /// Returns the exact ISO-standard or full audit timestamp string.
   static String formatExact(DateTime? dateTime) {

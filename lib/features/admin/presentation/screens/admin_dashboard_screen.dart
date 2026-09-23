@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
+import '../../../../core/utils/greeting_utils.dart';
+import '../../../../core/widgets/app_dialogs.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../identity/presentation/providers/identity_providers.dart';
 import '../providers/admin_dashboard_providers.dart';
@@ -33,6 +35,7 @@ class AdminDashboardScreen extends ConsumerWidget {
       authUser: authUser,
       defaultFallback: 'Administrator',
     );
+    final adminName = firstName;
     final orgId = profile?.organizationId ?? '';
 
     final todayFormatted = DateFormat('EEEE, MMMM d, y').format(DateTime.now());
@@ -183,7 +186,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Welcome back, $adminName',
+                            '$greeting, $adminName',
                             style: AppTextStyles.titleMedium(
                               color: AppColors.textPrimaryLight,
                             ).copyWith(fontWeight: FontWeight.w700),
@@ -314,70 +317,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               SiteCoverageSection(
                 onSiteTap: (item) => context.push(AppRoutes.adminSites),
               ),
-
-              const SizedBox(height: 32),
             ],
-          ),
-        ),
-      ),
-    ),
-  ],
-),
-);
-  }
-
-  Widget _buildShortcutButton(
-    BuildContext context, {
-    required String label,
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.borderLight),
-              boxShadow: const [
-                BoxShadow(
-                  color: AppColors.shadowColor,
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentRose,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  label,
-                  style: AppTextStyles.caption(
-                    color: AppColors.textPrimaryLight,
-                  ).copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

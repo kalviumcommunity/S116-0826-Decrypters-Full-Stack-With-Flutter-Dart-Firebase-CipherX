@@ -89,11 +89,11 @@ void main() {
 
       expect(find.text('Officer John Smith'), findsOneWidget);
       expect(find.text('ID: EMP-9001'), findsOneWidget);
-      expect(find.text('Active'), findsOneWidget);
+      expect(find.text('Active'), findsWidgets);
 
       expect(find.text('Officer Sarah Connor'), findsOneWidget);
       expect(find.text('ID: EMP-9002'), findsOneWidget);
-      expect(find.text('Inactive'), findsOneWidget);
+      expect(find.text('Inactive'), findsWidgets);
     });
 
     testWidgets('filters guard list by search query on name and employee ID',

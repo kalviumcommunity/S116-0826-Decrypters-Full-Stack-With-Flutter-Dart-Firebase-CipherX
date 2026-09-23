@@ -111,9 +111,7 @@ class NetworkStatusBanner extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isRestored
-                  ? Icons.wifi_rounded
-                  : Icons.wifi_off_rounded,
+              isRestored ? Icons.wifi_rounded : Icons.wifi_off_rounded,
               color: Colors.white,
               size: 16,
             ),

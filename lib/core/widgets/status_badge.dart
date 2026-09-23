@@ -28,6 +28,20 @@ class StatusBadge extends StatelessWidget {
     this.customBgColor,
   });
 
+  factory StatusBadge.active({String label = 'Active'}) {
+    return StatusBadge(
+      label: label,
+      variant: StatusBadgeVariant.success,
+    );
+  }
+
+  factory StatusBadge.inactive({String label = 'Inactive'}) {
+    return StatusBadge(
+      label: label,
+      variant: StatusBadgeVariant.neutral,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Color textColor;

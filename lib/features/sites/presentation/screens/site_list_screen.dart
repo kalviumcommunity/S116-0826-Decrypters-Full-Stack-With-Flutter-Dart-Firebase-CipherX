@@ -191,7 +191,9 @@ class _SiteListScreenState extends ConsumerState<SiteListScreen> {
                   child: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
                     itemCount: filteredSites.length,
                     itemBuilder: (context, index) {
                       final site = filteredSites[index];
@@ -222,9 +224,8 @@ class _SiteListScreenState extends ConsumerState<SiteListScreen> {
                                       : Colors.grey.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12.0),
                                   border: Border.all(
-                                    color: isActive
-                                        ? Colors.green
-                                        : Colors.grey,
+                                    color:
+                                        isActive ? Colors.green : Colors.grey,
                                   ),
                                 ),
                                 child: Row(
@@ -235,9 +236,8 @@ class _SiteListScreenState extends ConsumerState<SiteListScreen> {
                                           ? Icons.check_circle
                                           : Icons.cancel,
                                       size: 14,
-                                      color: isActive
-                                          ? Colors.green
-                                          : Colors.grey,
+                                      color:
+                                          isActive ? Colors.green : Colors.grey,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(

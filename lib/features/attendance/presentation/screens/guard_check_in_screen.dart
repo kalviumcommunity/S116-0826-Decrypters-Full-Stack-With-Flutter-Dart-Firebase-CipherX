@@ -475,7 +475,14 @@ class _GuardCheckInScreenState extends ConsumerState<GuardCheckInScreen> {
                         ),
                       ),
                       Text(
-                        '${[authOk, shiftOk, siteOk, gpsOk, geofenceOk, qrOk].where((e) => e).length}/6 Passed',
+                        '${[
+                          authOk,
+                          shiftOk,
+                          siteOk,
+                          gpsOk,
+                          geofenceOk,
+                          qrOk
+                        ].where((e) => e).length}/6 Passed',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -788,9 +795,8 @@ class _GuardCheckInScreenState extends ConsumerState<GuardCheckInScreen> {
             child: Icon(
               isPassed ? Icons.check_rounded : Icons.close_rounded,
               size: 17,
-              color: isPassed
-                  ? const Color(0xFF059669)
-                  : const Color(0xFFDC2626),
+              color:
+                  isPassed ? const Color(0xFF059669) : const Color(0xFFDC2626),
             ),
           ),
           const SizedBox(width: 12),
@@ -1101,4 +1107,3 @@ class _GuardCheckInScreenState extends ConsumerState<GuardCheckInScreen> {
     );
   }
 }
-
