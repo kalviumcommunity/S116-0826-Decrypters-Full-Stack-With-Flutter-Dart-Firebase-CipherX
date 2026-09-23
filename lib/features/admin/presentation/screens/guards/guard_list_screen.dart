@@ -142,7 +142,8 @@ class _GuardListScreenState extends ConsumerState<GuardListScreen> {
               return _buildEmptyView(
                 icon: Icons.search_off_rounded,
                 title: 'No guards found',
-                message: 'No guards match your search query or selected filter.',
+                message:
+                    'No guards match your search query or selected filter.',
                 showAddButton: false,
               );
             }

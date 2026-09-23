@@ -132,8 +132,9 @@ class FcmService {
         enableVibration: true,
       );
 
-      final androidPlugin = _localNotifications.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final androidPlugin =
+          _localNotifications.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
       if (androidPlugin != null) {
         await androidPlugin.createNotificationChannel(channel);
       }
@@ -169,13 +170,15 @@ class FcmService {
 
       // 4. Foreground Message Listener
       _foregroundSub?.cancel();
-      _foregroundSub = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      _foregroundSub =
+          FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         _handleForegroundMessage(message, channel);
       });
 
       // 5. Background Tap Listener (App opened from background state)
       _openedAppSub?.cancel();
-      _openedAppSub = FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      _openedAppSub =
+          FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         _handleNotificationTap(message);
       });
 
@@ -199,10 +202,13 @@ class FcmService {
     final data = message.data;
 
     final title = notification?.title ?? data['title'] ?? 'Cipher-X Alert';
-    final body = notification?.body ?? data['body'] ?? 'Operational notification received.';
+    final body = notification?.body ??
+        data['body'] ??
+        'Operational notification received.';
 
     // Construct query parameters string for tap payload
-    final Uri payloadUri = Uri(queryParameters: Map<String, String>.from(
+    final Uri payloadUri = Uri(
+        queryParameters: Map<String, String>.from(
       data.map((key, value) => MapEntry(key, value.toString())),
     ));
 
@@ -291,7 +297,8 @@ class FcmService {
           .doc(deviceId);
 
       await docRef.set(deviceToken.toFirestore(), SetOptions(merge: true));
-      debugPrint('FCM Token registered cleanly for user: $userId (device: $deviceId)');
+      debugPrint(
+          'FCM Token registered cleanly for user: $userId (device: $deviceId)');
 
       // Listen for token rotation
       _tokenRefreshSub?.cancel();

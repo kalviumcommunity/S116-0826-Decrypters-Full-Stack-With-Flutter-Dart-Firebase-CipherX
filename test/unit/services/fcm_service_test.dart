@@ -55,7 +55,8 @@ void main() {
   });
 
   group('FcmNotificationAdapter Unit Tests', () {
-    test('notify executes cleanly for critical incident alert candidate', () async {
+    test('notify executes cleanly for critical incident alert candidate',
+        () async {
       final adapter = FcmNotificationAdapter();
       final alert = Alert(
         alertId: 'alt_999',

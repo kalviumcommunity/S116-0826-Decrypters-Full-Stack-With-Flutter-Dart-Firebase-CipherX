@@ -38,7 +38,6 @@ class AdminDashboardScreen extends ConsumerWidget {
     final adminName = firstName;
     final orgId = profile?.organizationId ?? '';
 
-
     final todayFormatted = DateFormat('EEEE, MMMM d, y').format(DateTime.now());
 
     return Scaffold(
@@ -318,14 +317,12 @@ class AdminDashboardScreen extends ConsumerWidget {
               SiteCoverageSection(
                 onSiteTap: (item) => context.push(AppRoutes.adminSites),
               ),
-
             ],
           ),
         ),
       ),
     );
   }
-
 
   Widget _buildShortcutButton(
     BuildContext context, {
@@ -385,4 +382,3 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 }
-

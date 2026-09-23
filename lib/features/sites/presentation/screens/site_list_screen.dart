@@ -222,9 +222,8 @@ class _SiteListScreenState extends ConsumerState<SiteListScreen> {
                                       : Colors.grey.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12.0),
                                   border: Border.all(
-                                    color: isActive
-                                        ? Colors.green
-                                        : Colors.grey,
+                                    color:
+                                        isActive ? Colors.green : Colors.grey,
                                   ),
                                 ),
                                 child: Row(
@@ -235,9 +234,8 @@ class _SiteListScreenState extends ConsumerState<SiteListScreen> {
                                           ? Icons.check_circle
                                           : Icons.cancel,
                                       size: 14,
-                                      color: isActive
-                                          ? Colors.green
-                                          : Colors.grey,
+                                      color:
+                                          isActive ? Colors.green : Colors.grey,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(

@@ -560,5 +560,3 @@ class GuardHomeScreen extends ConsumerWidget {
     );
   }
 }
-
-

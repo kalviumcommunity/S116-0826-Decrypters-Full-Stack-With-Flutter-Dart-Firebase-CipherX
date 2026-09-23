@@ -42,7 +42,6 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     Color textColor;
